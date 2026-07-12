@@ -295,7 +295,7 @@ const SLIDES=[
     ${['This sounds like us','Too formal','Too casual','Too generic','Make it warmer','Make it bolder'].map(f=>`<button class="tag" data-fb="${f}">${f}</button>`).join('')}
   </div></div>
   <div class="brandcard">
-    <div class="bc-top"><div><div class="bc-wm">◆ ${B.name}</div><div class="bc-tag">${B.tagline}</div></div>${WM.replace('22px','26px').replace('22px','26px')}</div>
+    <div class="bc-top"><div><div class="bc-wm">${B.visual.logo?`<img src="${B.visual.logo}" style="width:26px;height:26px;vertical-align:-6px;border-radius:6px;margin-right:2px">`:'◆ '}${B.name}</div><div class="bc-tag">${B.tagline}</div></div>${WM.replace('22px','26px').replace('22px','26px')}</div>
     <div class="bc-grid">
       <div><div class="bl">Colors</div><div class="bswatch">${B.visual.colors.map(c=>`<i style="background:${c}"></i>`).join('')}</div></div>
       <div><div class="bl">Typography</div><div style="font-weight:800">${B.visual.type}</div></div>

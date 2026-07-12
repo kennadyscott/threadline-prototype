@@ -47,6 +47,13 @@ textarea,input{font-family:inherit}
 .kick{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
 h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .lead{color:var(--muted);font-size:16.5px;margin-bottom:24px}
+.lgrow{display:flex;gap:16px;flex-wrap:wrap;align-items:stretch;margin-top:6px}
+.lgtile{width:150px;height:150px;border-radius:20px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:22px;box-shadow:0 8px 26px rgba(20,20,60,.07);flex-shrink:0}
+.lgtile svg{width:100%;height:100%}
+.lgmark{width:30px;height:30px;display:inline-block;flex-shrink:0}
+.lgmark svg{width:100%;height:100%;display:block}
+.lgwhy{color:var(--muted);font-size:12.5px;margin-top:10px;font-style:italic}
+.lgcap{border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:12.5px;margin-top:14px}
 .assetrow{display:flex;gap:9px;flex-wrap:wrap}
 .assetbtn{border:1.5px dashed var(--line);border-radius:11px;padding:10px 15px;font-weight:800;font-size:13px;color:var(--muted);background:var(--surface);cursor:pointer;font-family:inherit}
 .assetbtn:hover{border-color:var(--violet);color:var(--violet)}
@@ -479,7 +486,7 @@ function p4(){ renderProg(); fallbackPillars();
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(2,p3)">← Back</button>
       <div class="grow"></div>
-      <button class="btn solid" onclick="adv(4,done)">These look right →</button>
+      <button class="btn solid" onclick="adv(4,logoOrDone)">These look right →</button>
     </div>`);
   renderProg();
   bindPillars();
@@ -542,6 +549,107 @@ async function adjustPillars(){
     toast('Pillars reworked around your feedback');
   }catch(e){ toast('AI adjustments need the live app — you can edit any pillar directly with ✏️'); }
   btn.disabled=false; btn.textContent=o;
+}
+
+/* ---------- logo + brand card step (only if nothing was uploaded) ---------- */
+let logoTries=0, logoV=null;
+const LOGO_SHAPES=['rounded','circle','split','badge'];
+function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
+function currentPalette(){
+  try{ const b=compileFromBuild(state,PILLARS); return { colors:(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[] }; }
+  catch(e){ return { colors:['#803dff','#3b82f6'], tagline:'', traits:[] }; }
+}
+function kwColors(fb){ fb=(fb||'').toLowerCase();
+  const map=[[/warm|coral|sunset|orange/, ['#fb7185','#f5a524']],[/soft|pastel|light|gentle|calm/,['#b9a7ff','#9ad0f5']],[/bold|strong|black|dark/,['#0f1118','#803dff']],[/green|earth|natur|eco|sustain/,['#20b878','#7cc26f']],[/blue|ocean|trust/,['#3b82f6','#22d3ee']],[/pink|fun/,['#fb7185','#c86bfa']],[/gold|yellow|sunny/,['#f4b400','#ffd35c']]];
+  for(const [re,c] of map){ if(re.test(fb)) return c; } return null;
+}
+function logoSVG(v){
+  const L=esc((state.name||'B').trim().charAt(0).toUpperCase());
+  const gid='lg'+logoTries;
+  const g=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${v.c1}"/><stop offset="1" stop-color="${v.c2}"/></linearGradient></defs>`;
+  const f=`url(#${gid})`;
+  if(v.shape==='circle') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<circle cx="48" cy="48" r="41" fill="none" stroke="${f}" stroke-width="7"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="${v.c1}">${L}</text></svg>`;
+  if(v.shape==='split') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="6" y="6" width="84" height="84" rx="20" fill="${v.c1}"/><path d="M6 62 Q48 42 90 62 L90 70 Q90 90 70 90 L26 90 Q6 90 6 70 Z" fill="${v.c2}" opacity=".85"/><text x="48" y="60" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="42" fill="#fff">${L}</text></svg>`;
+  if(v.shape==='badge') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="40" fill="${f}"/><circle cx="69" cy="27" r="7" fill="#fff" opacity=".92"/><text x="48" y="62" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="40" fill="#fff">${L}</text></svg>`;
+  return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="22" fill="${f}"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="#fff">${L}</text></svg>`;
+}
+async function logoDirection(feedback){
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You are a brand identity designer choosing a logo direction. Given the brand and (optionally) the founder\u2019s feedback on the previous take, pick two hex colors and one mark shape that fit the brand\u2019s personality, plus one short sentence explaining the choice. Shapes: rounded (solid rounded square), circle (outlined ring), split (two-tone horizon), badge (soft circle with accent dot).',
+      messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(feedback?('\n\nFeedback on the previous logo: '+feedback):'\n\nThis is the first draft.')}],
+      max_tokens:300,
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['c1','c2','shape','why'],additionalProperties:false}}}
+    })});
+    if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
+      if(t){ const j=JSON.parse(t); if(/^#[0-9a-f]{6}$/i.test(j.c1)&&/^#[0-9a-f]{6}$/i.test(j.c2)) return j; } }
+  }catch(e){}
+  const pal=currentPalette(); const kc=kwColors(feedback);
+  return { c1:kc?kc[0]:(pal.colors[0]||'#803dff'), c2:kc?kc[1]:(pal.colors[1]||'#3b82f6'), shape:LOGO_SHAPES[logoTries%4],
+    why: feedback?'Reworked around your notes — new shape and palette.':'Drawn from your brand colors and the voice you picked.' };
+}
+function renderLogoPreview(){
+  const pal=currentPalette(); const svg=logoSVG(logoV);
+  const el1=document.getElementById('lgTile'); if(el1) el1.innerHTML=svg;
+  const el2=document.getElementById('lgCardMark'); if(el2) el2.innerHTML=svg;
+  const why=document.getElementById('lgWhy'); if(why) why.textContent=logoV.why||'';
+}
+async function genLogo(feedback){
+  const rev=document.getElementById('lgReveal'); const th=document.getElementById('lgThink');
+  if(th) th.classList.add('on'); if(rev) rev.style.display='none';
+  logoV=await logoDirection(feedback);
+  if(th) th.classList.remove('on'); if(rev) rev.style.display='block';
+  renderLogoPreview();
+  const left=3-logoTries;
+  const cnt=document.getElementById('lgLeft'); if(cnt) cnt.textContent=left;
+  const row=document.getElementById('lgRegen');
+  if(row&&left<=0){ row.innerHTML='<div class="lgcap">That\u2019s three takes — solid direction beats endless spins. You can refine your logo anytime in <b>Settings → Brand</b>.</div>'; }
+  const fb=document.getElementById('lgfb'); if(fb) fb.value='';
+}
+function regenLogo(){
+  const fb=document.getElementById('lgfb');
+  const note=(fb?fb.value.trim():'');
+  if(note.length<5){ if(fb){ fb.focus(); } toast('Tell Threadline what\u2019s off first — that\u2019s how the next take gets closer'); return; }
+  logoTries++; genLogo(note);
+}
+function acceptLogo(){
+  try{ state.logoData='data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)); state.logoName=(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-logo.svg'; persist(); }catch(e){}
+  done();
+}
+function logoStage(){
+  logoTries=0;
+  const pal=currentPalette();
+  stage(`
+    <div class="kick">✦ One last piece</div>
+    <h2 class="q">Let's give ${state.name?`<b>${esc(state.name)}</b>`:'your brand'} <span class="grad-text">a face.</span></h2>
+    <p class="lead">You didn't upload a logo — so Threadline drafted one from everything you've shared, plus a brand card to hold it all.</p>
+    <div class="thinking" id="lgThink"><span>Threadline is sketching your mark</span><span class="dots"><i></i><i></i><i></i></span></div>
+    <div id="lgReveal" style="display:none">
+      <div class="lgrow">
+        <div class="lgtile" id="lgTile"></div>
+        <div class="excard" style="flex:1;min-width:240px">
+          <div class="exlogo"><span class="lgmark" id="lgCardMark"></span><span class="exwm">${esc(state.name||'Your brand')}</span></div>
+          <div class="extag">${esc(pal.tagline||'Your tagline lands in the brand review.')}</div>
+          <div class="exrow"><span class="exlbl">Colors</span>${pal.colors.slice(0,5).map(c=>`<span class="exsw" style="background:${c}"></span>`).join('')}</div>
+          <div class="exrow"><span class="exlbl">Voice</span><span style="font-weight:700;font-size:12.5px">${esc(pal.traits.join('. ')||state.voicePick||'')}${pal.traits.length?'.':''}</span></div>
+          <div class="exrow"><span class="exlbl">Pillars</span>${PILLARS.slice(0,4).map(pp=>`<span class="exv">${esc(pp.n)}</span>`).join('')}</div>
+        </div>
+      </div>
+      <p class="lgwhy" id="lgWhy"></p>
+      <div id="lgRegen">
+        <div class="field" style="margin-top:14px"><label>Not feeling it? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate — <span id="lgLeft">3</span> left)</span></label>
+          <textarea id="lgfb" placeholder="e.g. too corporate — we're playful and earthy, more like a farmers-market stand than a bank"></textarea>
+        </div>
+        <button class="btn ghost" onclick="regenLogo()">↻ Regenerate</button>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(3,p4)">← Back</button>
+      <div class="grow"></div>
+      <button class="btn solid" onclick="acceptLogo()">I love it — continue →</button>
+    </div>`);
+  renderProg();
+  genLogo('');
 }
 
 /* ---------- Completion ---------- */
