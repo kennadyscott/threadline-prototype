@@ -99,6 +99,10 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .sample .sl{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
 .sample .stext{font-size:15.5px;font-weight:600}
 
+.pfbrow{display:flex;gap:9px;margin-top:12px}
+.pfbrow input{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;outline:none;background:var(--surface);color:var(--ink);font-family:inherit;min-width:0}
+.pfbrow input:focus{border-color:var(--violet)}
+.pillar [contenteditable="true"]{outline:2px solid rgba(128,61,255,.35);border-radius:6px;padding:1px 6px;background:var(--surface)}
 .pillar{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:11px;background:var(--surface);display:flex;gap:14px;align-items:flex-start}
 .pillar .pc{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:grid;place-items:center;font-weight:900;color:#fff;font-size:15px}
 .pillar .pmix{margin-left:auto;font-weight:800;font-size:13px;color:var(--violet);background:rgba(128,61,255,.08);padding:3px 9px;border-radius:8px;white-space:nowrap}
@@ -382,8 +386,7 @@ async function personalizePillars(){
     const j=JSON.parse(t);
     if(!j.pillars||j.pillars.length<4) return;
     j.pillars.slice(0,4).forEach((x,i)=>{ if(x.n)PILLARS[i].n=x.n; if(x.p)PILLARS[i].p=x.p; });
-    const wrap=document.getElementById('pillars');
-    if(wrap&&wrap.querySelectorAll('.pillar').length===4){ wrap.innerHTML=PILLARS.map((pp,i)=>pillarHTML(pp,i)).join(''); bindPillars(); }
+    if(!pillarsTouched) renderPillars();
   }catch(e){}
 }
 
@@ -394,6 +397,8 @@ function p4(){ renderProg(); fallbackPillars();
     <h2 class="q">Here are your <span class="grad-text">content pillars.</span></h2>
     <p class="lead">Based on everything so far, these are the threads worth pulling. Keep what fits — rename, remove, or ask for alternatives.</p>
     <div id="pillars">${PILLARS.map((p,i)=>pillarHTML(p,i)).join('')}</div>
+    <button class="btn ghost" style="width:100%;border-style:dashed;margin-top:10px" onclick="addPillar()">＋ Add a pillar</button>
+    <div class="pfbrow"><input id="pfb" placeholder="Not quite right? Tell Threadline what feels off — e.g. we\u2019re really about sustainability and community"><button class="btn solid" id="pfbBtn" onclick="adjustPillars()">✦ Adjust</button></div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(2,p3)">← Back</button>
       <div class="grow"></div>
@@ -403,8 +408,64 @@ function p4(){ renderProg(); fallbackPillars();
   bindPillars();
   personalizePillars();
 }
-function pillarHTML(p,i){ return `<div class="pillar" data-i="${i}"><div class="pc" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><h4>${esc(p.n)} <span class="pmix">${p.mix}</span></h4><p>${esc(p.p)}</p></div><button class="verdict" data-del title="Remove">✕</button></div>`; }
-function bindPillars(){ document.querySelectorAll('#pillars .pillar [data-del]').forEach(b=>b.onclick=e=>{ e.target.closest('.pillar').remove(); }); }
+let pillarsTouched=false;
+const PCOLORS=['#803dff','#3b82f6','#22d3ee','#fb7185','#f5a524','#20b878'];
+function rebalanceMix(){ const n=PILLARS.length||1; const even=Math.round(100/n); PILLARS.forEach(pp=>pp.mix=even+'%'); }
+function pillarHTML(p,i){ return `<div class="pillar" data-i="${i}"><div class="pc" style="background:${p.c}">${esc((p.n||'?').charAt(0))}</div>
+  <div style="flex:1;min-width:0"><h4><span class="pname" data-f="n">${esc(p.n)}</span> <span class="pmix">${p.mix}</span></h4><p class="pdesc" data-f="p">${esc(p.p)}</p></div>
+  <button class="verdict" data-edit title="Edit this pillar">✏️</button>
+  <button class="verdict" data-del title="Remove">✕</button></div>`; }
+function renderPillars(){ const w=document.getElementById('pillars'); if(!w) return; w.innerHTML=PILLARS.map((pp,i)=>pillarHTML(pp,i)).join(''); bindPillars(); }
+function bindPillars(){
+  document.querySelectorAll('#pillars .pillar').forEach(card=>{
+    const i=+card.dataset.i;
+    card.querySelector('[data-del]').onclick=()=>{
+      if(PILLARS.length<=2){ toast('Keep at least two pillars — your mix needs range'); return; }
+      pillarsTouched=true; PILLARS.splice(i,1); rebalanceMix(); renderPillars(); };
+    card.querySelector('[data-edit]').onclick=e=>{
+      pillarsTouched=true;
+      const on=card.classList.toggle('editing');
+      card.querySelectorAll('[data-f]').forEach(f=>{ f.contentEditable=on; });
+      e.target.textContent=on?'✓':'✏️';
+      if(on){ const nEl=card.querySelector('[data-f="n"]'); nEl.focus(); document.getSelection().selectAllChildren(nEl); }
+      else{
+        PILLARS[i].n=card.querySelector('[data-f="n"]').textContent.trim()||PILLARS[i].n;
+        PILLARS[i].p=card.querySelector('[data-f="p"]').textContent.trim()||PILLARS[i].p;
+        renderPillars();
+      }
+    };
+  });
+}
+function addPillar(){
+  pillarsTouched=true;
+  PILLARS.push({n:'New pillar',c:PCOLORS[PILLARS.length%PCOLORS.length],mix:'—',p:'What this pillar covers.'});
+  rebalanceMix(); renderPillars();
+  const cards=document.querySelectorAll('#pillars .pillar'); const last=cards[cards.length-1];
+  if(last) last.querySelector('[data-edit]').click();
+}
+async function adjustPillars(){
+  const inp=document.getElementById('pfb'); const critique=inp?inp.value.trim():'';
+  if(!critique){ if(inp) inp.focus(); return; }
+  const btn=document.getElementById('pfbBtn'); btn.disabled=true; const o=btn.textContent; btn.textContent='✦ Adjusting…';
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You design content pillar systems for brands. The founder saw a draft set of pillars and gave feedback. Rework the pillars to honor the feedback while keeping a healthy mix (practical value, behind-the-scenes, proof, point of view — adapted to this brand). Return 3 to 5 pillars, each: 2-4 word name + one sentence under 18 words, specific to the brand\u2019s domain.',
+      messages:[{role:'user',content:'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nWe believe: '+(state.believe||'?')+'\n\nCurrent draft pillars:\n'+PILLARS.map(pp=>'- '+pp.n+': '+pp.p).join('\n')+'\n\nFounder feedback: '+critique}],
+      max_tokens:700,
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{pillars:{type:'array',minItems:3,maxItems:5,items:{type:'object',properties:{n:{type:'string'},p:{type:'string'}},required:['n','p'],additionalProperties:false}}},required:['pillars'],additionalProperties:false}}}
+    })});
+    if(!r.ok) throw new Error('offline');
+    const d=await r.json();
+    const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) throw new Error('empty');
+    const j=JSON.parse(t);
+    if(!j.pillars||j.pillars.length<3) throw new Error('shape');
+    PILLARS.length=0;
+    j.pillars.slice(0,5).forEach((x,i)=>PILLARS.push({n:x.n,p:x.p,c:PCOLORS[i%PCOLORS.length],mix:'25%'}));
+    rebalanceMix(); pillarsTouched=true; renderPillars(); inp.value='';
+    toast('Pillars reworked around your feedback');
+  }catch(e){ toast('AI adjustments need the live app — you can edit any pillar directly with ✏️'); }
+  btn.disabled=false; btn.textContent=o;
+}
 
 /* ---------- Completion ---------- */
 function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand) saveBrand(compileFromBuild(state, PILLARS)); }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
