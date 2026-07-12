@@ -288,6 +288,34 @@ function p2(){ renderProg();
   };
 }
 
+/* ---------- voice samples, personalized to their inputs ---------- */
+function voiceLine(l){
+  const aud=(state.audWho||'the people you serve').replace(/\.$/,'');
+  const pain=(state.audPain||'the overwhelm').replace(/\.$/,'');
+  return {
+    Polished:'A more considered way forward for '+aud+' — clarity first, noise never.',
+    Warm:'You\u2019re not behind. Let\u2019s take '+pain+' off your plate, one step at a time.',
+    Bold:cap(pain)+' isn\u2019t the problem. The old playbook is.',
+    Playful:'Dear '+pain+': you\u2019ve had your fun. We\u2019re taking it from here.'
+  }[l]||'';
+}
+function cap(x){ x=(x||'').trim(); return x?x.charAt(0).toUpperCase()+x.slice(1):x; }
+async function personalizeVoices(){
+  const raw=await tlAI(
+    'You write brand voice samples. Given a brand and its audience, write 4 short lines the BRAND itself could post to ITS audience about ITS topic — one per voice style. Polished: precise, assured. Warm: encouraging, human. Bold: direct, no hedging. Playful: light, a little cheeky. Each under 16 words, specific to this brand\u2019s domain (never about content marketing unless the brand IS content marketing), no hashtags. Return STRICT JSON only, no fences: {"Polished":"...","Warm":"...","Bold":"...","Playful":"..."}',
+    'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nTheir struggle: '+(state.audPain||'?')+'\nTired of hearing: '+(state.audTired||'?'),
+    400);
+  if(!raw) return;
+  try{
+    const txt=raw.replace(/&lt;[^&]*&gt;/g,'').replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+    const j=JSON.parse(txt.replace(/&quot;/g,'"').replace(/&amp;/g,'&'));
+    ['Polished','Warm','Bold','Playful'].forEach(k=>{
+      const elx=document.querySelector('[data-vs="'+k+'"]');
+      if(elx&&j[k]) elx.textContent=j[k];
+    });
+  }catch(e){}
+}
+
 /* ---------- Phase 3: Point of view + voice ---------- */
 function p3(){ renderProg();
   stage(`
@@ -296,8 +324,8 @@ function p3(){ renderProg();
     <p class="lead">Two sentences and a voice — that's all Threadline needs to make your content sound like nobody else's.</p>
     <div class="field"><label>We believe…</label><input id="believe" placeholder="…the hard part isn't posting, it's knowing what to say." value="${esc(state.believe)}"></div>
     <div class="field"><label>The industry gets this wrong when…</label><input id="wrong" placeholder="…it treats content like a volume game." value="${esc(state.wrong)}"></div>
-    <div class="field" style="margin-bottom:8px"><label>Which voice feels most like you?</label></div>
-    <div class="choices" id="voices">${VOICES.map((v,i)=>`<button class="sample" data-i="${i}"><div class="sl">${v.l}</div><div class="stext">${v.t}</div></button>`).join('')}</div>
+    <div class="field" style="margin-bottom:8px"><label>Which voice feels most like you?</label><div class="hint">The same message, four ways — written for <b>${esc(state.name||'your brand')}</b>, talking to ${esc(state.audWho||'your audience')}.</div></div>
+    <div class="choices" id="voices">${VOICES.map((v,i)=>`<button class="sample" data-i="${i}"><div class="sl">${v.l}</div><div class="stext" data-vs="${v.l}">${esc(voiceLine(v.l))}</div></button>`).join('')}</div>
     <div id="reflect"></div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(1,p2)">← Back</button>
@@ -307,18 +335,16 @@ function p3(){ renderProg();
     </div>`);
   renderProg();
   document.querySelectorAll('#voices .sample').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#voices .sample').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.voicePick=VOICES[+b.dataset.i].l; });
+  personalizeVoices();
   $('#go3').onclick=()=>{
     state.believe=$('#believe').value.trim(); state.wrong=$('#wrong').value.trim();
     if(!state.voicePick){ document.querySelector('#voices').scrollIntoView({behavior:'smooth'}); return; }
     $('#go3').style.display='none';
     thinkThenReveal($('#reflect'), ()=>{
       const v=state.voicePick; const card=el('div','ai');
-      const samples={
-        Polished:['Build a content system that reflects your strategy.','A clearer way to plan what you publish.'],
-        Warm:['Let’s turn what you already know into content that feels like you.','You bring the ideas — we’ll help you shape them.'],
-        Bold:['Stop guessing what to post. Start building a system.','Your best ideas deserve better than a blank calendar.'],
-        Playful:['Your ideas called. They’re ready to be more than notes.','Less staring at the calendar, more building.'],
-      }[v]||['','' ];
+      const pickedEl=document.querySelector('[data-vs="'+v+'"]');
+      const line=pickedEl?pickedEl.textContent:voiceLine(v);
+      const samples=[line, state.believe?('We believe '+state.believe.replace(/^…?\s*(that\s+)?/i,'')+'. That\u2019s the whole point.'):line];
       card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Your voice, drafted</div>
         <p>You lead with a <b>${esc(v.toLowerCase())}</b> voice${state.believe?`, built around the belief that <b>${esc(state.believe.replace(/^…?\s*/,''))}</b>`:''}.</p>
         <p class="soft">Here's how that sounds in the wild — does this feel like you?</p>
