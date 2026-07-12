@@ -289,29 +289,32 @@ function p2(){ renderProg();
 }
 
 /* ---------- voice samples, personalized to their inputs ---------- */
+function shortPhrase(x,max){ x=(x||'').trim().replace(/[.!?]+$/,''); x=x.split(/[,;.]/)[0].trim(); if(!x) return ''; return x.split(/\s+/).length>max?'':x; }
+function cap(x){ x=(x||'').trim(); return x?x.charAt(0).toUpperCase()+x.slice(1):x; }
 function voiceLine(l){
-  const aud=(state.audWho||'the people you serve').replace(/\.$/,'');
-  const pain=(state.audPain||'the overwhelm').replace(/\.$/,'');
+  const aud=shortPhrase(state.audWho,6), pain=shortPhrase(state.audPain,8);
   return {
-    Polished:'A more considered way forward for '+aud+' — clarity first, noise never.',
-    Warm:'You\u2019re not behind. Let\u2019s take '+pain+' off your plate, one step at a time.',
-    Bold:cap(pain)+' isn\u2019t the problem. The old playbook is.',
-    Playful:'Dear '+pain+': you\u2019ve had your fun. We\u2019re taking it from here.'
+    Polished: aud?('For '+aud+' — a clearer, more considered way forward.'):'A clearer, more considered way forward.',
+    Warm:'You\u2019re doing better than you think. Let\u2019s make this feel simple again.',
+    Bold: pain?('Everyone accepts that '+pain+'. We don\u2019t.'):'Good enough isn\u2019t. Let\u2019s raise the bar.',
+    Playful:'The old way had its fun. We\u2019re taking it from here.'
   }[l]||'';
 }
-function cap(x){ x=(x||'').trim(); return x?x.charAt(0).toUpperCase()+x.slice(1):x; }
 async function personalizeVoices(){
-  const raw=await tlAI(
-    'You write brand voice samples. Given a brand and its audience, write 4 short lines the BRAND itself could post to ITS audience about ITS topic — one per voice style. Polished: precise, assured. Warm: encouraging, human. Bold: direct, no hedging. Playful: light, a little cheeky. Each under 16 words, specific to this brand\u2019s domain (never about content marketing unless the brand IS content marketing), no hashtags. Return STRICT JSON only, no fences: {"Polished":"...","Warm":"...","Bold":"...","Playful":"..."}',
-    'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nTheir struggle: '+(state.audPain||'?')+'\nTired of hearing: '+(state.audTired||'?'),
-    400);
-  if(!raw) return;
   try{
-    const txt=raw.replace(/&lt;[^&]*&gt;/g,'').replace(/^```(json)?/i,'').replace(/```$/,'').trim();
-    const j=JSON.parse(txt.replace(/&quot;/g,'"').replace(/&amp;/g,'&'));
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You write brand voice samples. Given a brand and its audience, write 4 short lines the BRAND itself could post to ITS audience about ITS topic — one per voice style. Polished: precise, assured. Warm: encouraging, human. Bold: direct, no hedging. Playful: light, a little cheeky. Each is one complete, natural sentence under 16 words, specific to this brand\u2019s actual domain (never about content marketing unless the brand IS content marketing), no hashtags, no quotation marks.',
+      messages:[{role:'user',content:'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nTheir struggle: '+(state.audPain||'?')+'\nTired of hearing: '+(state.audTired||'?')}],
+      max_tokens:500,
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{Polished:{type:'string'},Warm:{type:'string'},Bold:{type:'string'},Playful:{type:'string'}},required:['Polished','Warm','Bold','Playful'],additionalProperties:false}}}
+    })});
+    if(!r.ok) return;
+    const d=await r.json();
+    const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return;
+    const j=JSON.parse(t);
     ['Polished','Warm','Bold','Playful'].forEach(k=>{
       const elx=document.querySelector('[data-vs="'+k+'"]');
-      if(elx&&j[k]) elx.textContent=j[k];
+      if(elx&&j[k]&&typeof j[k]==='string') elx.textContent=j[k];
     });
   }catch(e){}
 }
@@ -324,7 +327,7 @@ function p3(){ renderProg();
     <p class="lead">Two sentences and a voice — that's all Threadline needs to make your content sound like nobody else's.</p>
     <div class="field"><label>We believe…</label><input id="believe" placeholder="…the hard part isn't posting, it's knowing what to say." value="${esc(state.believe)}"></div>
     <div class="field"><label>The industry gets this wrong when…</label><input id="wrong" placeholder="…it treats content like a volume game." value="${esc(state.wrong)}"></div>
-    <div class="field" style="margin-bottom:8px"><label>Which voice feels most like you?</label><div class="hint">The same message, four ways — written for <b>${esc(state.name||'your brand')}</b>, talking to ${esc(state.audWho||'your audience')}.</div></div>
+    <div class="field" style="margin-bottom:8px"><label>Which voice feels most like you?</label><div class="hint">The same message, four ways — written for <b>${esc(state.name||'your brand')}</b>, talking to ${esc(shortPhrase(state.audWho,6)||'your audience')}.</div></div>
     <div class="choices" id="voices">${VOICES.map((v,i)=>`<button class="sample" data-i="${i}"><div class="sl">${v.l}</div><div class="stext" data-vs="${v.l}">${esc(voiceLine(v.l))}</div></button>`).join('')}</div>
     <div id="reflect"></div>
     <div class="nav">
