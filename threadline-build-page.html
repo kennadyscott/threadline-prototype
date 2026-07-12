@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Threadline — Build</title>
+<title>Threadline — Create</title>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
 <style>
@@ -81,6 +81,28 @@ input,textarea,select{font-family:inherit}
 .ph{display:flex;align-items:center;gap:10px}
 .ph h3{font-size:17px}
 .rec{font-size:10.5px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.1);border-radius:999px;padding:4px 10px}
+.recentpill{margin-left:auto;border:1.5px solid var(--line);border-radius:999px;padding:6px 13px;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface);cursor:pointer;white-space:nowrap}
+.recentpill:hover{border-color:var(--violet);color:var(--violet)}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:50px 20px;overflow-y:auto}
+.overlay.on{display:flex}
+.modal{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:540px;padding:24px;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal h3{font-size:17px;display:flex;align-items:center;gap:9px}
+.modal .msub{color:var(--muted);font-size:12.5px;margin:3px 0 14px}
+.macts{display:flex;gap:10px;margin-top:14px}
+.macts .grow{flex:1}
+.mbtn{padding:11px 16px;border-radius:11px;font-weight:800;font-size:13.5px;cursor:pointer}
+.mbtn.pri{background:var(--grad2);color:#fff}
+.mbtn.ghost{color:var(--muted)}
+.mf label{display:block;font-weight:700;font-size:12px;margin-bottom:5px}
+.mf textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;outline:none;background:var(--surface);color:var(--ink);min-height:74px;resize:vertical;font-family:inherit}
+.ctxgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+@media(max-width:520px){.ctxgrid{grid-template-columns:1fr}}
+.ctxopt{border:1.5px solid var(--line);border-radius:12px;padding:12px 10px;background:var(--surface-2);cursor:pointer;text-align:center;font-family:inherit}
+.ctxopt:hover{border-color:var(--violet)}
+.ctxopt span{font-size:20px;display:block}
+.ctxopt b{font-size:12.5px;display:block;margin-top:6px}
+.ctxopt i{font-style:normal;font-size:10.5px;color:var(--faint);display:block;margin-top:2px}
 .psub{color:var(--muted);font-size:13.5px;margin-top:3px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px;font-weight:700;font-size:13px;color:var(--muted);transition:.13s}
@@ -96,14 +118,15 @@ input,textarea,select{font-family:inherit}
 .send{margin-left:auto;width:40px;height:40px;border-radius:50%;background:var(--grad2);color:#fff;font-size:16px;font-weight:900;display:grid;place-items:center;box-shadow:0 6px 16px rgba(128,61,255,.3)}
 .send:hover{filter:brightness(1.08)}
 
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:14px}
-@media(max-width:760px){.modes{grid-template-columns:1fr 1fr}}
-.mode{border:1px solid var(--line);border-radius:15px;padding:18px;background:var(--surface);cursor:pointer;transition:.14s;display:flex;flex-direction:column}
+.modes{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:14px}
+@media(max-width:1150px){.modes{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.modes{grid-template-columns:1fr 1fr}}
+.mode{border:1px solid var(--line);border-radius:13px;padding:12px 13px;background:var(--surface);cursor:pointer;transition:.14s;display:flex;flex-direction:column}
+.mode.ctx{border-style:dashed;border-color:rgba(128,61,255,.35)}
 .mode:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
-.mode .mi{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:20px;margin-bottom:12px}
-.mode b{font-size:14.5px}
-.mode p{color:var(--muted);font-size:12.5px;margin-top:4px;flex:1}
-.mode .go{margin-top:10px;color:var(--violet);font-weight:900}
+.mode .mi{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:15px;margin-bottom:8px}
+.mode b{font-size:12.5px;line-height:1.3}
+.mode p{color:var(--muted);font-size:11px;margin-top:3px;flex:1}
 
 .srcstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:14px}
 /* viral hooks + trends */
@@ -274,7 +297,7 @@ svg.defs{position:absolute;width:0;height:0}
         <div class="colmain">
           <div class="hero">
             <div>
-              <h1>Build with Threadline <span>✦</span></h1>
+              <h1>Create with Threadline <span>✦</span></h1>
               <p>Your thought partner for content that connects.<br>Tell Threadline what you're working on, and we'll help you uncover ideas, shape angles, and build content that fits your strategy.</p>
             </div>
             <svg class="doodle" viewBox="0 0 220 130" fill="none">
@@ -292,7 +315,7 @@ svg.defs{position:absolute;width:0;height:0}
           </div>
 
           <div class="panel">
-            <div class="ph"><h3>Start a thought partner session</h3><span class="rec">Recommended</span></div>
+            <div class="ph"><h3>Start a thought partner session</h3><span class="rec">Recommended</span><button class="recentpill" onclick="openRecent()">🕘 Recent sessions</button></div>
             <p class="psub">Tell Threadline what's on your mind, and we'll talk it through together.</p>
             <div class="chips" id="starters"></div>
             <div class="inputbox">
@@ -306,16 +329,10 @@ svg.defs{position:absolute;width:0;height:0}
             </div>
           </div>
 
-          <div style="margin-top:26px"><h3 style="font-size:17px">Other ways to build</h3><p class="psub">Different starting points for different needs.</p></div>
+          <div style="margin-top:26px"><h3 style="font-size:17px">Other ways to create</h3><p class="psub">Different starting points for different needs.</p></div>
           <div class="modes" id="modes"></div>
 
-          <div style="margin-top:26px"><h3 style="font-size:17px">Build from your content and context</h3><p class="psub">Use what you already have to spark new ideas.</p></div>
-          <div class="srcstrip">
-            <div class="src" onclick="toast('Upload a doc — Threadline extracts themes, quotes & directions')"><div class="si">📄</div><div><b>Upload a doc</b><span>PDF, DOCX, TXT</span></div></div>
-            <div class="src" onclick="toast('Paste or capture — notes, links, or text')"><div class="si">📋</div><div><b>Paste or capture</b><span>Notes, links, or text</span></div></div>
-            <div class="src" onclick="startSession({mode:'story'})"><div class="si">👥</div><div><b>Use a client story</b><span>Turn moments into content</span></div></div>
-            <div class="src" onclick="toast('Import from source — transcripts, calls & more (future integration)')"><div class="si">✨</div><div><b>Import from source</b><span>Transcripts, calls, more</span></div></div>
-          </div>
+
 
           <div style="margin-top:26px"><h3 style="font-size:17px">🎬 Viral hooks for Reels</h3><p class="psub">Proven opening lines — pick one and Threadline writes the reel with you.</p></div>
           <div class="panel">
@@ -337,17 +354,31 @@ svg.defs{position:absolute;width:0;height:0}
         </div>
 
         <div class="rail">
-          <div class="rpanel"><h3>Your recent sessions <button class="va" onclick="toast('Session history — prototype')">View all</button></h3>
-            <div id="recent"></div>
-          </div>
-          <div class="rpanel"><h3>Quick prompts</h3><p class="psub" style="margin-top:2px">Use a prompt to get started fast.</p><div id="qps"></div></div>
           <div class="seriescard"><b>Create a recurring series</b><p>Build a signature series your audience will look forward to.</p><button onclick="location.href='threadline-series.html'">Go to Series Generator →</button></div>
         </div>
       </div>
     </div>
 
     <!-- ================= SESSION ================= -->
-    <div id="sessionView">
+    <div class="overlay" id="recentOverlay"><div class="modal" style="max-width:460px">
+  <h3>🕘 Recent sessions</h3><p class="msub">Pick up where you left off.</p>
+  <div id="recentList"></div>
+  <div class="macts"><div class="grow"></div><button class="mbtn ghost" onclick="closeRecent()">Close</button></div>
+</div></div>
+
+<div class="overlay" id="ctxOverlay"><div class="modal" style="max-width:520px">
+  <h3>📎 Create from your content</h3>
+  <p class="msub">Give Threadline something you already have. It reads it, pulls out the themes worth building, and starts a session around them.</p>
+  <div class="ctxgrid">
+    <button class="ctxopt" onclick="ctxPick('file')"><span>📄</span><b>Upload a file</b><i>Doc, PDF, slides</i></button>
+    <button class="ctxopt" onclick="ctxPick('video')"><span>🎬</span><b>Upload a video</b><i>We’ll transcribe it</i></button>
+    <button class="ctxopt" onclick="ctxPick('transcript')"><span>🎙</span><b>Add a transcript</b><i>Calls, podcasts, notes</i></button>
+  </div>
+  <div class="mf" style="margin-top:12px"><label>Or paste an idea or note you already have</label><textarea id="ctxText" placeholder="Paste anything — half-formed is fine."></textarea></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeCtx()">Cancel</button><div class="grow"></div><button class="mbtn pri" onclick="ctxStart()">Start creating →</button></div>
+</div></div>
+
+<div id="sessionView">
       <div class="shead">
         <button class="back" onclick="endSession()">← New session</button>
         <div class="stt"><b id="sTitle">Session</b><span id="sMeta">Just now · autosaved</span></div>
@@ -403,7 +434,7 @@ const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars
 const SLOT_SERIES=B.series[0]?B.series[0][0]:'your series';
 
 /* ---------- nav ---------- */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Build','Think, create, build',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- landing content ---------- */
@@ -411,14 +442,13 @@ const STARTERS=['I want to talk about...','A recent client win',"An idea I'm stu
 $('#starters').innerHTML=STARTERS.map(s=>`<button class="chip" onclick="document.getElementById('mainInput').value=${JSON.stringify(s==='I want to talk about...'?'I want to talk about ':s+': ')};document.getElementById('mainInput').focus()">${s}</button>`).join('');
 
 const MODES=[
-  {k:'idea',ic:'💡',bg:'rgba(128,61,255,.1)',t:'Idea Generator',d:'Get fresh ideas based on your brand, audience, and goals.'},
-  {k:'angle',ic:'🖼️',bg:'rgba(32,184,120,.1)',t:'Angle Explorer',d:'Explore different angles on a topic to find the strongest one.'},
-  {k:'sharpen',ic:'🎯',bg:'rgba(251,113,133,.12)',t:'Message Sharpening',d:'Clarify your message and make your point of view stronger.'},
-  {k:'repurpose',ic:'📄',bg:'rgba(245,165,36,.14)',t:'Content Repurposer',d:'Turn one piece of content into multiple formats and angles.'},
-  {k:'planner',ic:'📅',bg:'rgba(59,130,246,.1)',t:'Planner Fill',d:'Get ideas specifically for your open slots and upcoming dates.'},
-  {k:'ask',ic:'🧠',bg:'rgba(34,211,238,.12)',t:'Ask Threadline',d:'Ask anything. No prompt needed. Just start the conversation.'},
+  {k:'idea',ic:'💡',bg:'rgba(128,61,255,.1)',t:'Idea Generator',d:'Fresh ideas from your brand & goals.'},
+  {k:'angle',ic:'🖼️',bg:'rgba(32,184,120,.1)',t:'Angle Explorer',d:'Find the strongest angle on a topic.'},
+  {k:'sharpen',ic:'🎯',bg:'rgba(251,113,133,.12)',t:'Message Sharpening',d:'Make your point of view stronger.'},
+  {k:'repurpose',ic:'📄',bg:'rgba(245,165,36,.14)',t:'Content Repurposer',d:'One piece \u2192 many formats.'},
 ];
-$('#modes').innerHTML=MODES.map(m=>`<div class="mode" onclick="startSession({mode:'${m.k}'})"><div class="mi" style="background:${m.bg}">${m.ic}</div><b>${m.t}</b><p>${m.d}</p><span class="go">→</span></div>`).join('');
+$('#modes').innerHTML=MODES.map(m=>`<div class="mode" onclick="startSession({mode:'${m.k}'})"><div class="mi" style="background:${m.bg}">${m.ic}</div><b>${m.t}</b><p>${m.d}</p></div>`).join('')
+ +`<div class="mode ctx" onclick="openCtx()"><div class="mi" style="background:rgba(34,211,238,.12)">\u{1F4CE}</div><b>From your content</b><p>Upload a file, video, or transcript \u2014 or paste an idea.</p></div>`;
 
 const RECENT=[
   {ic:'💬',bg:'rgba(128,61,255,.1)',t:'Overcoming objections in sales conversations',w:'Today at 9:41 AM'},
@@ -426,10 +456,14 @@ const RECENT=[
   {ic:'✏️',bg:'rgba(251,113,133,.12)',t:(function(){const w=strip(B.messaging.primary).split(/\s+/);let o='';for(const x of w){if((o+' '+x).trim().length>40)break;o=(o+' '+x).trim();}return o.replace(/[.,;:]$/,'');})(),w:'2 days ago'},
   {ic:'🎯',bg:'rgba(59,130,246,.1)',t:'Positioning our offer with confidence',w:'3 days ago'},
 ];
-$('#recent').innerHTML=RECENT.map(r=>`<div class="sess" onclick="toast('Reopening session — continue where you left off')"><div class="si" style="background:${r.bg}">${r.ic}</div><div class="st"><b>${r.t}</b><span>${r.w}</span></div><span class="car">›</span></div>`).join('');
-
-const QPS=[['📅','Find ideas for my open slots','planner'],['🚀','Build around an offer or launch','offer'],['🔁','Repurpose existing content','repurpose'],['👥','Find audience pain points','idea'],['☀️','Develop a point of view','sharpen']];
-$('#qps').innerHTML=QPS.map(([ic,t,m])=>`<button class="qp" onclick="startSession({mode:'${m}'})"><span>${ic}</span>${t}</button>`).join('');
+$('#recentList').innerHTML=RECENT.map(r=>`<div class="sess" onclick="closeRecent();toast('Reopening session — continue where you left off')"><div class="si" style="background:${r.bg}">${r.ic}</div><div class="st"><b>${r.t}</b><span>${r.w}</span></div><span class="car">›</span></div>`).join('');
+function openRecent(){ $('#recentOverlay').classList.add('on'); }
+function closeRecent(){ $('#recentOverlay').classList.remove('on'); }
+function openCtx(){ $('#ctxOverlay').classList.add('on'); setTimeout(()=>$('#ctxText').focus(),80); }
+function closeCtx(){ $('#ctxOverlay').classList.remove('on'); }
+function ctxPick(k){ toast({file:'Upload a doc — Threadline extracts the themes, quotes & directions worth building',video:'Upload a video — Threadline transcribes it and pulls the strongest moments',transcript:'Add a transcript — Threadline finds the threads worth building from it'}[k]); }
+function ctxStart(){ const v=$('#ctxText').value.trim(); if(!v){ $('#ctxText').focus(); toast('Paste a note — or pick an upload option'); return; } $('#ctxText').value=''; closeCtx(); startSession({mode:'free',seed:v,title:v.slice(0,44)}); }
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('on'); }));
 
 /* ---------- viral hooks for reels ---------- */
 const HOOKS={

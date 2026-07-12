@@ -323,12 +323,12 @@ $('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUp
 })();
 
 /* ---------- nav ---------- */
-const NAV=[['🏠','Home','Your content command center',1,''],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',1,''],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- stats ---------- */
 const STATS=[
-  {cls:'v',ic:'✦',n:12,l:'Ideas to explore',d:'From Build & Idea Bank',go:'View ideas →',href:'threadline-plan.html'},
+  {cls:'v',ic:'✦',n:12,l:'Ideas to explore',d:'From Create & your Idea Bank',go:'View ideas →',href:'threadline-plan.html'},
   {cls:'c',ic:'✏️',n:5,l:'Drafts in progress',d:'Keep the momentum',go:'Open drafts →',href:'threadline-plan.html?view=kanban'},
   {cls:'g',ic:'🗓️',n:8,l:'Planned this week',d:'On track',go:'View Plan →',href:'threadline-plan.html'},
   {cls:'b',ic:'🕒',n:3,l:'Open slots',d:'In your series',go:'Fill them now →',href:'threadline-build-page.html?mode=planner'},
