@@ -195,7 +195,7 @@ svg.defs{position:absolute;width:0;height:0}
 
 <div class="top"><div class="topin">
   <div class="brand"><span class="mark" id="hmark"></span>Threadline <span class="tagd">Brand Review</span></div>
-  <div class="hprog"><div class="hbar"><i id="hbar"></i></div><span class="ht" id="ht">0 of 12 approved</span></div>
+  <div class="hprog"><div class="hbar"><i id="hbar"></i></div><span class="ht" id="ht">0 of 6 approved</span></div>
 </div></div>
 
 <div class="shell">
@@ -220,52 +220,27 @@ const posShort=stripTags(B.positioning.statement).split('—unlike')[0].trim()+'
 
 /* ------- slides (rendered from the brand model B) ------- */
 const SLIDES=[
-{ nav:'Overview', kicker:'Brand overview', title:'Your brand, at a glance',
-  says:`Based on your answers, the heart of your brand is helping <b>${B.heartLine}.</b>`,
+{ nav:'Foundation', kicker:'Your foundation', title:'Your brand, at a glance',
+  says:`Based on your answers, the heart of your brand is helping <b>${B.heartLine}.</b> Here's the whole foundation — positioning, audience, and message in one place.`,
   body:()=>`<div class="card"><div class="kv">
     <div class="r"><div class="k">Brand name</div><div class="v ed">${B.name}</div></div>
     <div class="r"><div class="k">One-line description</div><div class="v ed">${B.overview.oneLine}</div></div>
-    <div class="r"><div class="k">Mission</div><div class="v ed">${B.overview.mission}</div></div>
     <div class="r"><div class="k">Core promise</div><div class="v ed">${B.overview.promise}</div></div>
-    <div class="r"><div class="k">Primary audience</div><div class="v ed">${B.overview.audience}</div></div>
+    <div class="r"><div class="k">Primary message</div><div class="v ed">${B.messaging.primary}</div></div>
     <div class="r"><div class="k">Key differentiator</div><div class="v ed" id="ov-diff">${B.overview.differentiator}</div></div>
-  </div></div>`,
-  chips:[{t:'Ask Threadline why',r:`The through-line in your answers kept pointing here. Your mission, your promise, and your audience all circle the same core value—so I put it at the heart.`}]
-},
-{ nav:'Positioning', kicker:'Positioning', title:'How your brand fits in the market',
-  says:B.positioning.saysLine,
-  body:()=>`<div class="card"><h4>Positioning statement</h4><p class="ed" style="font-size:16px;line-height:1.55">${B.positioning.statement}</p></div>
-  <div class="card"><h4>The shift you create</h4><div class="transform">
+  </div></div>
+  <div class="card"><h4>Positioning</h4><p class="ed" style="font-size:15.5px;line-height:1.55">${B.positioning.statement}</p>
+  <div class="transform" style="margin-top:14px">
     <div class="tb from"><div class="tl">Right now they feel</div><div class="tv">${B.positioning.theyFeel}</div></div>
     <div class="arrow">→</div>
     <div class="tb to"><div class="tl">You help them become</div><div class="tv">${B.positioning.theyBecome}</div></div>
   </div></div>
-  <div class="card"><div class="kv">
-    <div class="r"><div class="k">They struggle with</div><div class="v ed">${B.positioning.struggle}</div></div>
-    <div class="r"><div class="k">You help them achieve</div><div class="v ed">${B.positioning.achieve}</div></div>
-    <div class="r"><div class="k">How you're different</div><div class="v ed">${B.positioning.different}</div></div>
-    <div class="r"><div class="k">Become known for</div><div class="v ed">${B.positioning.knownFor}</div></div>
-  </div></div>`
-},
-{ nav:'Audience', kicker:'Audience', title:'Who you are building for',
-  says:B.audience.saysLine,
-  body:()=>`<div class="card"><div class="kv">
+  <div class="card"><h4>Who you're building for</h4><div class="kv">
     <div class="r"><div class="k">Primary audience</div><div class="v ed">${B.audience.primary}</div></div>
-    <div class="r"><div class="k">Goals</div><div class="v ed">${B.audience.goals}</div></div>
     <div class="r"><div class="k">Pain points</div><div class="v ed">${B.audience.pains}</div></div>
-    <div class="r"><div class="k">Emotional needs</div><div class="v ed">${B.audience.emotional}</div></div>
-    <div class="r"><div class="k">Objections</div><div class="v ed">${B.audience.objections}</div></div>
-    <div class="r"><div class="k">Buying triggers</div><div class="v ed">${B.audience.triggers}</div></div>
-  </div></div>
-  <div class="card"><h4>Language they use</h4><div class="tags">${B.audience.language.map(x=>`<span class="tag">${x}</span>`).join('')}</div>
-    <h4 style="margin-top:18px">Questions they ask</h4><div class="tags">${B.audience.questions.map(x=>`<span class="tag v">${x}</span>`).join('')}</div>
-  </div>`
-},
-{ nav:'Personality', kicker:'Brand personality', title:'How your brand should feel',
-  says:`Here's how your brand should feel—dialed in from your answers.`,
-  body:()=>`<div class="card">${B.personality.spectrums.map(([a,b,p])=>`<div class="spectrum"><div class="sr"><div class="lbl"><span>${a}</span><span>${b}</span></div><div class="track"><div class="fillhalf" style="width:${p}%"></div><div class="knob" style="left:${p}%"></div></div></div></div>`).join('')}
-  <p class="ed" style="margin-top:6px;font-size:15.5px;font-weight:600" id="pers-sum">${B.personality.summary}</p></div>`,
-  chips:[{t:'Feels a bit too serious',r:`Fair—I can nudge the Playful ↔ Serious slider toward the middle so you keep authority but feel more human. Want me to soften a few voice samples to match?`}]
+  </div>
+  <h4 style="margin-top:16px">Language they use</h4><div class="tags">${B.audience.language.map(x=>`<span class="tag">${x}</span>`).join('')}</div></div>`,
+  chips:[{t:'Ask Threadline why',r:`The through-line in your answers kept pointing here. Your mission, your promise, and your audience all circle the same core value—so I put it at the heart. The full detail — mission, objections, buying triggers — is saved to Settings → Brand.`}]
 },
 { nav:'Voice', kicker:'Brand voice', title:'How your brand sounds',
   says:B.voice.saysLine,
@@ -291,21 +266,6 @@ const SLIDES=[
     {t:'Make it warmer',r:`I can warm it up—more "we're in this together," fewer imperatives. Here's a warmer headline option.`,apply:(root)=>{ const h=root.querySelector('#v-head'); if(h) h.textContent="You don't have to overthink it—let's find your next step together."; }}
   ]
 },
-{ nav:'Messaging', kicker:'Messaging foundation', title:'What your brand consistently says',
-  says:`Approve one primary tagline. I'll keep the rest as campaign lines.`,
-  body:()=>`<div class="card"><h4>Primary message</h4><p class="ed" style="font-size:16px;font-weight:600">${B.messaging.primary}</p></div>
-  <div class="card"><div class="kv">
-    <div class="r"><div class="k">Supporting messages</div><div class="v ed">${B.messaging.supporting}</div></div>
-    <div class="r"><div class="k">Core beliefs</div><div class="v ed">${B.messaging.beliefs}</div></div>
-    <div class="r"><div class="k">Point of view</div><div class="v ed">${B.messaging.pov}</div></div>
-    <div class="r"><div class="k">Value propositions</div><div class="v ed">${B.messaging.valueProps}</div></div>
-    <div class="r"><div class="k">Elevator pitch</div><div class="v ed">${B.messaging.pitch}</div></div>
-  </div></div>
-  <div class="card"><h4>Tagline — pick your primary</h4><div class="tags" id="taglines">
-    ${B.taglineOptions.map((t,i)=>`<button class="tag ${i===0?'v':''}" data-tag>${t}</button>`).join('')}
-  </div><p style="color:var(--faint);font-size:13px;margin-top:10px">The others are saved as campaign lines.</p></div>`,
-  bind:(root)=>{ root.querySelectorAll('#taglines [data-tag]').forEach(b=>b.onclick=()=>{ root.querySelectorAll('#taglines [data-tag]').forEach(x=>x.classList.remove('v')); b.classList.add('v'); toast('Primary tagline set'); }); }
-},
 { nav:'Pillars', kicker:'Content pillars', title:'What your brand will talk about',
   says:`Drag the mix to match how you want to show up. It doesn't have to add to 100.`,
   body:()=>`<div class="card" id="pillars">${B.pillars.map(([n,c,d,w],i)=>`<div class="pillar"><div class="pc" style="background:${c}"></div><div><div class="pn ed">${n}</div><div class="pd ed">${d}</div></div>
@@ -323,21 +283,18 @@ const SLIDES=[
       card.querySelector('[data-rm]').onclick=()=>{ card.classList.toggle('removed'); };
     }); }
 },
-{ nav:'Visual', kicker:'Visual identity', title:'How your brand looks',
-  says:`Here's how your visual identity comes together. Approve each piece.`,
-  body:()=>`<div class="vgrid">
-    <div class="vc"><span class="appr" data-appr>✓</span><h5>Primary logo</h5><div class="logobox"><div class="wm">◆ ${B.name}</div></div></div>
-    <div class="vc"><span class="appr" data-appr>✓</span><h5>Secondary / stacked</h5><div class="logobox alt"><div class="wm dark">◆<br>${B.name}</div></div></div>
-    <div class="vc"><span class="appr" data-appr>✓</span><h5>App / social icon</h5><div class="logobox" style="background:var(--grad2)"><div class="wm" style="font-size:26px">◆</div></div></div>
-    <div class="vc"><span class="appr" data-appr>✓</span><h5>Color palette</h5><div class="swatches">${B.visual.colors.map(c=>`<div class="sw" style="background:${c};color:${swTx(c)}">${c}</div>`).join('')}</div></div>
-    <div class="vc"><span class="appr" data-appr>✓</span><h5>Typography</h5><div class="typ"><div class="big">${(B.visual.type||'Satoshi').split('·')[0].trim()}</div><div class="sm">Headlines — bold, geometric</div><div class="sm" style="margin-top:6px">${B.visual.type} — clean, readable body</div></div></div>
-    <div class="vc"><span class="appr" data-appr>✓</span><h5>Imagery &amp; motif</h5><div class="typ"><div class="sm">${B.visual.imagery}</div></div></div>
-  </div>`,
-  bind:(root)=>{ root.querySelectorAll('[data-appr]').forEach(a=>a.onclick=()=>a.classList.toggle('on')); }
-},
-{ nav:'Brand Card', kicker:'Brand card', title:'Your quick-reference brand system',
-  says:`One page that holds the whole system. Download it or share it with a collaborator.`,
-  body:()=>`<div class="brandcard">
+{ nav:'In action', kicker:'Your brand, in action', title:'Here’s what all of this adds up to',
+  says:`I generated these from your foundation — this is your gut check. And your brand card holds the whole system on one page.`,
+  body:()=>`<div class="card"><div class="samples">
+    <div class="s"><div class="sl">Social post</div><div class="cap" id="pv-post">${B.preview.post}</div></div>
+    <div class="s"><div class="sl">Carousel cover</div><div class="head">${B.preview.cover}</div></div>
+    <div class="s"><div class="sl">Website headline</div><div class="head">${B.preview.headline}</div></div>
+    <div class="s"><div class="sl">Call to action</div><span class="cta">${B.preview.cta}</span></div>
+  </div></div>
+  <div class="card"><h4>How does this feel?</h4><div class="tags" id="pv-fb">
+    ${['This sounds like us','Too formal','Too casual','Too generic','Make it warmer','Make it bolder'].map(f=>`<button class="tag" data-fb="${f}">${f}</button>`).join('')}
+  </div></div>
+  <div class="brandcard">
     <div class="bc-top"><div><div class="bc-wm">◆ ${B.name}</div><div class="bc-tag">${B.tagline}</div></div>${WM.replace('22px','26px').replace('22px','26px')}</div>
     <div class="bc-grid">
       <div><div class="bl">Colors</div><div class="bswatch">${B.visual.colors.map(c=>`<i style="background:${c}"></i>`).join('')}</div></div>
@@ -346,20 +303,8 @@ const SLIDES=[
       <div><div class="bl">Keywords</div><div class="bchips">${B.voice.use.slice(0,4).map(k=>`<span>${k}</span>`).join('')}</div></div>
       <div class="bpos">${posShort}</div>
     </div></div>
-  <div style="display:flex;gap:10px;margin-top:16px"><button class="btn out" onclick="toast('Brand card downloaded (PDF)')">↓ Download</button><button class="btn out" onclick="toast('Share link copied')">↗ Share</button></div>`
-},
-{ nav:'Preview', kicker:'Content preview', title:'Here’s what your brand sounds like in action',
-  says:`I generated these from your approved foundation. This is your final gut check—tell me if anything's off.`,
-  body:()=>`<div class="card"><div class="samples">
-    <div class="s"><div class="sl">Social post</div><div class="cap" id="pv-post">${B.preview.post}</div></div>
-    <div class="s"><div class="sl">Carousel cover</div><div class="head">${B.preview.cover}</div></div>
-    <div class="s"><div class="sl">Email intro</div><div class="cap">${B.preview.email}</div></div>
-    <div class="s"><div class="sl">Website headline</div><div class="head">${B.preview.headline}</div></div>
-    <div class="s"><div class="sl">Call to action</div><span class="cta">${B.preview.cta}</span></div>
-  </div></div>
-  <div class="card"><h4>How does this feel?</h4><div class="tags" id="pv-fb">
-    ${['This sounds like us','Too formal','Too casual','Too generic','Make it warmer','Make it bolder','Add more personality'].map(f=>`<button class="tag" data-fb="${f}">${f}</button>`).join('')}
-  </div></div>`,
+  <div style="display:flex;gap:10px;margin-top:16px"><button class="btn out" onclick="toast('Brand card downloaded (PDF)')">↓ Download</button><button class="btn out" onclick="toast('Share link copied')">↗ Share</button></div>
+  <p style="color:var(--faint);font-size:12.5px;margin-top:12px">Your full visual identity — logo directions, palette, type — is saved to Settings → Brand. Refine it anytime.</p>`,
   bind:(root)=>{ root.querySelectorAll('#pv-fb [data-fb]').forEach(b=>b.onclick=()=>{ const f=b.dataset.fb;
       if(f==='This sounds like us'){ b.classList.add('use'); toast('Locked in — voice model confirmed'); }
       else { toast('Voice model updated: '+f.toLowerCase()); }
@@ -368,7 +313,7 @@ const SLIDES=[
 { nav:'Activate', kicker:'Final brand system', title:'Your brand is ready to work',
   says:`Everything below is approved and ready. Activating turns these decisions into your live content engine.`,
   body:()=>`<div class="card"><h4>Approved &amp; locked in</h4><div class="tags">
-    ${['Positioning','Audience','Voice','Messaging','Pillars','Visual identity','Logo','Style guide','Recommended series'].map(x=>`<span class="tag use">✓ ${x}</span>`).join('')}
+    ${['Foundation','Voice','Pillars','Recommended series','Brand card'].map(x=>`<span class="tag use">✓ ${x}</span>`).join('')}
   </div></div>
   <div class="card"><h4>What Threadline does the moment you activate</h4><div class="kv">
     <div class="r"><div class="k">Idea Bank</div><div class="v">Fills with starter ideas from your audience questions, pain points &amp; beliefs.</div></div>
@@ -471,8 +416,8 @@ function activate(){
       <div class="card" style="margin:0"><h4 style="color:var(--violet)">Plan</h4><div style="font-weight:800;font-size:22px">First 4 weeks drafted</div><div style="font-size:13px;color:var(--muted)">Recurring series slots already placed.</div></div>
     </div>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button class="btn out" onclick="location.href='threadline-app-home.html?activate=1'">Review my first series</button>
-      <button class="btn solid big" onclick="location.href='threadline-app-home.html?activate=1'">Open my workspace →</button>
+      <button class="btn out" onclick="location.href='threadline-app-home.html?activate=1'">Open my workspace</button>
+      <button class="btn solid big" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Turn my point of view into my first post: '+(stripTags?stripTags(B.messaging.pov):'my point of view'))">Create my first piece →</button>
     </div>
     <p class="grad-text" style="margin-top:22px;font-weight:800;font-size:16px">The thinking is done. Now Threadline gets to work.</p>
   </div>`;

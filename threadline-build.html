@@ -138,8 +138,8 @@ const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=nu
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'' };
 
-const PHASES=['Idea','Audience','Positioning','Voice','Pillars'];
-let step=0; // 0..4 phases, 5 = done
+const PHASES=['Idea','Audience','Point of view','Pillars'];
+let step=0; // 0..3 phases, 4 = done
 
 const PILLARS=[
   {n:'Think Clearly',c:'#803dff',mix:'30%',p:'Help your audience make stronger decisions before they create more content.'},
@@ -162,7 +162,7 @@ const VOICES=[
 function renderProg(){
   const p=$('#prog'); p.innerHTML='';
   PHASES.forEach((name,i)=>{
-    const cls='pstep'+(i===step?' on':'')+(i<step||step===5?' done':'');
+    const cls='pstep'+(i===step?' on':'')+(i<step||step===4?' done':'');
     p.appendChild(el('div',cls,`<span>${name}</span><span class="b"></span>`));
   });
 }
@@ -288,61 +288,29 @@ function p2(){ renderProg();
   };
 }
 
-/* ---------- Phase 3: Positioning ---------- */
+/* ---------- Phase 3: Point of view + voice ---------- */
 function p3(){ renderProg();
   stage(`
-    <div class="kick">✦ Your angle</div>
-    <h2 class="q">Why this brand, <span class="grad-text">for this audience?</span></h2>
-    <p class="lead">Finish a few sentences — instinct first, don't overthink.</p>
+    <div class="kick">✦ Your point of view</div>
+    <h2 class="q">What do you <span class="grad-text">stand for?</span></h2>
+    <p class="lead">Two sentences and a voice — that's all Threadline needs to make your content sound like nobody else's.</p>
     <div class="field"><label>We believe…</label><input id="believe" placeholder="…the hard part isn't posting, it's knowing what to say." value="${esc(state.believe)}"></div>
     <div class="field"><label>The industry gets this wrong when…</label><input id="wrong" placeholder="…it treats content like a volume game." value="${esc(state.wrong)}"></div>
-    <div class="field"><label>After working with us, people feel…</label><input id="feel" placeholder="…clear, confident, and back in control." value="${esc(state.feel)}"></div>
+    <div class="field" style="margin-bottom:8px"><label>Which voice feels most like you?</label></div>
+    <div class="choices" id="voices">${VOICES.map((v,i)=>`<button class="sample" data-i="${i}"><div class="sl">${v.l}</div><div class="stext">${v.t}</div></button>`).join('')}</div>
     <div id="reflect"></div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(1,p2)">← Back</button>
       <button class="btn ghost" data-next style="display:none" onclick="adv(3,p4)">Continue →</button>
       <div class="grow"></div>
-      <button class="btn solid" id="go3">Show me directions</button>
-    </div>`);
-  renderProg();
-  $('#go3').onclick=()=>{
-    state.believe=$('#believe').value.trim(); state.wrong=$('#wrong').value.trim(); state.feel=$('#feel').value.trim();
-    $('#go3').style.display='none';
-    thinkThenReveal($('#reflect'), ()=>{
-      const card=el('div','ai');
-      card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Three ways to stand</div>
-        <p class="soft">There are a few strong directions inside what you said. None is wrong — they lead to different brands. Which pulls you?</p>
-        <div class="choices">${POSITIONING.map((d,i)=>`<button class="choice" data-i="${i}"><div class="cl">${d.k}</div><div class="ct">${d.t}</div><div class="cd">${d.d}</div></button>`).join('')}</div>`;
-      card.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ card.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.positioning=POSITIONING[+b.dataset.i].t; });
-      return card;
-    });
-  };
-}
-
-/* ---------- Phase 4: Voice ---------- */
-function p4(){ renderProg();
-  stage(`
-    <div class="kick">✦ How you sound</div>
-    <h2 class="q">Let's make it <span class="grad-text">sound like you.</span></h2>
-    <p class="lead">Same message, four voices. Which one feels most like the brand you're building?</p>
-    <div class="choices" id="voices">${VOICES.map((v,i)=>`<button class="sample" data-i="${i}"><div class="sl">${v.l}</div><div class="stext">${v.t}</div></button>`).join('')}</div>
-    <div class="row2" style="margin-top:18px">
-      <div class="field" style="margin:0"><label>Three words that describe your brand</label><input id="words" placeholder="warm, sharp, honest" value="${esc(state.words)}"></div>
-      <div class="field" style="margin:0"><label>Three it should never be</label><input id="never" placeholder="corporate, salesy, generic" value="${esc(state.neverWords)}"></div>
-    </div>
-    <div id="reflect"></div>
-    <div class="nav">
-      <button class="btn ghost" data-back onclick="adv(2,p3)">← Back</button>
-      <button class="btn ghost" data-next style="display:none" onclick="adv(4,p5)">Continue →</button>
-      <div class="grow"></div>
-      <button class="btn solid" id="go4">Build my voice</button>
+      <button class="btn solid" id="go3">Build my voice</button>
     </div>`);
   renderProg();
   document.querySelectorAll('#voices .sample').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#voices .sample').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.voicePick=VOICES[+b.dataset.i].l; });
-  $('#go4').onclick=()=>{
-    state.words=$('#words').value.trim(); state.neverWords=$('#never').value.trim();
+  $('#go3').onclick=()=>{
+    state.believe=$('#believe').value.trim(); state.wrong=$('#wrong').value.trim();
     if(!state.voicePick){ document.querySelector('#voices').scrollIntoView({behavior:'smooth'}); return; }
-    $('#go4').style.display='none';
+    $('#go3').style.display='none';
     thinkThenReveal($('#reflect'), ()=>{
       const v=state.voicePick; const card=el('div','ai');
       const samples={
@@ -352,7 +320,7 @@ function p4(){ renderProg();
         Playful:['Your ideas called. They’re ready to be more than notes.','Less staring at the calendar, more building.'],
       }[v]||['','' ];
       card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Your voice, drafted</div>
-        <p>You lead with a <b>${esc(v.toLowerCase())}</b> voice${state.words?`, built on <b>${esc(state.words)}</b>`:''}${state.neverWords?`, and never <b>${esc(state.neverWords)}</b>`:''}.</p>
+        <p>You lead with a <b>${esc(v.toLowerCase())}</b> voice${state.believe?`, built around the belief that <b>${esc(state.believe.replace(/^…?\s*/,''))}</b>`:''}.</p>
         <p class="soft">Here's how that sounds in the wild — does this feel like you?</p>
         <div class="sample" style="cursor:default;margin-top:8px"><div class="sl">Sample headline</div><div class="stext">${esc(samples[0])}</div></div>
         <div class="sample" style="cursor:default;margin-top:8px"><div class="sl">Sample caption</div><div class="stext" style="font-weight:500;font-size:14.5px">${esc(samples[1])}</div></div>`;
@@ -361,17 +329,17 @@ function p4(){ renderProg();
   };
 }
 
-/* ---------- Phase 5: Pillars ---------- */
-function p5(){ renderProg();
+/* ---------- Phase 4: Pillars ---------- */
+function p4(){ renderProg();
   stage(`
     <div class="kick">✦ What you'll be known for</div>
     <h2 class="q">Here are your <span class="grad-text">content pillars.</span></h2>
     <p class="lead">Based on everything so far, these are the threads worth pulling. Keep what fits — rename, remove, or ask for alternatives.</p>
     <div id="pillars">${PILLARS.map((p,i)=>pillarHTML(p,i)).join('')}</div>
     <div class="nav">
-      <button class="btn ghost" data-back onclick="adv(3,p4)">← Back</button>
+      <button class="btn ghost" data-back onclick="adv(2,p3)">← Back</button>
       <div class="grow"></div>
-      <button class="btn solid" onclick="adv(5,done)">These look right →</button>
+      <button class="btn solid" onclick="adv(4,done)">These look right →</button>
     </div>`);
   renderProg();
   bindPillars();
@@ -380,7 +348,7 @@ function pillarHTML(p,i){ return `<div class="pillar" data-i="${i}"><div class="
 function bindPillars(){ document.querySelectorAll('#pillars .pillar [data-del]').forEach(b=>b.onclick=e=>{ e.target.closest('.pillar').remove(); }); }
 
 /* ---------- Completion ---------- */
-function done(){ step=5; renderProg(); try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand) saveBrand(compileFromBuild(state, PILLARS)); }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand) saveBrand(compileFromBuild(state, PILLARS)); }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
   const built=['Positioning','Audience profile','Brand voice','Content pillars','Visual direction'];
   stage(`<div class="done-wrap">
     <div class="burst">🎉</div>
@@ -403,21 +371,21 @@ function findKeyword(s){ const kws=['simplicity','simple','relief','overwhelm','
 
 /* ---------- save / resume ---------- */
 const SAVE_KEY='threadline.build';
-const CAP={name:'name',idea:'idea',why:'why',audWho:'audWho',audPain:'audPain',audTired:'audTired',believe:'believe',wrong:'wrong',feel:'feel',words:'words',never:'neverWords'};
+const CAP={name:'name',idea:'idea',why:'why',audWho:'audWho',audPain:'audPain',audTired:'audTired',believe:'believe',wrong:'wrong'};
 function captureCurrent(){ for(const id in CAP){ const e=document.getElementById(id); if(e) state[CAP[id]]=e.value.trim(); } }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({state,step,at:Date.now()})); }catch(e){} }
 function loadSaved(){ try{ const r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function saveProgress(){ captureCurrent(); persist(); toast('Progress saved — pick up anytime.'); }
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
 function resetState(){ for(const k in state) state[k]=''; }
-const PHASE_FN=[p1,p2,p3,p4,p5,done];
-function go(n){ step=Math.max(0,Math.min(5,n)); renderProg(); PHASE_FN[step](); }
+const PHASE_FN=[p1,p2,p3,p4,done];
+function go(n){ step=Math.max(0,Math.min(4,n)); renderProg(); PHASE_FN[step](); }
 function adv(n,fn){ captureCurrent(); step=n; persist(); (fn||PHASE_FN[n])(); }
 function resumePrompt(saved){
   stage(`<div style="text-align:center;padding-top:26px">
     <div class="kick" style="justify-content:center">✦ Welcome back</div>
     <h2 class="q" style="margin-top:10px">Pick up where you <span class="grad-text">left off?</span></h2>
-    <p class="lead" style="max-width:46ch;margin:12px auto 26px">You were on <b>${esc(PHASES[Math.min(saved.step||0,4)])}</b>. Everything you told Threadline is saved and waiting.</p>
+    <p class="lead" style="max-width:46ch;margin:12px auto 26px">You were on <b>${esc(PHASES[Math.min(saved.step||0,3)])}</b>. Everything you told Threadline is saved and waiting.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button class="btn ghost" id="fresh">Start over</button>
       <button class="btn solid" id="resume">Resume →</button>
