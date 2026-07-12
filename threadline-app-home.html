@@ -395,11 +395,11 @@ function renderWelcome(){
   $('#welcome').innerHTML=`<div class="welcome">
     <button class="wx" onclick="dismissWelcome()" title="Dismiss">×</button>
     <h3>✨ Your brand is active. Threadline has started building with it.</h3>
-    <div class="chips"><span><b>${B.pillars.length}</b> content pillars</span><span><b>${Math.min(4,B.series.length)}</b> active series</span><span><b>24</b> starter Sparks</span><span><b>8</b> planned content slots</span></div>
-    <div class="wacts"><button class="wbtn" onclick="toast('Opening “${B.series[0]?B.series[0][0]:'your first series'}”…')">Review first series</button><button class="wbtn" onclick="location.href='threadline-spark-bank.html'">Explore Spark Bank</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Open Plan</button></div>
+    <div class="chips"><span style="cursor:pointer" onclick="location.href='threadline-review.html?slide=6'" title="Open your pillars in the brand deck"><b>${B.pillars.length}</b> content pillars</span><span style="cursor:pointer" onclick="location.href='threadline-series.html?tab=active'"><b>${Math.min(4,B.series.length)}</b> active series</span><span style="cursor:pointer" onclick="location.href='threadline-spark-bank.html'"><b>24</b> starter Sparks</span><span style="cursor:pointer" onclick="location.href='threadline-plan.html'"><b>8</b> planned content slots</span></div>
+    <div class="wacts"><button class="wbtn" onclick="location.href='threadline-series.html?tab=active'">Review first series</button><button class="wbtn" onclick="location.href='threadline-spark-bank.html'">Explore Spark Bank</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Open Plan</button></div>
     <div class="check" id="check"><div class="ct" onclick="document.getElementById('check').classList.toggle('open')">▸ Getting started — 1 of 6 done</div>
       <div class="items">
-        ${[['Brand approved',1],['Review recommended series',0],['Choose your main Plan view',0],['Connect publishing channels',0],['Review the first week',0],['Build the first content piece',0]].map(([t,d])=>`<div class="citem${d?' done':''}"><span class="cb">✓</span>${t}</div>`).join('')}
+        ${[['Brand approved',1,'threadline-review.html'],['Review recommended series',0,'threadline-series.html?tab=active'],['Choose your main Plan view',0,'threadline-plan.html'],['Connect publishing channels',0,'threadline-analytics.html'],['Review the first week',0,'threadline-plan.html?view=calendar'],['Build the first content piece',0,'threadline-build-page.html']].map(([t,d,href])=>`<div class="citem${d?' done':''}" style="cursor:pointer" onclick="location.href='${href}'"><span class="cb">✓</span>${t} <span style="color:var(--faint);font-weight:800">›</span></div>`).join('')}
       </div></div>
   </div>`;
 }
