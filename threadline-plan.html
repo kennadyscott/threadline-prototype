@@ -233,6 +233,29 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .rulesec label.ckrow{display:flex;align-items:flex-start;gap:10px;font-weight:700;font-size:13.5px;padding:4px 0;cursor:pointer}
 .rulesec label.ckrow input{accent-color:var(--violet);width:17px;height:17px;margin-top:2px}
 .rulesec label.ckrow span{display:block;font-size:11.5px;color:var(--faint);font-weight:600}
+/* asset modal */
+.aopt{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.aopt>button{border:1.5px solid var(--line);border-radius:14px;padding:18px 14px;text-align:center;transition:.13s;background:var(--surface)}
+.aopt>button:hover{border-color:var(--violet)}
+.aopt .ic2{font-size:22px}
+.aopt b{display:block;font-size:14px;margin-top:7px}
+.aopt span{display:block;font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.4}
+.ctxline{background:var(--surface-2);border-radius:11px;padding:10px 13px;font-size:12.5px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.ctxline b{color:var(--ink)}
+.refgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.refc{border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;transition:.13s;background:var(--surface)}
+.refc:hover{border-color:var(--violet)}
+.refc .rth{height:64px;border-radius:9px;display:grid;place-items:center;font-size:26px;margin-bottom:7px}
+.refc b{font-size:11.5px;display:block;line-height:1.3}
+.prev{border-radius:16px;padding:26px 20px;text-align:center;color:#fff;margin:6px 0 10px;box-shadow:var(--shadow-sm)}
+.prev .pv-copy{font-family:'Satoshi';font-weight:900;font-size:19px;line-height:1.25}
+.prev .pv-brand{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.75;margin-top:12px}
+.vnote{font-size:11.5px;color:var(--faint);font-style:italic;margin-bottom:8px}
+.credline{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted);background:var(--surface-2);border-radius:9px;padding:7px 11px;margin-bottom:12px}
+.fbchips{display:flex;flex-wrap:wrap;gap:7px}
+.fbc{border:1.5px solid var(--line);border-radius:999px;padding:7px 13px;font-weight:700;font-size:12px;color:var(--muted)}
+.fbc:hover{border-color:var(--violet);color:var(--violet)}
+.limitbox{background:rgba(245,165,36,.08);border:1px solid rgba(245,165,36,.3);border-radius:11px;padding:11px 13px;font-size:12px;margin-top:10px;line-height:1.5}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:95;display:flex;align-items:center;gap:12px;max-width:92vw}
 .toast.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
 .toast button{color:var(--cyan);font-weight:800}
@@ -293,6 +316,12 @@ svg.defs{position:absolute;width:0;height:0}
 <div class="drawer" id="ws"></div>
 
 <div class="minimenu" id="minimenu"></div>
+
+<div class="overlay" id="assetOverlay"><div class="modal" style="max-width:560px">
+  <h3>🖼 Asset <span id="as-name" style="color:var(--faint);font-weight:700;font-size:13px"></span></h3>
+  <p class="msub" id="as-ctx"></p>
+  <div id="as-body"></div>
+</div></div>
 
 <div class="overlay" id="rulesOverlay"><div class="modal">
   <h3>⚙ Planning rules</h3>
@@ -414,7 +443,7 @@ function itemRow(x){
     <td style="color:var(--muted);font-weight:600">${x.fmt}</td>
     <td>${serPill(x.ser)}</td>
     <td>${chanIcons(x.ch)}</td>
-    <td><span class="assetbox">${x.asset||'＋'}</span></td>
+    <td><span class="assetbox" style="cursor:pointer" title="Upload or create asset" onclick="event.stopPropagation();openAsset(${x.id})">${x.asset||'＋'}</span></td>
     <td class="tnote">${esc(x.note||'')}</td>
   </tr>`;
 }
@@ -511,6 +540,71 @@ function reusePlatform(id){ const src=ITEMS.find(i=>i.id===id); if(!src) return;
   dup.note='Platform version of “'+src.t.slice(0,26)+'…” — tailor for the new channel.';
   ITEMS.push(dup); render(); openWs(dup.id); toast('Post duplicated for '+(dup.ch.includes('in')?'LinkedIn':'Instagram/TikTok')+' — linked to the original'); }
 
+/* ---------- assets: upload or create (AI) ---------- */
+const CREDITS={left:17,total:20};
+let asId=null;
+function assetCtx(x){ return `<div class="ctxline"><b>What this post is:</b> ${esc(x.t)} — ${esc(x.fmt||'Post')} · ${esc(x.ser||'')}${x.note?` · <i>${esc(x.note)}</i>`:''}</div>`; }
+function openAsset(id,step){ asId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
+  x.refines=x.refines||0;
+  $('#as-name').textContent='· '+x.t.slice(0,34)+(x.t.length>34?'…':'');
+  $('#as-ctx').textContent='Every generation and refinement uses 1 image credit from your monthly quota.';
+  if(step==='create') assetMode(); else assetChoose();
+  $('#assetOverlay').classList.add('on');
+}
+function closeAsset(){ $('#assetOverlay').classList.remove('on'); }
+function assetChoose(){ const x=ITEMS.find(i=>i.id===asId);
+  $('#as-body').innerHTML=assetCtx(x)+`<div class="aopt">
+    <button onclick="doUpload(asId)"><span class="ic2">📤</span><b>Upload asset</b><span>PNG, JPG, or video — attach your own file. No credits used.</span></button>
+    <button onclick="assetMode()"><span class="ic2">✦</span><b>Create asset</b><span>Threadline designs it from this post + your brand.</span></button>
+  </div>`;
+}
+function doUpload(id){ const x=ITEMS.find(i=>i.id===id); if(x){ x.asset='🖼'; } closeAsset(); render(); toast('Asset uploaded — attached to the post (no credits used)'); }
+function assetMode(){ const x=ITEMS.find(i=>i.id===asId);
+  let refs=ITEMS.filter(i=>!i.arch&&!i.open&&i.id!==asId&&i.ser===x.ser&&i.asset).slice(0,3);
+  if(!refs.length) refs=ITEMS.filter(i=>i.asset&&!i.open&&i.id!==asId).slice(0,3);
+  const col=(SER[x.ser]||{color:'#803dff'}).color;
+  $('#as-body').innerHTML=assetCtx(x)+`
+    <h5 style="font-size:12.5px;font-weight:800;margin-bottom:3px">🎨 Match an asset from ${esc(x.ser||'your series')} <span style="color:var(--faint);font-weight:600">(recommended)</span></h5>
+    <div style="font-size:11.5px;color:var(--faint)">Same design, new copy — keeps the series recognizable. 1 credit.</div>
+    <div class="refgrid">${refs.map(r=>`<button class="refc" onclick="genAsset('match')"><span class="rth" style="background:${col}18">${r.asset}</span><b>${esc(r.t.slice(0,30))}</b></button>`).join('')}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
+      <button class="ob" style="padding:10px 15px;font-size:12.5px" onclick="genAsset('new')">✨ Create something new (1 credit)</button>
+      <span style="font-size:11px;color:var(--faint)">A fresh design just for this post.</span>
+    </div>`;
+}
+function genAsset(mode){ const x=ITEMS.find(i=>i.id===asId);
+  CREDITS.left=Math.max(0,CREDITS.left-1);
+  renderAssetPreview(x,mode,null);
+}
+function renderAssetPreview(x,mode,note){
+  const left=Math.max(0,3-(x.refines||0));
+  const col=(SER[x.ser]||{color:'#803dff'}).color;
+  const B0=(window.loadBrand&&loadBrand())||defaultBrand();
+  $('#as-body').innerHTML=`
+    ${note?`<div class="vnote">↻ Refined — ${esc(note)}</div>`:''}
+    <div class="prev" style="background:linear-gradient(135deg,${col},${col}cc 60%,#0f172a)">
+      <div class="pv-copy">${esc(x.t)}</div>
+      <div class="pv-brand">${esc(B0.name)} · ${esc(x.ser||'')}</div>
+    </div>
+    <div class="credline">✦ Used 1 image credit · <b>${CREDITS.left} of ${CREDITS.total} left this month</b> · ${mode==='match'?'matched to your series design':mode==='new'?'new direction':'refinement'}</div>
+    ${left>0?`
+    <h5 style="font-size:12.5px;font-weight:800;margin-bottom:7px">Not quite right? <span style="color:var(--faint);font-weight:600">(${left} refinement${left>1?'s':''} left on this asset · 1 credit each)</span></h5>
+    <div class="fbchips">
+      <button class="fbc" onclick="refine('softened the polish — hand-set type, natural texture, less symmetry')">Looks AI-generated</button>
+      <button class="fbc" onclick="refine('loosened it up — warmer palette from your brand, conversational copy treatment')">A little corporate for our vibe</button>
+      <button class="fbc" onclick="assetMode()">See a series example →</button>
+      <button class="fbc" onclick="ownFeedback()">✏️ My own feedback</button>
+    </div>
+    <div id="as-own"></div>`
+    :`<div class="limitbox"><b>Refinement limit reached for this asset.</b> Guided tweaks beat endless retries — start a fresh direction, or upload your own.
+      <div style="display:flex;gap:8px;margin-top:9px"><button class="ob" onclick="ITEMS.find(i=>i.id===asId).refines=0;genAsset('new')">✨ Fresh direction (1 credit)</button><button class="ob" onclick="doUpload(asId)">📤 Upload my own</button></div></div>`}
+    <div class="dbtns" style="margin-top:16px"><button class="dbtn ghost" onclick="closeAsset()">Cancel</button><div class="grow"></div><button class="dbtn pri" onclick="useAsset()">✓ Use this asset</button></div>`;
+}
+function refine(note){ const x=ITEMS.find(i=>i.id===asId); x.refines=(x.refines||0)+1; CREDITS.left=Math.max(0,CREDITS.left-1); renderAssetPreview(x,'refine',note); }
+function ownFeedback(){ $('#as-own').innerHTML=`<div style="margin-top:10px"><textarea id="as-fb" placeholder="Tell Threadline what's off — the vibe, the series look, anything specific." style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:10px 12px;font-size:13px;min-height:60px;outline:none;font-family:inherit"></textarea>
+  <button class="ob" style="margin-top:7px" onclick="refine('applied your feedback: “'+($('#as-fb').value.trim().slice(0,60)||'…')+'”')">↻ Refine with my feedback (1 credit)</button></div>`; $('#as-fb').focus(); }
+function useAsset(){ const x=ITEMS.find(i=>i.id===asId); if(x) x.asset='🎨'; closeAsset(); render(); toast('Asset attached — saved to this post & your series library'); }
+
 /* ---------- workspace ---------- */
 let wsId=null;
 function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
@@ -533,7 +627,10 @@ function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
       ${['Find the strongest hook','Make it sound more like me','Make this clearer','Adapt for LinkedIn','Add a CTA','Check brand voice'].map(a=>`<button class="aic" onclick="toast('${a} — applied in your ${lc(B.voice.traits[0]||'clear')} voice')">${a}</button>`).join('')}
     </div></div>
     <div class="dsec"><h5>Assets & workflow</h5>
-      <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)"><span class="assetbox">${x.asset||'＋'}</span> 1 asset · ${x.cm||0} comments ${x.status==='Approved'&&!x.asset?'<span class="warn">Missing cover graphic</span>':''}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)"><span class="assetbox">${x.asset||'＋'}</span> ${x.cm||0} comments
+        <button class="ob" onclick="doUpload(${x.id})">📤 Upload asset</button>
+        <button class="ob" onclick="openAsset(${x.id},'create')">✦ Create asset</button>
+        ${x.status==='Approved'&&!x.asset?'<span class="warn">Missing cover graphic</span>':''}</div>
       <div class="dwf">
         <button class="wb" onclick="reuseLater(wsId)">🔁 Reuse later</button>
         <button class="wb" onclick="reusePlatform(wsId)">📲 Reuse on another platform</button>
