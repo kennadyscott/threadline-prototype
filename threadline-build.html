@@ -47,6 +47,32 @@ textarea,input{font-family:inherit}
 .kick{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
 h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .lead{color:var(--muted);font-size:16.5px;margin-bottom:24px}
+.assetrow{display:flex;gap:9px;flex-wrap:wrap}
+.assetbtn{border:1.5px dashed var(--line);border-radius:11px;padding:10px 15px;font-weight:800;font-size:13px;color:var(--muted);background:var(--surface);cursor:pointer;font-family:inherit}
+.assetbtn:hover{border-color:var(--violet);color:var(--violet)}
+#assetChips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.achip{display:inline-flex;align-items:center;gap:7px;background:rgba(128,61,255,.07);border:1px solid rgba(128,61,255,.25);border-radius:999px;padding:5px 11px;font-weight:700;font-size:12px}
+.achip img{width:20px;height:20px;border-radius:5px;object-fit:contain;background:#fff}
+.achip b{cursor:pointer;color:var(--faint);font-weight:900}
+.achip b:hover{color:#c83a56}
+.exlink{color:var(--violet);font-weight:800;cursor:pointer;text-decoration:underline}
+.exoverlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:90;display:none;align-items:center;justify-content:center;padding:20px}
+.exoverlay.on{display:flex}
+.exmodal{background:var(--surface);border-radius:20px;box-shadow:0 24px 70px rgba(15,18,34,.25);width:100%;max-width:430px;padding:22px}
+.exhead{display:flex;justify-content:space-between;align-items:center}
+.exhead b{font-size:16px}
+.exx{background:none;border:none;font-size:15px;color:var(--faint);cursor:pointer;font-family:inherit}
+.exsub{color:var(--muted);font-size:12.5px;margin:4px 0 14px}
+.excard{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fdfcf9}
+.exlogo{display:flex;align-items:center;gap:8px}
+.exbulb{font-size:22px}
+.exwm{font-weight:900;font-size:22px;letter-spacing:-.02em}
+.extag{color:#54607a;font-size:12.5px;font-weight:600;margin:2px 0 12px}
+.exrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.exlbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);min-width:44px}
+.exsw{width:22px;height:22px;border-radius:6px;display:inline-block}
+.exv{background:#fff;border:1px solid #eee3c8;color:#8a6d1f;border-radius:999px;padding:3px 10px;font-weight:700;font-size:11px}
+.exfoot{color:var(--muted);font-size:12px;margin-top:13px;line-height:1.5}
 .field{margin-bottom:16px}
 .field label{display:block;font-weight:700;font-size:14.5px;margin-bottom:8px}
 .field textarea,.field input{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 15px;font-size:15.5px;color:var(--ink);outline:none;transition:.12s}
@@ -136,11 +162,27 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 <div class="wrap" id="wrap"></div>
 
 <script src="threadline-brand.js"></script>
+<div class="exoverlay" id="exOverlay" onclick="if(event.target===this)closeBrandExample()">
+  <div class="exmodal">
+    <div class="exhead"><b>What a brand card looks like</b><button class="exx" onclick="closeBrandExample()">✕</button></div>
+    <p class="exsub">One page (or a whole deck) that shows how your brand looks and sounds. Here's a sample:</p>
+    <div class="excard">
+      <div class="exlogo"><span class="exbulb">💡</span><span class="exwm">TutorEd</span></div>
+      <div class="extag">The right tutor. The right fit.</div>
+      <div class="exrow"><span class="exlbl">Colors</span><span class="exsw" style="background:#000"></span><span class="exsw" style="background:#F4B400"></span><span class="exsw" style="background:#FFD35C"></span><span class="exsw" style="background:#F3F3F3;border:1px solid #e6e9f1"></span><span class="exsw" style="background:#C69A6B"></span></div>
+      <div class="exrow"><span class="exlbl">Type</span><b style="font-size:13px">Poppins ExtraBold</b><span style="color:var(--faint);font-size:12px">+ Inter Regular</span></div>
+      <div class="exrow"><span class="exlbl">Values</span><span class="exv">Approachable</span><span class="exv">Bright</span><span class="exv">Encouraging</span><span class="exv">Dependable</span></div>
+      <div class="exrow"><span class="exlbl">Voice</span><span style="font-weight:700;font-size:12.5px">Supportive. Smart. Friendly.</span></div>
+    </div>
+    <p class="exfoot">Yours can be simpler or fancier — a logo file, a style guide PDF, even a screenshot of your colors. Anything helps. And if you have nothing yet, that's exactly what we're about to build together.</p>
+  </div>
+</div>
+
 <script>
 const $=s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'' };
+const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'' };
 
 const PHASES=['Idea','Audience','Point of view','Pillars'];
 let step=0; // 0..3 phases, 4 = done
@@ -201,6 +243,30 @@ function thinkThenRevealAI(container, promise, render){
   });
 }
 
+/* ---------- brand asset uploads (optional, phase 1) ---------- */
+function renderAssetChips(){
+  const w=document.getElementById('assetChips'); if(!w) return;
+  let h='';
+  if(state.logoName) h+=`<span class="achip">${state.logoData?`<img src="${state.logoData}" alt="">`:'🖼'} ${esc(state.logoName)} <b onclick="clearAsset('logo')" title="Remove">✕</b></span>`;
+  if(state.deckName) h+=`<span class="achip">📄 ${esc(state.deckName)} <b onclick="clearAsset('deck')" title="Remove">✕</b></span>`;
+  w.innerHTML=h;
+}
+function clearAsset(k){ if(k==='logo'){ state.logoName=''; state.logoData=''; } else state.deckName=''; persist(); renderAssetChips(); }
+function initAssets(){
+  const lb=document.getElementById('logoBtn'), db=document.getElementById('deckBtn');
+  const lf=document.getElementById('logoFile'), df=document.getElementById('deckFile');
+  if(!lb) return;
+  lb.onclick=()=>lf.click(); db.onclick=()=>df.click();
+  lf.onchange=()=>{ const f=lf.files[0]; if(!f) return; state.logoName=f.name;
+    const rd=new FileReader();
+    rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); const sc=Math.min(1,96/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); try{ state.logoData=c.toDataURL('image/png'); }catch(e){ state.logoData=''; } persist(); renderAssetChips(); }; img.src=rd.result; };
+    rd.readAsDataURL(f); renderAssetChips(); toast('Logo added — it\u2019ll anchor your brand kit'); };
+  df.onchange=()=>{ const f=df.files[0]; if(!f) return; state.deckName=f.name; persist(); renderAssetChips(); toast('Got it — Threadline will fold your branding into the foundation'); };
+  renderAssetChips();
+}
+function showBrandExample(){ document.getElementById('exOverlay').classList.add('on'); }
+function closeBrandExample(){ document.getElementById('exOverlay').classList.remove('on'); }
+
 /* ---------- Phase 1: Idea ---------- */
 function p1(){
   const s=stage(`
@@ -210,6 +276,16 @@ function p1(){
     <div class="field"><label>What's it called? <span style="color:var(--faint);font-weight:500">(a working name is fine)</span></label>
       <input id="name" placeholder="e.g. Still Skincare" value="${esc(state.name)}">
       <div class="hint">Don't overthink it—you can rename it anytime.</div>
+    </div>
+    <div class="field"><label>Already have branding? <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <div class="assetrow">
+        <button class="assetbtn" id="logoBtn" type="button">🖼 Upload your logo</button>
+        <button class="assetbtn" id="deckBtn" type="button">🎨 Upload a brand card or deck</button>
+        <input type="file" id="logoFile" accept="image/*" hidden>
+        <input type="file" id="deckFile" accept="image/*,.pdf,.ppt,.pptx,.key" hidden>
+      </div>
+      <div id="assetChips"></div>
+      <div class="hint">Colors, fonts, logo, voice — anything that shows how your brand looks and sounds. <a class="exlink" onclick="showBrandExample()">See an example</a>.<br>Don't have these yet? <b>Don't worry</b> — we'll create them together after we learn more about your company.</div>
     </div>
     <div class="field"><label>What are you building?</label>
       <textarea id="idea" placeholder="e.g. I'm starting a skincare brand for women over 40 who feel overwhelmed by 10-step routines and just want something simple that works.">${esc(state.idea)}</textarea>
@@ -224,6 +300,7 @@ function p1(){
       <div class="grow"></div>
       <button class="btn solid" id="go1">Let's look at this together</button>
     </div>`);
+  initAssets();
   $('#go1').onclick=()=>{
     state.name=$('#name').value.trim(); state.idea=$('#idea').value.trim(); state.why=$('#why').value.trim();
     if(!state.idea){ $('#idea').focus(); return; }
@@ -468,7 +545,7 @@ async function adjustPillars(){
 }
 
 /* ---------- Completion ---------- */
-function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand) saveBrand(compileFromBuild(state, PILLARS)); }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
   const built=['Positioning','Audience profile','Brand voice','Content pillars','Visual direction'];
   stage(`<div class="done-wrap">
     <div class="burst">🎉</div>
