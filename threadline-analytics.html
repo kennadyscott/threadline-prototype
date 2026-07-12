@@ -423,7 +423,7 @@ const SCOLOR=['#803dff','#3b82f6','#22d3ee','#fb7185','#f5a524'];
 const SNAME=B.series.map(s=>s[0]);
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['📊','Analytics','Measure what matters',1,'']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',1,'']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:''}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- connections ---------- */

@@ -4,6 +4,19 @@
 (function(){
   const KEY='threadline.brand';
 
+  /* heal known typos in stored content (typed during onboarding / series setup) */
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(!k||k.indexOf('threadline.')!==0) continue;
+      const v=localStorage.getItem(k);
+      if(!v||!/buliding|\bcler\b/i.test(v)) continue;
+      localStorage.setItem(k, v
+        .replace(/buliding/gi, m=>m[0]==='B'?'Building':'building')
+        .replace(/\bcler\b/gi, m=>m[0]==='C'?'Clear':'clear'));
+    }
+  }catch(e){}
+
   /* ---------- helpers ---------- */
   const clean=s=>(s||'').trim().replace(/[.!?,;:\s]+$/,'');
   const cap=s=>{ s=(s||'').trim(); return s? s.charAt(0).toUpperCase()+s.slice(1) : s; };

@@ -353,7 +353,7 @@ const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars
 const BTS_PILLAR=(B.pillars.find(p=>/behind|process|work/i.test(p[0]))||B.pillars[1]||B.pillars[0])[0];
 
 /* ---------- nav ---------- */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['⚡','Spark Bank','Your idea library',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['⚡','Spark Bank','Your idea library',1,''],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 function renderNav(){ $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span>${on?`<span class="cnt">${SPARKS.filter(s=>!s.archived).length}</span>`:''}</button>`).join(''); }
 
 /* ---------- spark data (generated from the brand model) ---------- */

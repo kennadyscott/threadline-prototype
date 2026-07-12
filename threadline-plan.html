@@ -377,7 +377,7 @@ $('#wsname').textContent=B.name;
 $('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📅','Plan','Plan, create, and publish',1,''],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',1,''],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- data ---------- */
