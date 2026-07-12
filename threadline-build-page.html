@@ -324,7 +324,7 @@ svg.defs{position:absolute;width:0;height:0}
             <div class="broll">
               <div class="bh"><b>📹 B-roll to film this week</b><span>Batch 10–15 second vertical clips in natural light — no talking needed. One filming session covers a month of reels.</span></div>
               <div class="brgrid" id="brgrid"></div>
-              <div style="margin-top:11px"><button class="use" onclick="toast('B-roll shot list saved to Spark Bank — check it off as you film')">Save shot list to Spark Bank</button></div>
+              <div style="margin-top:11px"><button class="use" onclick="toast('B-roll shot list saved to Idea Bank — check it off as you film')">Save shot list to Idea Bank</button></div>
             </div>
           </div>
 
@@ -403,7 +403,7 @@ const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars
 const SLOT_SERIES=B.series[0]?B.series[0][0]:'your series';
 
 /* ---------- nav ---------- */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Build','Think, create, build',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- landing content ---------- */
@@ -549,12 +549,12 @@ function addOutput(o){
     <div class="ometa"><span>↳ ${o.pillar}</span><span>${o.format}</span>${o.slot?`<span>📅 ${o.slot}</span>`:''}</div>
     <div class="owhy">Why: ${o.why}</div>
     <div class="oacts">
-      <button class="ob" data-save>Save to Spark Bank</button>
+      <button class="ob" data-save>Save to Idea Bank</button>
       <button class="ob pri" data-plan>Post to Plan</button>
       <button class="ob" data-build>Build into content</button>
       <button class="ob" data-refine>Refine</button>
     </div>`;
-  c.querySelector('[data-save]').onclick=e=>{ e.target.classList.add('done'); e.target.textContent='✓ Saved to Spark Bank'; toast('Saved — linked to this session'); };
+  c.querySelector('[data-save]').onclick=e=>{ e.target.classList.add('done'); e.target.textContent='✓ Saved to Idea Bank'; toast('Saved — linked to this session'); };
   c.querySelector('[data-plan]').onclick=()=>openDrawer(o);
   c.querySelector('[data-build]').onclick=()=>toast('Creating planned item + opening content workspace…');
   c.querySelector('[data-refine]').onclick=()=>{ say(`Let's refine <b>${o.t}</b>. What's not landing yet — the hook, the specificity, or the tone?`,[
@@ -701,7 +701,7 @@ function ideasFor(p){
 /* angles */
 function runAngles(){
   const topic=strip(B.messaging.pov);
-  say(`Give me a topic — or we can use one from your Spark Bank:`,[
+  say(`Give me a topic — or we can use one from your Idea Bank:`,[
     {t:'Use: “'+topic.slice(0,44)+'”',go:()=>anglesFor(topic)},
     {t:'I’ll type my own',go:()=>say('Go ahead — one line is plenty.')},
   ]);

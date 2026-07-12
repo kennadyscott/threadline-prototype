@@ -265,7 +265,7 @@ svg.defs{position:absolute;width:0;height:0}
   </div>
   <div class="autos"><h6>Automation</h6>
     <label><input type="checkbox" checked> Automatically create future Plan slots</label>
-    <label><input type="checkbox" checked> Suggest topics from Spark Bank &amp; reserve</label>
+    <label><input type="checkbox" checked> Suggest topics from Idea Bank &amp; reserve</label>
     <label><input type="checkbox" checked> Maintain a minimum idea reserve (pause when empty)</label>
     <label><input type="checkbox"> Require my review before topics are assigned</label>
   </div>
@@ -295,7 +295,7 @@ const EDU_PILLAR=B.pillars[0][0];
 const AUD_SHORT=strip(B.audience.primary).split(',')[0].replace(/\.$/,'');
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',1,''],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',1,''],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- data ---------- */
@@ -465,7 +465,7 @@ function renderRail(){
   </div>
   <div class="rpanel reserve"><span class="rn">12 ideas</span><h3>Starter episode reserve</h3><p class="rsub">Kickstart your new series.</p>
     <div style="font-size:12.5px;color:var(--muted);line-height:1.5">AI-generated episode ideas are ready to add to your Plan.</div>
-    <button class="rlink" onclick="toast('Episode ideas — sourced from Spark Bank + your brand foundation')">View episode ideas →</button>
+    <button class="rlink" onclick="toast('Episode ideas — sourced from Idea Bank + your brand foundation')">View episode ideas →</button>
   </div>`;
 }
 

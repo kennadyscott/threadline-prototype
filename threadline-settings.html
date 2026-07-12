@@ -213,7 +213,7 @@ $('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUp
 $('#ws-name-input').value=B.name;
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center','threadline-app-home.html'],['📅','Plan','Plan, create, and publish','threadline-plan.html'],['⚡','Spark Bank','Your idea library','threadline-spark-bank.html'],['✎','Build','Think, create, build','threadline-build-page.html'],['🧵','Series','Create recurring impact','threadline-series.html'],['📊','Analytics','Measure what matters','threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center','threadline-app-home.html'],['📅','Plan','Plan, create, and publish','threadline-plan.html'],['✎','Build','Think, create, build','threadline-build-page.html'],['🧵','Series','Create recurring impact','threadline-series.html'],['📊','Analytics','Measure what matters','threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,href])=>`<button class="nitem" onclick="location.href='${href}'"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- team review rules (same key Plan reads) ---------- */

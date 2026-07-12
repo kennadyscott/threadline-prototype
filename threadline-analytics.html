@@ -387,7 +387,7 @@ svg.defs{position:absolute;width:0;height:0}
   <p class="msub">Replicate never means copying the post — it means carrying the strongest <b>pattern</b> forward. What do you want to carry?</p>
   <div class="chips" id="repChips"></div>
   <div id="repResults"></div>
-  <div class="macts"><button class="mbtn ghost" onclick="closeRep()">Close</button><div class="grow"></div><button class="mbtn pri" id="repAll" style="display:none" onclick="closeRep();toast('3 directions saved to Spark Bank — pattern + source post attached')">Save all to Spark Bank</button></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeRep()">Close</button><div class="grow"></div><button class="mbtn pri" id="repAll" style="display:none" onclick="closeRep();toast('3 directions saved to Idea Bank — pattern + source post attached')">Save all to Idea Bank</button></div>
 </div></div>
 
 <!-- Evaluate modal -->
@@ -433,7 +433,7 @@ const SCOLOR=['#803dff','#3b82f6','#22d3ee','#fb7185','#f5a524'];
 const SNAME=B.series.map(s=>s[0]);
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',1,'']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',1,'']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:''}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- connections ---------- */
@@ -499,7 +499,7 @@ function renderRepurpose(){
   ${EXTS.map(([ic,t,ch])=>`<div class="ext" onclick="this.classList.toggle('on')"><span class="xck">✓</span><span style="font-size:14px">${ic}</span>${t}<span class="xf">${ch}</span></div>`).join('')}
   <div class="nacts" style="margin-top:10px">
     <button class="pa pri" onclick="repBuild()">Build selected</button>
-    <button class="pa" onclick="toast('All 4 saved to Spark Bank — source post & metric attached')">Save all to Spark Bank</button>
+    <button class="pa" onclick="toast('All 4 saved to Idea Bank — source post & metric attached')">Save all to Idea Bank</button>
     <button class="pa" onclick="toast('Added to Plan — placement preview respects your cadence')">Add to Plan</button>
   </div>`;
 }
@@ -606,12 +606,12 @@ function renderHi(){
     <div class="hacts"><button class="pa pri" onclick="openRep()">♻️ Replicate</button>
       <button class="pa" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Follow-up: '+${JSON.stringify(strip(B.messaging.primary))})">Create follow-up</button>
       <button class="pa" onclick="toast('Repurposing — carousel, email & reel versions queued as linked items')">Repurpose</button>
-      <button class="pa" onclick="this.classList.add('done');this.textContent='✓ Spark saved';toast('Insight saved to Spark Bank — source post & metric attached')">＋ Spark</button></div></div>
+      <button class="pa" onclick="this.classList.add('done');this.textContent='✓ Spark saved';toast('Insight saved to Idea Bank — source post & metric attached')">＋ Spark</button></div></div>
   <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(32,184,120,.12)">📈</div>
     <div style="min-width:0"><div class="ht">A client’s before → after, in their words</div><div class="hm">${esc(SNAME[2]||'Series')} · Instagram · Jun 25</div><span class="goalpill">🎯 Goal: Saves</span></div>
     <span class="delta up">+38% vs avg</span></div>
     <div class="reasons"><h6>Likely reasons</h6><ul><li>Real numbers in the first line</li><li>Proof told in the client’s voice, not yours</li></ul></div>
-    <div class="hacts"><button class="pa pri" onclick="openRep()">♻️ Replicate</button><button class="pa" onclick="location.href='threadline-series.html'">Build a series</button><button class="pa" onclick="this.classList.add('done');this.textContent='✓ Spark saved';toast('Saved to Spark Bank')">＋ Spark</button></div></div>
+    <div class="hacts"><button class="pa pri" onclick="openRep()">♻️ Replicate</button><button class="pa" onclick="location.href='threadline-series.html'">Build a series</button><button class="pa" onclick="this.classList.add('done');this.textContent='✓ Spark saved';toast('Saved to Idea Bank')">＋ Spark</button></div></div>
   <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(245,165,36,.14)">💎</div>
     <div style="min-width:0"><div class="ht">How we price our work <span class="gem">Hidden gem</span></div><div class="hm">Text Post · LinkedIn · Jun 18</div><span class="goalpill">🎯 Goal: Clicks</span></div>
     <span class="delta" style="color:#b57708">Low reach</span></div>
@@ -657,7 +657,7 @@ const NOTICED=[
    conf:['c-mod','Moderate confidence — 11 pieces'],acts:[['Update series defaults',null,'CTA defaults updated: save-CTAs for education, question-CTAs for discussion'],['Apply to upcoming content','threadline-plan.html']]},
   {t:'Five comments asked how to create a series without repeating yourself',int:1,
    d:'A recurring audience question is your clearest content request — answering it publicly builds trust before the ask.',
-   conf:['c-strong','Direct audience signal — 5 comments'],acts:[['Build a Q&A post','threadline-build-page.html?seed='+encodeURIComponent('How to run a content series without repeating yourself')],['Create a Spark',null,'Saved to Spark Bank — comments & source attached']]},
+   conf:['c-strong','Direct audience signal — 5 comments'],acts:[['Build a Q&A post','threadline-build-page.html?seed='+encodeURIComponent('How to run a content series without repeating yourself')],['Create a Spark',null,'Saved to Idea Bank — comments & source attached']]},
   {t:'Your '+(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars[2]||B.pillars[0])[0]+' pillar gets the fewest posts but the highest click-through',int:1,
    d:'Proof appears connected to buying behavior more than any other pillar. Consider raising it from 10% to 20% of next month’s Plan.',
    conf:['c-mod','Moderate confidence — this quarter'],acts:[['Update Plan balance','threadline-plan.html'],['Build proof content','threadline-build-page.html?seed='+encodeURIComponent('A client result told in their words')]]},
@@ -691,7 +691,7 @@ function renderRecos(){
     <div style="min-width:0"><div class="rt">${esc(r.t)} <span class="prio ${r.p[0]}">${r.p[1]}</span></div>
     <div class="rd">Why: ${esc(r.d)}</div><div class="rsug">${esc(r.sug)}</div>
     <div class="nacts"><button class="pa pri" onclick="location.href='${r.build}'">Build now</button>
-      <button class="pa" onclick="this.classList.add('done');this.textContent='✓ Saved';toast('Saved to Spark Bank — rationale attached')">Save Spark</button>
+      <button class="pa" onclick="this.classList.add('done');this.textContent='✓ Saved';toast('Saved to Idea Bank — rationale attached')">Save Spark</button>
       <button class="pa" onclick="toast('Posted to Plan — placement preview respects series cadence')">Post to Plan</button>
       <button class="pa" onclick="dismissReco(${i})">Dismiss</button></div></div></div>`).join('');
 }
@@ -726,7 +726,7 @@ function repPick(btn,opt){
   ];
   $('#repResults').innerHTML=`<div class="msec"><h5>Pattern carried forward: <span style="color:var(--violet)">${opt}</span></h5>
     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Original pattern: <i>“${hookBase}”</i> — new directions, not duplicates:</div>
-    ${ideas.map(i=>`<div class="gen"><b>${esc(i)}</b><div class="ga"><button class="pa" onclick="this.classList.add('done');this.textContent='✓ Saved';toast('Saved to Spark Bank')">＋ Spark</button><button class="pa" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(i).replace(/'/g,'’')}')">Build</button><button class="pa" onclick="toast('Posted to Plan')">Post to Plan</button></div></div>`).join('')}</div>`;
+    ${ideas.map(i=>`<div class="gen"><b>${esc(i)}</b><div class="ga"><button class="pa" onclick="this.classList.add('done');this.textContent='✓ Saved';toast('Saved to Idea Bank')">＋ Spark</button><button class="pa" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(i).replace(/'/g,'’')}')">Build</button><button class="pa" onclick="toast('Posted to Plan')">Post to Plan</button></div></div>`).join('')}</div>`;
   $('#repAll').style.display='';
 }
 

@@ -100,6 +100,39 @@ input,textarea,select{font-family:inherit}
 .autofill:hover{background:rgba(128,61,255,.1)}
 
 /* ============ PLANNER TABLE ============ */
+/* Idea Bank (merged Idea Bank) */
+.ibank{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:16px 18px;margin-top:16px;transition:box-shadow .3s}
+.ibank.flash{box-shadow:0 0 0 2.5px var(--violet)}
+.ibhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.ibhead h3{font-size:16px;display:flex;align-items:center;gap:8px}
+.ibn{background:rgba(128,61,255,.1);color:var(--violet);font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px}
+.ibhead p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.ibadd{border:1.5px solid var(--line);border-radius:10px;padding:8px 13px;font-weight:800;font-size:12.5px;color:var(--violet);background:var(--surface);cursor:pointer;flex-shrink:0}
+.ibadd:hover{border-color:var(--violet)}
+.ibchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.ibchip{border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-size:11.5px;color:var(--muted);background:var(--surface);cursor:pointer}
+.ibchip.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
+.ibfilters{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ibgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:12px}
+@media(max-width:1100px){.ibgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.ibgrid{grid-template-columns:1fr}}
+.ibc{border:1px solid var(--line);border-radius:13px;padding:12px 13px;background:var(--surface-2);display:flex;flex-direction:column;gap:6px}
+.ibtop{display:flex;align-items:center;gap:7px}
+.ibic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.ibty{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.ibpick{margin-left:auto;font-size:10px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.09);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.ibc b{font-size:13.5px;line-height:1.35}
+.ibc p{font-size:11.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ibmeta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
+.ibpil{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
+.ibwhen{font-size:10.5px;color:var(--faint);white-space:nowrap}
+.ibbtns{display:flex;gap:7px;margin-top:2px}
+.ibb{flex:1;border:1.5px solid var(--line);border-radius:9px;padding:7px 0;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface);cursor:pointer}
+.ibb.pri{color:var(--violet);border-color:rgba(128,61,255,.35)}
+.ibb:hover{border-color:var(--violet);color:var(--violet)}
+.ibmore{margin-top:11px;width:100%;border:1.5px dashed var(--line);border-radius:10px;padding:9px;font-weight:800;font-size:12.5px;color:var(--violet);background:none;cursor:pointer}
+.ibmore:hover{border-color:var(--violet)}
+.ibempty{grid-column:1/-1;border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);font-size:12.5px}
 .twouter{position:relative;margin-top:14px}
 .twouter .tablewrap{margin-top:0}
 .tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-top:14px;box-shadow:var(--shadow-sm);overflow-x:auto;scrollbar-width:thin;scrollbar-color:#c4cbdb var(--surface-2)}
@@ -301,13 +334,14 @@ svg.defs{position:absolute;width:0;height:0}
   <div class="main">
     <div class="topbar">
       <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
-      <button class="newspark" onclick="toast('New Spark — available on every page')">＋ New Spark</button>
+      <button class="newspark" onclick="addIdea()">＋ New Spark</button>
     </div>
 
     <div class="content">
       <div class="colmain">
         <div class="greet"><h1>Plan <span style="font-size:20px">📅</span></h1><p>Organize your content system by rhythm, status, and schedule.</p></div>
         <div id="welcome"></div>
+        <div class="ibank" id="ibank"></div>
         <div class="views" id="views"></div>
         <div class="cbar">
           <button class="csel" onclick="toast('Search within Plan')">🔍 Search</button>
@@ -366,7 +400,7 @@ svg.defs{position:absolute;width:0;height:0}
   <h3>✦ Auto-fill suggestions</h3>
   <p class="msub">Threadline previews placements — nothing is placed without your approval.</p>
   <div id="afList"></div>
-  <div class="macts"><button class="mbtn ghost" onclick="closeAutofill()">Not now</button><div class="grow"></div><button class="mbtn ghost" onclick="closeAutofill();toast('Saved to Spark Bank instead')">Save to Spark Bank</button><button class="mbtn pri" onclick="approveAutofill()">Approve all</button></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeAutofill()">Not now</button><div class="grow"></div><button class="mbtn ghost" onclick="closeAutofill();toast('Saved to your Idea Bank instead')">Save to Idea Bank</button><button class="mbtn pri" onclick="approveAutofill()">Approve all</button></div>
 </div></div>
 
 <script src="threadline-brand.js"></script>
@@ -385,7 +419,7 @@ $('#wsname').textContent=B.name;
 $('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',1,''],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',1,''],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- data ---------- */
@@ -403,9 +437,6 @@ const STATUS={
 const S0=B.series[0]?B.series[0][0]:'Series', S1=B.series[1]?B.series[1][0]:'Series', S2=B.series[2]?B.series[2][0]:'Series', S3=B.series[3]?B.series[3][0]:S0, S4=B.series[4]?B.series[4][0]:S1;
 const Q=B.audience.questions;
 let ITEMS=[
-  // Idea bank (unscheduled)
-  {t:'How we vet tools before recommending',un:1,status:'Idea',fmt:'Carousel',ser:S0,ch:['in','ig','tt'],asset:'💻',note:'Customer trust is key.',cm:2},
-  {t:'Our process, behind the scenes',un:1,status:'Idea',fmt:'Video',ser:S1,ch:['in','ig'],asset:'🎬',note:'Show the real workflow.'},
   // July
   {t:'The moment our client saw the biggest shift',m:7,d:8,w:'Wed, Jul 8',status:'Scheduled',fmt:'Carousel',ser:S2,ch:['in','ig'],asset:'📈',note:'Include metrics + quote.'},
   {t:'Myth: You need to be everywhere',m:7,d:15,w:'Wed, Jul 15',status:'Scheduled',fmt:'Short Video',ser:S3,ch:['tt','ig'],asset:'🎥',note:'Myth vs reality format.'},
@@ -444,8 +475,7 @@ function setMain(){ try{ localStorage.setItem(VKEY,view); }catch(e){} render(); 
 
 /* ---------- PLANNER ---------- */
 function plannerHTML(){
-  const groups=[['💡 Idea Bank <span style="color:var(--faint);font-weight:700">(Unscheduled)</span>', ITEMS.filter(x=>x.un&&!x.arch)],
-                ['📅 July 2026', ITEMS.filter(x=>x.m===7&&!x.arch)],
+  const groups=[['📅 July 2026', ITEMS.filter(x=>x.m===7&&!x.arch)],
                 ['📅 August 2026', ITEMS.filter(x=>x.m===8&&!x.arch)]];
   const total=ITEMS.filter(x=>!x.arch&&!x.open).length;
   return `<div class="tablewrap" id="twrap"><table>
@@ -474,7 +504,7 @@ function openRow(x){
     <td>${statusPill('Planned').replace('Planned','Open slot')}</td>
     <td colspan="4"><div class="oactions">
       <button class="ob" onclick="event.stopPropagation();fillSlot(${x.id},'reserve')">Use next reserve idea</button>
-      <button class="ob" onclick="event.stopPropagation();location.href='threadline-spark-bank.html'">Choose from Spark Bank</button>
+      <button class="ob" onclick="event.stopPropagation();ibSpot()">Choose from Idea Bank</button>
       <button class="ob" onclick="event.stopPropagation();location.href='threadline-build-page.html?mode=planner'">Ask Threadline</button>
       <button class="ob" onclick="event.stopPropagation();skipSlot(${x.id})">Skip</button>
     </div></td><td></td></tr>`;
@@ -484,13 +514,13 @@ function fillSlot(id,src){ const x=ITEMS.find(i=>i.id===id); if(!x) return;
   render(); toast('Filled from reserve — “My weekly reset ritual” placed in the '+x.ser+' slot'); }
 function skipSlot(id){ const x=ITEMS.find(i=>i.id===id); x.arch=1; render(); toastUndo('Occurrence skipped — series cadence continues',()=>{ x.arch=0; render(); }); }
 function addIdea(){ const t=prompt('New content idea:'); if(!t) return;
-  ITEMS.push({id:NEXT_ID(),t,un:1,status:'Idea',fmt:'Text Post',ser:S0,ch:['in'],asset:'＋',note:'Added manually.'}); render(); toast('Added to Idea Bank'); }
+  IDEAS.unshift({id:1000+IDEAS.length,t,type:'Idea',pillar:IBP[0]||null,sum:'Added manually — develop it in Build when you\u2019re ready.',when:'Just now',posted:0}); renderIdeaBank(); toast('Added to your Idea Bank'); }
 function toggleCheck(id){ checks.has(id)?checks.delete(id):checks.add(id); render(); }
 function bulkStatus(st){ [...checks].forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.status=st; }); const n=checks.size; checks.clear(); render(); toast(n+' items → '+st); }
 function bulkArchive(){ const ids=[...checks]; ids.forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.arch=1; }); checks.clear(); render(); toastUndo(ids.length+' items archived',()=>{ ids.forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.arch=0; }); render(); }); }
 
 /* ---------- KANBAN ---------- */
-const KCOLS=['Idea','Planned','In Progress','Ready for Review','Approved','Scheduled','Published'];
+const KCOLS=['Planned','In Progress','Ready for Review','Approved','Scheduled','Published'];
 const KFILTERS=[['all','All content'],['mine','My work'],['review','Needs my review'],['ready','Ready to schedule']];
 function kanbanHTML(){
   const items=ITEMS.filter(x=>!x.arch&&!x.open&&(kfilter==='all'||kfilter==='mine'||(kfilter==='review'&&x.status==='Ready for Review')||(kfilter==='ready'&&x.status==='Approved')));
@@ -633,7 +663,7 @@ function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
     <span class="dk">Content workspace</span>
     <input class="dt" id="ws-t" value="${esc(x.t)}">
     <div class="dmeta">${x.w||'No date yet'} · ${esc(x.ser)} · Kennady</div>
-    <div class="sparkline">⚡ <span>Original Spark preserved — <b>view in Spark Bank</b></span></div>
+    <div class="sparkline">⚡ <span>Original Spark preserved — <b>view in Idea Bank</b></span></div>
     <div class="dgrid" style="margin-top:14px">
       <div class="df"><label>Status</label><select id="ws-st">${Object.keys(STATUS).map(s=>`<option${s===x.status?' selected':''}>${s}</option>`).join('')}</select></div>
       <div class="df"><label>Format</label><select id="ws-f">${['Carousel','Short Video','Text Post','Graphic','Reel','Email','Video'].map(f=>`<option${f===x.fmt?' selected':''}>${f}</option>`).join('')}</select></div>
@@ -724,8 +754,58 @@ function initTableCue(){ const w=document.getElementById('twrap'), f=document.ge
   const upd=()=>{ const more=w.scrollWidth-w.clientWidth>8, atEnd=w.scrollLeft+w.clientWidth>=w.scrollWidth-8;
     f.classList.toggle('off',!more||atEnd); };
   w.addEventListener('scroll',upd,{passive:true}); window.addEventListener('resize',upd); upd(); }
+/* ---------- Idea Bank (Idea Bank, merged into Plan) ---------- */
+const IBP=B.pillars.map(p=>p[0]);
+const TYPEMETA={
+  'Idea':{ic:'\u2726',bg:'rgba(128,61,255,.1)',c:'#803dff'},
+  'Question':{ic:'\u2753',bg:'rgba(251,113,133,.12)',c:'#e05575'},
+  'Client Story':{ic:'\u{1F49A}',bg:'rgba(32,184,120,.12)',c:'#178a5a'},
+  'Observation':{ic:'\u{1F4A1}',bg:'rgba(245,165,36,.14)',c:'#b57708'},
+  'Trend/News':{ic:'\u{1F4E3}',bg:'rgba(34,211,238,.14)',c:'#0e7f95'},
+  'Personal Note':{ic:'\u270F\uFE0F',bg:'rgba(59,130,246,.1)',c:'#3b82f6'},
+  'Customer Language':{ic:'\u{1F4AC}',bg:'rgba(128,61,255,.08)',c:'#803dff'},
+  'Point of View':{ic:'\u2600\uFE0F',bg:'rgba(245,165,36,.14)',c:'#b57708'}
+};
+let IDEAS=[
+  {t:strip(B.messaging.primary),sum:'Too many brands try to sound smart instead of being clear. Clarity builds trust faster.',type:'Point of View',pillar:IBP[1]||IBP[0],pick:1,when:'Today',fmt:'Text Post'},
+  {t:'How we vet tools before recommending',sum:'Customer trust is key \u2014 show the criteria, not just the verdict.',type:'Idea',pillar:IBP[0],when:'Today',fmt:'Carousel'},
+  {t:'Our process, behind the scenes',sum:'Show the real workflow, not the highlight reel.',type:'Personal Note',pillar:IBP[2]||IBP[0],when:'Yesterday',fmt:'Video'},
+  {t:(Q[0]||'What do clients ask before hiring us?'),sum:'You hear this on every discovery call \u2014 answer it publicly.',type:'Question',pillar:IBP[0],pick:1,when:'2 days ago',fmt:'Carousel'},
+  {t:'The moment our client saw the biggest shift',sum:'After we simplified their approach, everything started compounding.',type:'Client Story',pillar:IBP[3]||IBP[0],pick:1,when:'3 days ago',fmt:'Carousel'},
+  {t:strip(B.messaging.pov),sum:'The real problem is rarely effort \u2014 it\u2019s direction.',type:'Observation',pillar:IBP[1]||IBP[0],when:'4 days ago',fmt:'Text Post'},
+  {t:'More conversation around AI fatigue',sum:'People crave real ideas and human perspective right now.',type:'Trend/News',pillar:null,when:'5 days ago',fmt:'Short Video'},
+  {t:(B.audience.language[0]||'"I just want this to work."').replace(/^"|"$/g,''),sum:'Their exact words \u2014 keep verbatim for hooks and headlines.',type:'Customer Language',pillar:null,when:'1 week ago',fmt:'Text Post'}
+];
+IDEAS.forEach((x,i)=>{ x.id=1000+i; x.posted=0; });
+let ibPillar='all', ibOpen=false;
+function ibPick(ci){ ibPillar=['all'].concat(IBP)[ci]||'all'; renderIdeaBank(); }
+function ibFiltered(){ return IDEAS.filter(i=>!i.posted&&(ibPillar==='all'||i.pillar===ibPillar)); }
+function ibCard(i){ const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
+  return `<div class="ibc"><div class="ibtop"><span class="ibic" style="background:${tm.bg}">${tm.ic}</span><span class="ibty" style="color:${tm.c}">${i.type}</span>${i.pick?'<span class="ibpick">\u2726 Threadline pick</span>':''}</div>
+    <b>${esc(i.t)}</b><p>${esc(i.sum)}</p>
+    <div class="ibmeta"><span class="ibpil">${esc(i.pillar||'Needs a home')}</span><span class="ibwhen">${i.when||''}</span></div>
+    <div class="ibbtns"><button class="ibb pri" onclick="ibBuild(${i.id})">Build \u2192</button><button class="ibb" onclick="ibSchedule(${i.id})">Schedule</button></div></div>`; }
+function renderIdeaBank(){
+  const list=ibFiltered(); const total=IDEAS.filter(i=>!i.posted).length; const shown=ibOpen?list:list.slice(0,3);
+  $('#ibank').innerHTML=`
+    <div class="ibhead">
+      <div><h3>\u{1F4A1} Idea Bank <span class="ibn">${total}</span></h3><p>Sparks and ideas that aren\u2019t scheduled yet \u2014 build one out, or give it a date below.</p></div>
+      <button class="ibadd" onclick="addIdea()">\uFF0B Add idea</button>
+    </div>
+    <div class="ibchips">${['all'].concat(IBP).map((pn,ci)=>`<button class="ibchip${ibPillar===pn?' on':''}" onclick="ibPick(${ci})">${pn==='all'?'All pillars':esc(pn)}</button>`).join('')}</div>
+    ${ibOpen?`<div class="ibfilters"><button class="csel" onclick="toast('Filter by type \u2014 Idea, Question, Client Story, Observation, Trend\u2026')">\u2726 Type</button><button class="csel" onclick="toast('Filter by source \u2014 notes, voice, conversations, Threadline')">\u{1F4CE} Source</button><button class="csel" onclick="toast('Sort \u2014 newest, strongest thread, best fit for open slots')">\u2195 Sort</button><button class="csel" onclick="toast('1 archived idea \u2014 seasonal, parked until relevant')">\u{1F5C2} Archived</button></div>`:''}
+    <div class="ibgrid">${shown.map(ibCard).join('')||'<div class="ibempty">No ideas in this pillar yet \u2014 add one, or ask Threadline in Build.</div>'}</div>
+    ${list.length>3||ibOpen?`<button class="ibmore" onclick="ibOpen=!ibOpen;renderIdeaBank()">${ibOpen?'Show less \u25B4':'View all '+list.length+' ideas \u25BE'}</button>`:''}`;
+}
+function ibBuild(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return; location.href='threadline-build-page.html?seed='+encodeURIComponent(i.t); }
+function ibSchedule(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return;
+  const slot=ITEMS.find(x=>x.open&&!x.arch);
+  if(slot){ slot.open=0; slot.t=i.t; slot.status='Planned'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your open '+slot.ser+' slot on '+slot.w); }
+  else { ITEMS.push({id:NEXT_ID(),t:i.t,m:8,d:26,w:'Wed, Aug 26',status:'Planned',fmt:i.fmt||'Carousel',ser:S0,ch:['in'],asset:'\u2726',note:'From Idea Bank.'}); i.posted=1; render(); toast('Scheduled for Wed, Aug 26 \u2014 drag it anywhere in Plan'); } }
+function ibSpot(){ const b=document.getElementById('ibank'); b.scrollIntoView({behavior:'smooth',block:'center'}); b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),1400); }
+
 /* ---------- render ---------- */
-function render(){ renderViews();
+function render(){ renderViews(); renderIdeaBank();
   $('#view').innerHTML = view==='planner'?('<div class="twouter">'+plannerHTML()+'<div class="tfade" id="tfade"><span>Scroll for more \u2192</span></div></div>') : view==='kanban'?kanbanHTML() : calendarHTML();
   initTableCue();
   $('#bulk').classList.toggle('on',checks.size>0); $('#bulkN').textContent=checks.size+' selected';

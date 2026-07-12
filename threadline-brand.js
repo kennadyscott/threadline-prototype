@@ -281,7 +281,7 @@
     const ITEMS=[
       {ic:'✏️',bg:'rgba(128,61,255,.1)',t:'Draft “Client Win Story” is ready for review',s:'2 hours ago',href:'threadline-plan.html'},
       {ic:'📅',bg:'rgba(59,130,246,.1)',t:'3 open slots in your rhythm this week',s:'5 hours ago',href:'threadline-plan.html'},
-      {ic:'⚡',bg:'rgba(245,165,36,.14)',t:'Threadline added 4 fresh ideas to Spark Bank',s:'Yesterday',href:'threadline-spark-bank.html'},
+      {ic:'⚡',bg:'rgba(245,165,36,.14)',t:'Threadline added 4 fresh ideas to your Idea Bank',s:'Yesterday',href:'threadline-plan.html'},
     ];
     const isRead=()=>{ try{ return localStorage.getItem(NKEY)==='1'; }catch(e){ return false; } };
     const setRead=()=>{ try{ localStorage.setItem(NKEY,'1'); }catch(e){} };

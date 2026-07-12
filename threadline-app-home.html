@@ -268,7 +268,7 @@ svg.defs{position:absolute;width:0;height:0}
         </div>
 
         <div class="panel">
-          <div class="phead"><h3>Ideas worth building</h3><span class="sub">Fresh ideas Threadline thinks you'll love.</span><button class="act" onclick="toast('Opening Spark Bank → Threadline Picks')">View all ideas →</button></div>
+          <div class="phead"><h3>Ideas worth building</h3><span class="sub">Fresh ideas Threadline thinks you'll love.</span><button class="act" onclick="toast('Opening Idea Bank → Threadline Picks')">View all ideas →</button></div>
           <div class="ideas" id="ideas"></div>
         </div>
 
@@ -299,7 +299,7 @@ svg.defs{position:absolute;width:0;height:0}
     <button class="mbtn ghost" onclick="closeSpark()">Cancel</button>
     <div class="grow"></div>
     <button class="mbtn sec" onclick="saveSpark('Posted to Plan')">Post to Plan</button>
-    <button class="mbtn pri" onclick="saveSpark('Saved to Spark Bank')">Save to Spark Bank</button>
+    <button class="mbtn pri" onclick="saveSpark('Saved to Idea Bank')">Save to Idea Bank</button>
   </div>
 </div></div>
 
@@ -323,12 +323,12 @@ $('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUp
 })();
 
 /* ---------- nav ---------- */
-const NAV=[['🏠','Home','Your content command center',1,''],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',1,''],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- stats ---------- */
 const STATS=[
-  {cls:'v',ic:'✦',n:12,l:'Ideas to explore',d:'From Build & Spark Bank',go:'View ideas →',href:'threadline-spark-bank.html?tab=picks'},
+  {cls:'v',ic:'✦',n:12,l:'Ideas to explore',d:'From Build & Idea Bank',go:'View ideas →',href:'threadline-plan.html'},
   {cls:'c',ic:'✏️',n:5,l:'Drafts in progress',d:'Keep the momentum',go:'Open drafts →',href:'threadline-plan.html?view=kanban'},
   {cls:'g',ic:'🗓️',n:8,l:'Planned this week',d:'On track',go:'View Plan →',href:'threadline-plan.html'},
   {cls:'b',ic:'🕒',n:3,l:'Open slots',d:'In your series',go:'Fill them now →',href:'threadline-build-page.html?mode=planner'},
@@ -352,7 +352,7 @@ const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','D
       <span class="rst ${sc}">${sc==='planned'?'✓ ':''}${sl}</span></div>`;
   }
   const od=new Date(today); od.setDate(od.getDate()+n+1);
-  html+=`<div class="rcard open" onclick="toast('Add content: choose from Spark Bank, ask Threadline, or add a Spark')">
+  html+=`<div class="rcard open" onclick="toast('Add content: choose from Idea Bank, ask Threadline, or add a Spark')">
     <div class="day">Open slot</div><div class="date">${MONS[od.getMonth()]} ${od.getDate()}</div>
     <div class="plus">＋</div><div class="fm">Add content</div></div>`;
   wrap.innerHTML=html;
@@ -382,7 +382,7 @@ $('#ideas').innerHTML=IDEAS.map(i=>`<div class="icard"><span class="ilabel ${i.c
 const ATTN=[
   {bg:'rgba(251,113,133,.12)',ic:'✏️',t:'2 drafts need review',d:"They're ready for your feedback",href:'threadline-plan.html?f=review'},
   {bg:'rgba(32,184,120,.12)',ic:'🗓️',t:'3 open slots this week',d:'Fill your series and stay consistent',href:'threadline-build-page.html?mode=planner'},
-  {bg:'rgba(128,61,255,.12)',ic:'✦',t:'4 ideas ready to build',d:"Great ideas. Let's turn them into content.",href:'threadline-spark-bank.html?tab=picks'},
+  {bg:'rgba(128,61,255,.12)',ic:'✦',t:'4 ideas ready to build',d:"Great ideas. Let's turn them into content.",href:'threadline-plan.html'},
   {bg:'rgba(245,165,36,.14)',ic:'👥',t:'1 client story to capture',d:"Don't let this moment fade",msg:'Opening New Spark → Client Story'},
 ];
 $('#attn').innerHTML=ATTN.map(a=>`<div class="aitem" onclick="${a.href?`location.href='${a.href}'`:`toast('${a.msg}')`}"><div class="ai" style="background:${a.bg}">${a.ic}</div><div class="at"><b>${a.t}</b><span>${a.d}</span></div><span class="car">›</span></div>`).join('');
@@ -391,7 +391,7 @@ $('#attn').innerHTML=ATTN.map(a=>`<div class="aitem" onclick="${a.href?`location
 const s0=B.series[0]?B.series[0][0]:'your series', s1=B.series[1]?B.series[1][0]:'your series';
 const ACTIVITY=[
   {bg:'rgba(128,61,255,.1)',ic:'📝',t:'Draft “Client Win Story” was updated',w:'2 hours ago'},
-  {bg:'rgba(32,184,120,.1)',ic:'⚡',t:'New idea “'+(window.stripTags?stripTags(B.messaging.pov):'A fresh point of view')+'” was added to Spark Bank',w:'5 hours ago'},
+  {bg:'rgba(32,184,120,.1)',ic:'⚡',t:'New idea “'+(window.stripTags?stripTags(B.messaging.pov):'A fresh point of view')+'” was added to Idea Bank',w:'5 hours ago'},
   {bg:'rgba(251,113,133,.1)',ic:'📅',t:'Threadline populated next week’s “'+s0+'” slot',w:'1 day ago'},
   {bg:'rgba(59,130,246,.1)',ic:'🧵',t:'Series “'+s1+'” was activated',w:'1 day ago'},
   {bg:'rgba(245,165,36,.12)',ic:'👥',t:'Draft “Founder POV: What I believe” moved to Ready for Review',w:'2 days ago'},
@@ -407,8 +407,8 @@ function renderWelcome(){
   $('#welcome').innerHTML=`<div class="welcome">
     <button class="wx" onclick="dismissWelcome()" title="Dismiss">×</button>
     <h3>✨ Your brand is active. Threadline has started building with it.</h3>
-    <div class="chips"><span style="cursor:pointer" onclick="location.href='threadline-review.html?slide=6'" title="Open your pillars in the brand deck"><b>${B.pillars.length}</b> content pillars</span><span style="cursor:pointer" onclick="location.href='threadline-series.html?tab=active'"><b>${Math.min(4,B.series.length)}</b> active series</span><span style="cursor:pointer" onclick="location.href='threadline-spark-bank.html'"><b>24</b> starter Sparks</span><span style="cursor:pointer" onclick="location.href='threadline-plan.html'"><b>8</b> planned content slots</span></div>
-    <div class="wacts"><button class="wbtn" onclick="location.href='threadline-series.html?tab=active'">Review first series</button><button class="wbtn" onclick="location.href='threadline-spark-bank.html'">Explore Spark Bank</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Open Plan</button></div>
+    <div class="chips"><span style="cursor:pointer" onclick="location.href='threadline-review.html?slide=6'" title="Open your pillars in the brand deck"><b>${B.pillars.length}</b> content pillars</span><span style="cursor:pointer" onclick="location.href='threadline-series.html?tab=active'"><b>${Math.min(4,B.series.length)}</b> active series</span><span style="cursor:pointer" onclick="location.href='threadline-plan.html'"><b>24</b> starter Sparks</span><span style="cursor:pointer" onclick="location.href='threadline-plan.html'"><b>8</b> planned content slots</span></div>
+    <div class="wacts"><button class="wbtn" onclick="location.href='threadline-series.html?tab=active'">Review first series</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Explore Idea Bank</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Open Plan</button></div>
     <div class="check" id="check"><div class="ct" onclick="document.getElementById('check').classList.toggle('open')">▸ Getting started — 1 of 6 done</div>
       <div class="items">
         ${[['Brand approved',1,'threadline-review.html'],['Review recommended series',0,'threadline-series.html?tab=active'],['Choose your main Plan view',0,'threadline-plan.html'],['Connect publishing channels',0,'threadline-analytics.html'],['Review the first week',0,'threadline-plan.html?view=calendar'],['Build the first content piece',0,'threadline-build-page.html']].map(([t,d,href])=>`<div class="citem${d?' done':''}" style="cursor:pointer" onclick="location.href='${href}'"><span class="cb">✓</span>${t} <span style="color:var(--faint);font-weight:800">›</span></div>`).join('')}
@@ -434,7 +434,7 @@ $('#sparkOverlay').addEventListener('click',e=>{ if(e.target.id==='sparkOverlay'
   if(!/[?&]activate=1/.test(location.search)) return;
   try{ localStorage.removeItem(FIRST_KEY); }catch(e){}
   renderWelcome();
-  const steps=['Building your Spark Bank','Activating your series','Creating your first content rhythm','Preparing ideas based on your brand'];
+  const steps=['Building your Idea Bank','Activating your series','Creating your first content rhythm','Preparing ideas based on your brand'];
   const wrap=$('#tsteps');
   wrap.innerHTML=steps.map(s=>`<div class="tstep"><span class="tc">✓</span>${s}</div>`).join('');
   $('#transition').classList.add('on');
