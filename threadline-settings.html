@@ -36,7 +36,7 @@ input,select{font-family:inherit}
 .app.nav-open .scrim{opacity:1;pointer-events:auto}
 .topbar{padding:12px 16px;gap:10px}
 }
-@media(max-width:600px){.topbar{padding:10px 12px}.topbar .search{flex:1;min-width:0}.topbar .kbd{display:none}}
+@media(max-width:600px){.topbar{padding:10px 12px}}
 .sidebar{background:var(--surface);border-right:1px solid var(--line-2);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
 .logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;padding:2px 10px 18px}
 .nav{display:flex;flex-direction:column;gap:3px}
@@ -58,10 +58,10 @@ input,select{font-family:inherit}
 .topbar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(247,248,251,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
 .search{flex:0 1 340px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:var(--faint);font-size:14px;cursor:text}
 .search .kbd{margin-left:auto;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
-.bell{position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.bell{margin-left:auto;position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
 .bell:hover{background:var(--surface-2)}
 .bell i{position:absolute;top:4px;right:4px;background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
-.newspark{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
+.newspark{display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
 
 .content{padding:26px 28px 0;max-width:980px;margin:0 auto}
 .greet h1{font-size:clamp(24px,3vw,30px)}
@@ -148,7 +148,6 @@ svg.defs{position:absolute;width:0;height:0}
 
   <div class="main">
     <div class="topbar">
-      <div class="search" onclick="toast('Global search — prototype')">🔍 Search anything... <span class="kbd">⌘ K</span></div>
       <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
       <button class="newspark" onclick="toast('New Spark — available on every page')">＋ New Spark</button>
     </div>

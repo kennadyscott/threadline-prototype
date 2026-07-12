@@ -37,7 +37,7 @@ input,textarea,select{font-family:inherit}
 .app.nav-open .scrim{opacity:1;pointer-events:auto}
 .topbar{padding:12px 16px;gap:10px}
 }
-@media(max-width:600px){.topbar{padding:10px 12px}.topbar .search{flex:1;min-width:0}.topbar .kbd{display:none}}
+@media(max-width:600px){.topbar{padding:10px 12px}}
 .sidebar{background:var(--surface);border-right:1px solid var(--line-2);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
 .logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;padding:2px 10px 18px}
 .nav{display:flex;flex-direction:column;gap:3px}
@@ -62,10 +62,10 @@ input,textarea,select{font-family:inherit}
 .topbar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(247,248,251,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
 .search{flex:0 1 340px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:var(--faint);font-size:14px;cursor:text}
 .search .kbd{margin-left:auto;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
-.bell{position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.bell{margin-left:auto;position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
 .bell:hover{background:var(--surface-2)}
 .bell i{position:absolute;top:4px;right:4px;background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
-.newspark{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
+.newspark{display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
 .newspark:hover{filter:brightness(1.06)}
 
 /* ---------- landing ---------- */
@@ -106,6 +106,37 @@ input,textarea,select{font-family:inherit}
 .mode .go{margin-top:10px;color:var(--violet);font-weight:900}
 
 .srcstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:14px}
+/* viral hooks + trends */
+.hooktabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.htab{border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:800;font-size:12.5px;color:var(--muted);cursor:pointer;background:var(--surface)}
+.htab.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
+.hookrow{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line-2)}
+.hookrow:last-of-type{border-bottom:none}
+.hookrow .ht2{font-size:13.5px;font-weight:700;flex:1;min-width:0}
+.use{border:1.5px solid var(--line);border-radius:9px;padding:6px 12px;font-weight:800;font-size:12px;color:var(--violet);flex-shrink:0;background:var(--surface);cursor:pointer}
+.use:hover{border-color:var(--violet)}
+.broll{margin-top:16px;border-top:1px dashed var(--line);padding-top:14px}
+.bh b{font-size:14px}
+.bh span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.brgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media(max-width:760px){.brgrid{grid-template-columns:1fr 1fr}}
+.brc{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface-2)}
+.brc b{font-size:12.5px;display:flex;gap:7px;align-items:center}
+.brc span{font-size:11.5px;color:var(--muted);display:block;margin-top:3px}
+.trhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.trhead .who{font-size:13px;font-weight:700;color:var(--muted)}
+.trbtn{background:var(--grad2);color:#fff;font-weight:800;font-size:12.5px;padding:9px 15px;border-radius:10px;cursor:pointer}
+.trbtn[disabled]{opacity:.6}
+.trgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:900px){.trgrid{grid-template-columns:1fr}}
+.trcol h5{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);margin-bottom:8px}
+.tritem{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;background:var(--surface)}
+.tritem b{font-size:13px;display:block;padding-right:52px;position:relative}
+.tritem p{font-size:11.5px;color:var(--muted);margin:4px 0 8px}
+.tritem .bfrom{color:var(--violet);font-weight:800;font-size:11.5px;cursor:pointer;background:none;border:none;padding:0;font-family:inherit}
+.trmom{position:absolute;right:0;top:1px;font-size:10px;font-weight:800;color:var(--green);white-space:nowrap}
+.trnote{font-size:11.5px;color:var(--faint);margin-top:12px;border-top:1px dashed var(--line-2);padding-top:11px}
+
 @media(max-width:900px){.srcstrip{grid-template-columns:1fr 1fr}}
 .src{display:flex;gap:11px;align-items:center;border:1.5px dashed var(--line);border-radius:13px;padding:13px 14px;cursor:pointer;transition:.13s;background:var(--surface)}
 .src:hover{border-color:var(--violet)}
@@ -233,7 +264,6 @@ svg.defs{position:absolute;width:0;height:0}
 
   <div class="main">
     <div class="topbar">
-      <div class="search" onclick="toast('Global search — prototype')">🔍 Search anything... <span class="kbd">⌘ K</span></div>
       <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
       <button class="newspark" onclick="toast('New Spark — available on every page')">＋ New Spark</button>
     </div>
@@ -285,6 +315,24 @@ svg.defs{position:absolute;width:0;height:0}
             <div class="src" onclick="toast('Paste or capture — notes, links, or text')"><div class="si">📋</div><div><b>Paste or capture</b><span>Notes, links, or text</span></div></div>
             <div class="src" onclick="startSession({mode:'story'})"><div class="si">👥</div><div><b>Use a client story</b><span>Turn moments into content</span></div></div>
             <div class="src" onclick="toast('Import from source — transcripts, calls & more (future integration)')"><div class="si">✨</div><div><b>Import from source</b><span>Transcripts, calls, more</span></div></div>
+          </div>
+
+          <div style="margin-top:26px"><h3 style="font-size:17px">🎬 Viral hooks for Reels</h3><p class="psub">Proven opening lines — pick one and Threadline writes the reel with you.</p></div>
+          <div class="panel">
+            <div class="hooktabs" id="hooktabs"></div>
+            <div id="hooklist"></div>
+            <div class="broll">
+              <div class="bh"><b>📹 B-roll to film this week</b><span>Batch 10–15 second vertical clips in natural light — no talking needed. One filming session covers a month of reels.</span></div>
+              <div class="brgrid" id="brgrid"></div>
+              <div style="margin-top:11px"><button class="use" onclick="toast('B-roll shot list saved to Spark Bank — check it off as you film')">Save shot list to Spark Bank</button></div>
+            </div>
+          </div>
+
+          <div style="margin-top:26px"><h3 style="font-size:17px">📈 Trending in your category</h3><p class="psub" id="trendsub">Market research for your niche — what\u2019s working on Instagram Reels &amp; TikTok right now.</p></div>
+          <div class="panel">
+            <div class="trhead"><span class="who" id="trwho"></span><button class="trbtn" id="trbtn" onclick="refreshTrends()">✦ Research my niche</button></div>
+            <div class="trgrid" id="trgrid"></div>
+            <p class="trnote">✦ Threadline researches content patterns for your category. Live platform trend data — audio charts, specific sounds — unlocks when you connect your accounts in Analytics.</p>
           </div>
         </div>
 
@@ -382,6 +430,101 @@ $('#recent').innerHTML=RECENT.map(r=>`<div class="sess" onclick="toast('Reopenin
 
 const QPS=[['📅','Find ideas for my open slots','planner'],['🚀','Build around an offer or launch','offer'],['🔁','Repurpose existing content','repurpose'],['👥','Find audience pain points','idea'],['☀️','Develop a point of view','sharpen']];
 $('#qps').innerHTML=QPS.map(([ic,t,m])=>`<button class="qp" onclick="startSession({mode:'${m}'})"><span>${ic}</span>${t}</button>`).join('');
+
+/* ---------- viral hooks for reels ---------- */
+const HOOKS={
+ 'Curiosity':[
+  'Nobody talks about this part of [your topic]…',
+  'I did [habit/experiment] for 30 days — here\u2019s what actually happened',
+  'The [industry] secret I probably shouldn\u2019t share',
+  '3 signs you\u2019re [problem] — and don\u2019t even know it',
+  'Here\u2019s what [clients/customers] never tell you to your face'],
+ 'Contrarian':[
+  'Stop doing [common advice]. Here\u2019s why.',
+  'Unpopular opinion: [popular belief] is keeping you stuck',
+  'Everyone tells you to [advice]. They\u2019re wrong — here\u2019s what works.',
+  '[Popular tactic] is dead. Do this instead.',
+  'The advice that almost ruined my business'],
+ 'Relatable':[
+  'POV: you finally [small win your audience wants]',
+  'Things I wish I knew before [starting the thing]',
+  'If your [workspace/plan/inbox] looks like this — you\u2019re doing better than you think',
+  'A realistic day in the life of [your role]',
+  'Tell me you\u2019re a [niche] without telling me you\u2019re a [niche]'],
+ 'Authority':[
+  'How I [result] in [timeframe] — the full breakdown',
+  'Steal my exact [process/template/checklist]',
+  '5 [tools/habits] that changed how I [work/create/sell]',
+  'Watch me [do the actual work] in real time',
+  'The 80/20 of [your topic]: focus here first'],
+ 'Story':[
+  'I almost quit [the thing] last year. Then this happened.',
+  'My client said \u201c[objection or quote]\u201d — here\u2019s what we did',
+  'From [before] to [after] in [timeframe]: the honest version',
+  'The mistake that cost me [money/time] — so you don\u2019t repeat it',
+  'Three years ago I [past state]. Today I [present state]. Here\u2019s the bridge.']
+};
+let hookTab=Object.keys(HOOKS)[0];
+function useHook(h){ startSession({mode:'free',seed:'Help me write a short reel script that opens with this hook: \u201c'+h+'\u201d \u2014 fill in the brackets for my brand and audience, then give me the beats: hook, tension, payoff, CTA.',title:'Reel: '+h.slice(0,40)}); }
+function renderHooks(){
+  $('#hooktabs').innerHTML=Object.keys(HOOKS).map(k=>`<button class="htab${k===hookTab?' on':''}" onclick="hookTab='${k}';renderHooks()">${k}</button>`).join('');
+  $('#hooklist').innerHTML=HOOKS[hookTab].map(h=>`<div class="hookrow"><div class="ht2">${esc(h)}</div><button class="use" onclick='useHook(${JSON.stringify(h)})'>Use \u2192</button></div>`).join('');
+}
+const BROLL=[
+ ['\u2328\uFE0F','Hands typing','Over-the-shoulder at your laptop \u2014 the classic \u201cwork happening\u201d shot'],
+ ['\u2615','The pour','Coffee or tea pouring \u2014 universal \u201cstarting the day\u201d beat'],
+ ['\u{1F4D3}','Pen to paper','Writing in a notebook, checking off a list, sketching a plan'],
+ ['\u{1F6B6}','Walk into frame','Entering your workspace, sitting down, opening the laptop'],
+ ['\u{1F5A5}','Screen scroll','Slow scroll through your real work \u2014 plan, designs, results (blur client info)'],
+ ['\u{1F4CE}','Tools of the trade','Close-ups of whatever you actually use \u2014 gear, products, software'],
+ ['\u{1FA9F}','Golden-hour window','You working by a window in warm light \u2014 instant mood'],
+ ['\u{1F4E6}','The process','Packing an order, prepping a session, setting up \u2014 whatever \u201cbehind the scenes\u201d means for you'],
+ ['\u{1F305}','Close the laptop','End-of-day shot \u2014 pairs with reflective voiceovers and story hooks'] ];
+function renderBroll(){ $('#brgrid').innerHTML=BROLL.map(([ic,t,d])=>`<div class="brc"><b><span>${ic}</span>${t}</b><span>${d}</span></div>`).join(''); }
+
+/* ---------- trending in your category ---------- */
+let TRENDS={
+ topics:[
+  {t:'\u201cWhat I\u2019d do differently\u201d retrospectives',m:'\u2191 Rising',p:'Honest look-backs outperform polished tips \u2014 audiences trust scars more than wins.'},
+  {t:'Anti-hustle, pro-systems takes',m:'\u2191 Rising',p:'\u201cDo less, decide better\u201d angles are beating productivity-hack content in most B2B niches.'},
+  {t:'Real client moments (with numbers)',m:'\u2192 Steady',p:'Specific before\u2192after beats generic testimonials. One number in the first line.'},
+  {t:'\u201cWatch me work\u201d process content',m:'\u2191 Rising',p:'Unedited process builds more trust than the finished result \u2014 especially for services.'}],
+ formats:[
+  {t:'Silent b-roll + text overlay',p:'Your b-roll shots + a hook as on-screen text + trending audio underneath. Lowest lift, highest consistency.'},
+  {t:'Green-screen point-at-screenshot',p:'React to a stat, comment, or your own result. The screenshot does the credibility work.'},
+  {t:'Talking head with jump cuts every 2\u20133s',p:'One take, tight cuts, caption every word. Works when the hook is strong enough to carry it.'}],
+ audio:[
+  {t:'Slowed acoustic + spoken voiceover',p:'For story and \u201chonest take\u201d reels \u2014 calm audio signals substance.'},
+  {t:'Upbeat instrumental, beat-matched cuts',p:'For listicle and tips content \u2014 cut your b-roll on the beat.'},
+  {t:'Original audio (your voice)',p:'Platforms are boosting original audio \u2014 a strong VO can itself become a trend.'}]
+};
+function trendWho(){ return (B.overview&&B.overview.oneLine)?B.overview.oneLine:(B.name+' \u2014 your niche'); }
+function buildFromTrend(t){ startSession({mode:'free',seed:'This is trending in my category right now: \u201c'+t+'\u201d. Help me build a post or reel that rides this trend but sounds like my brand \u2014 not like everyone else jumping on it.',title:'Trend: '+t.slice(0,38)}); }
+function renderTrends(){
+  $('#trwho').textContent='Researched for: '+trendWho();
+  $('#trgrid').innerHTML=
+   '<div class="trcol"><h5>\u{1F525} Trending angles</h5>'+TRENDS.topics.map(x=>`<div class="tritem"><b>${esc(x.t)}<span class="trmom">${x.m||''}</span></b><p>${esc(x.p)}</p><button class="bfrom" onclick='buildFromTrend(${JSON.stringify(x.t)})'>Build from this \u2192</button></div>`).join('')+'</div>'
+  +'<div class="trcol"><h5>\u{1F3AC} Reel formats working now</h5>'+TRENDS.formats.map(x=>`<div class="tritem"><b>${esc(x.t)}</b><p>${esc(x.p)}</p><button class="bfrom" onclick='buildFromTrend(${JSON.stringify(x.t)})'>Build from this \u2192</button></div>`).join('')+'</div>'
+  +'<div class="trcol"><h5>\u{1F3B5} Audio patterns</h5>'+TRENDS.audio.map(x=>`<div class="tritem"><b>${esc(x.t)}</b><p>${esc(x.p)}</p><button class="bfrom" onclick='buildFromTrend(${JSON.stringify(x.t)})'>Build from this \u2192</button></div>`).join('')+'</div>';
+}
+async function refreshTrends(){
+  const btn=$('#trbtn'); btn.disabled=true; const orig=btn.textContent; btn.textContent='\u2726 Researching\u2026';
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You are a social-media market researcher. Based on the niche given, infer what content angles, reel formats and audio styles are most likely performing well on Instagram Reels and TikTok for that category right now. Be specific to the niche, not generic. Return STRICT JSON only, no prose, no code fences: {"topics":[{"t":"angle name","m":"\u2191 Rising|\u2192 Steady","p":"one sentence why it works"} x4],"formats":[{"t":"format","p":"one sentence how to use it"} x3],"audio":[{"t":"audio style","p":"one sentence when to use it"} x3]}',
+      messages:[{role:'user',content:'Niche: '+trendWho()+'. Audience: '+((B.audience&&B.audience.primary)||'small business owners')+'. Voice: '+((B.voice&&B.voice.traits)?B.voice.traits.join(', '):'clear, grounded')+'.'}],
+      max_tokens:900})});
+    if(!r.ok) throw new Error('offline');
+    const d=await r.json();
+    let txt=d&&d.content&&d.content[0]&&d.content[0].text; if(!txt) throw new Error('empty');
+    txt=txt.replace(/^```(json)?/i,'').replace(/```$/,'').trim();
+    const j=JSON.parse(txt);
+    if(!j.topics||!j.formats||!j.audio) throw new Error('shape');
+    TRENDS=j; renderTrends(); toast('Fresh research for your niche \u2014 tap any trend to build from it');
+  }catch(e){ toast('Live AI research runs in the real app \u2014 showing curated patterns for now'); }
+  btn.disabled=false; btn.textContent=orig;
+}
+renderHooks(); renderBroll(); renderTrends();
 
 /* =========================================================
    SESSION ENGINE
