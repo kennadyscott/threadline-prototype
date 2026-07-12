@@ -175,6 +175,28 @@ function thinkThenReveal(container, buildCard){
   setTimeout(()=>{ t.remove(); const card=buildCard(); container.appendChild(card); const nx=document.querySelector('.stage.on [data-next]'); if(nx)nx.style.display='inline-flex'; },850);
 }
 
+/* ---------- real AI (when served by the app; static demo falls back to scripts) ---------- */
+async function tlAI(system,user,maxTokens){
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:user}],max_tokens:maxTokens||350})});
+    if(!r.ok) return null;
+    const d=await r.json();
+    const t=d&&d.content&&d.content[0]&&d.content[0].text;
+    if(!t) return null;
+    return esc(t).replace(/&lt;(\/?b)&gt;/g,'<$1>');
+  }catch(e){ return null; }
+}
+function thinkThenRevealAI(container, promise, render){
+  const t=el('div','thinking','<span>Threadline is thinking</span><span class="dots"><i></i><i></i><i></i></span>');
+  container.appendChild(t);
+  const timeout=new Promise(res=>setTimeout(()=>res(null),12000));
+  Promise.race([promise,timeout]).then(text=>{
+    t.remove();
+    container.appendChild(render(text||null));
+    const nx=document.querySelector('.stage.on [data-next]'); if(nx)nx.style.display='inline-flex';
+  });
+}
+
 /* ---------- Phase 1: Idea ---------- */
 function p1(){
   const s=stage(`
@@ -202,12 +224,21 @@ function p1(){
     state.name=$('#name').value.trim(); state.idea=$('#idea').value.trim(); state.why=$('#why').value.trim();
     if(!state.idea){ $('#idea').focus(); return; }
     $('#go1').style.display='none';
-    thinkThenReveal($('#reflect'), ()=>{
-      const kw=findKeyword(state.idea);
+    const aiP=tlAI(
+      'You are Threadline, a sharp, warm brand thought partner. A founder just told you what they are building. Reply with exactly two short paragraphs separated by a blank line, no greeting: (1) reflect the essence back in sharper language than theirs — synthesize, never quote their wording back to them; name what is really being built and wrap the single most important phrase in <b></b>. (2) Ask one perceptive follow-up question that surfaces the core tension or choice this brand will need to make. Under 65 words total. Plain text with <b> tags only.',
+      'What they are building: '+state.idea+'\nWhy they are building it: '+(state.why||'(not shared)')+(state.name?'\nBrand name: '+state.name:'')
+    );
+    thinkThenRevealAI($('#reflect'), aiP, (text)=>{
       const card=el('div','ai');
-      card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Threadline</div>
+      if(text){
+        const parts=text.split(/\n\s*\n/);
+        card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Threadline</div><p>${parts[0]}</p>${parts.slice(1).map(p=>`<p class="soft">${p}</p>`).join('')}`;
+      }else{
+        const kw=findKeyword(state.idea);
+        card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Threadline</div>
         <p>Here's what I'm hearing: you're building <b>${esc(trimIdea(state.idea))}</b>.</p>
         ${kw?`<p class="soft">You mentioned <b>"${esc(kw)}"</b> — that feels central. Is it the <b>product benefit</b>, the <b>brand personality</b>, or both? Hold that thought; it'll shape everything downstream.</p>`:`<p class="soft">There's a real thread here. Let's pull on it.</p>`}`;
+      }
       return card;
     });
   };
@@ -234,11 +265,16 @@ function p2(){ renderProg();
     state.audWho=$('#audWho').value.trim(); state.audPain=$('#audPain').value.trim(); state.audTired=$('#audTired').value.trim();
     if(!state.audWho){ $('#audWho').focus(); return; }
     $('#go2').style.display='none';
-    thinkThenReveal($('#reflect'), ()=>{
+    const aiP=tlAI(
+      'You are Threadline, a brand thought partner. From a founder’s raw notes about their audience, write a vivid persona summary for one person named Jamie. 3–4 sentences, under 75 words. Synthesize the notes into natural, grammatical prose — never echo their phrasing or paste fragments. Cover: who Jamie is, what she is up against, what she has already tried, and what she wants from content. Warm, specific, human. No headers, bullets, or tags.',
+      'Who they most want to help: '+state.audWho+'\nWhat makes it hard for them: '+(state.audPain||'(not shared)')+'\nWhat they are tired of hearing: '+(state.audTired||'(not shared)')+'\nThe product being built for them: '+state.idea
+    );
+    thinkThenRevealAI($('#reflect'), aiP, (text)=>{
       const card=el('div','ai');
+      const personaBody = text || `Jamie is ${esc(state.audWho||'building something real')}, and ${esc(state.audPain||'the ideas are there — the structure isn\'t')}. She doesn't lack ideas; she lacks a system for developing them${state.audTired?`, and she's tired of ${esc(state.audTired)}`:''}. She wants help — but not content that erases her voice.`;
       card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Here's who I picture</div>
         <div class="persona"><div class="pn"><span class="av"></span>Meet Jamie</div>
-          <p>Jamie is ${esc(state.audWho||'building something real')}, and ${esc(state.audPain||'the ideas are there — the structure isn\'t')}. She doesn't lack ideas; she lacks a system for developing them${state.audTired?`, and she's tired of ${esc(state.audTired)}`:''}. She wants help — but not content that erases her voice.</p></div>
+          <p>${personaBody}</p></div>
         <p class="soft" style="margin-top:12px">Does this feel like her?</p>
         <div class="verdicts">
           <button class="verdict">That's exactly right</button>
