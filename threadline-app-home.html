@@ -100,6 +100,15 @@ input,textarea,select{font-family:inherit}
 .citem.done{color:var(--ink)}
 .citem.done .cb{background:var(--green);border-color:var(--green);color:#fff}
 
+/* connect-channels prompt */
+.cprompt{display:flex;align-items:center;gap:13px;flex-wrap:wrap;background:var(--surface);border:1.5px dashed var(--line);border-radius:14px;padding:13px 16px;margin-top:14px}
+.cpi{font-size:20px}
+.cpt{flex:1;min-width:220px}
+.cpt b{font-size:13.5px}
+.cpt p{color:var(--muted);font-size:12px;margin-top:2px}
+.cpa{display:flex;gap:8px;align-items:center}
+.cplater{color:var(--faint);font-weight:800;font-size:12.5px;padding:8px 10px;cursor:pointer;background:none;border:none;font-family:inherit}
+.cplater:hover{color:var(--ink)}
 /* stat cards */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
 @media(max-width:860px){.stats{grid-template-columns:1fr 1fr}}
@@ -260,6 +269,7 @@ svg.defs{position:absolute;width:0;height:0}
       <div class="colmain">
         <div class="greet"><h1 id="greeting">Good morning, Kennady ☀️</h1><p id="greetsub">Let's create content that connects, builds trust, and moves your brand forward.</p></div>
         <div id="welcome"></div>
+        <div id="connectPrompt"></div>
         <div class="stats" id="stats"></div>
 
         <div class="panel">
@@ -409,14 +419,25 @@ function renderWelcome(){
     <h3>✨ Your brand is active. Threadline has started building with it.</h3>
     <div class="chips"><span style="cursor:pointer" onclick="location.href='threadline-review.html?slide=6'" title="Open your pillars in the brand deck"><b>${B.pillars.length}</b> content pillars</span><span style="cursor:pointer" onclick="location.href='threadline-series.html?tab=active'"><b>${Math.min(4,B.series.length)}</b> active series</span><span style="cursor:pointer" onclick="location.href='threadline-plan.html'"><b>24</b> starter Sparks</span><span style="cursor:pointer" onclick="location.href='threadline-plan.html'"><b>8</b> planned content slots</span></div>
     <div class="wacts"><button class="wbtn" onclick="location.href='threadline-series.html?tab=active'">Review first series</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Explore Idea Bank</button><button class="wbtn" onclick="location.href='threadline-plan.html'">Open Plan</button></div>
-    <div class="check" id="check"><div class="ct" onclick="document.getElementById('check').classList.toggle('open')">▸ Getting started — 1 of 6 done</div>
+    <div class="check" id="check"><div class="ct" onclick="document.getElementById('check').classList.toggle('open')">▸ Getting started — 1 of 3 done</div>
       <div class="items">
-        ${[['Brand approved',1,'threadline-review.html'],['Review recommended series',0,'threadline-series.html?tab=active'],['Choose your main Plan view',0,'threadline-plan.html'],['Connect publishing channels',0,'threadline-analytics.html'],['Review the first week',0,'threadline-plan.html?view=calendar'],['Build the first content piece',0,'threadline-build-page.html']].map(([t,d,href])=>`<div class="citem${d?' done':''}" style="cursor:pointer" onclick="location.href='${href}'"><span class="cb">✓</span>${t} <span style="color:var(--faint);font-weight:800">›</span></div>`).join('')}
+        ${[['Brand approved',1,'threadline-review.html'],['Review your first series',0,'threadline-series.html?tab=active'],['Build your first content piece',0,'threadline-build-page.html']].map(([t,d,href])=>`<div class="citem${d?' done':''}" style="cursor:pointer" onclick="location.href='${href}'"><span class="cb">✓</span>${t} <span style="color:var(--faint);font-weight:800">›</span></div>`).join('')}
       </div></div>
   </div>`;
 }
 function dismissWelcome(){ try{ localStorage.setItem(FIRST_KEY,'1'); }catch(e){} renderWelcome(); toast('Welcome banner dismissed'); }
 renderWelcome();
+
+/* connect-channels — optional, its own dismissible prompt (pulled out of the checklist) */
+const CONNECT_KEY='threadline.connectPrompted';
+function renderConnectPrompt(){
+  let off=false; try{ off=!!localStorage.getItem(CONNECT_KEY); }catch(e){}
+  $('#connectPrompt').innerHTML=off?'':`<div class="cprompt"><span class="cpi">🔌</span>
+    <div class="cpt"><b>When you're ready to publish</b><p>Connect Instagram, LinkedIn, or YouTube to unlock scheduling and real analytics. No rush — everything else works without it.</p></div>
+    <div class="cpa"><button class="wbtn" onclick="location.href='threadline-analytics.html'">Connect channels</button><button class="cplater" onclick="dismissConnect()">Later</button></div></div>`;
+}
+function dismissConnect(){ try{ localStorage.setItem(CONNECT_KEY,'1'); }catch(e){} renderConnectPrompt(); toast('No problem — connect anytime from Analytics'); }
+renderConnectPrompt();
 
 /* ---------- new spark modal ---------- */
 function openSpark(){ const P=$('#sp-pillar'),S=$('#sp-series');
