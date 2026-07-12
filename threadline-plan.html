@@ -320,6 +320,7 @@ svg.defs{position:absolute;width:0;height:0}
 </div></div>
 
 <script src="threadline-brand.js"></script>
+<script src="threadline-preview.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
@@ -548,6 +549,7 @@ function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
   $('#ws-st').onchange=()=>{ x.status=$('#ws-st').value; render(); };
 }
 function wsStatus(st){ const x=ITEMS.find(i=>i.id===wsId); if(!x) return;
+  if(st==='Scheduled' && window.tlGate && tlGate('activate your brand to schedule posts')) return;
   x.t=$('#ws-t').value||x.t; x.status=st; x.fmt=$('#ws-f').value; x.ser=$('#ws-s').value; x.w=$('#ws-w').value;
   closeWs(); render(); toast('“'+x.t.slice(0,30)+'…” → '+st+(st==='Ready for Review'?' · assigned to '+getRules().reviewer:st==='Scheduled'?' · Wednesday 9:00 AM':''));
 }

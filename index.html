@@ -82,7 +82,7 @@ h1{font-size:clamp(26px,4vw,36px)}
 </div>
 <script>
 function resetDemo(){
-  ['threadline.brand','threadline.build','threadline.import','threadline.homeWelcomed','threadline.sparksWelcomed','threadline.planWelcomed','threadline.planView','threadline.connections','threadline.teamRules'].forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  ['threadline.brand','threadline.build','threadline.import','threadline.homeWelcomed','threadline.sparksWelcomed','threadline.planWelcomed','threadline.planView','threadline.connections','threadline.teamRules','threadline.activated'].forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
   let t=document.querySelector('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
   t.textContent='Demo reset — the journey starts fresh'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400);
 }
