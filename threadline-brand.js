@@ -273,4 +273,64 @@
   window.defaultBrand=defaultBrand;
   window.compileFromBuild=compileFromBuild;
   window.compileFromImport=compileFromImport;
+
+  /* ---------- notification center (shared by every app page) ---------- */
+  function initNotifs(){
+    const bell=document.querySelector('.topbar .bell'); if(!bell||bell._tln) return; bell._tln=1;
+    const NKEY='threadline.notifsRead';
+    const ITEMS=[
+      {ic:'✏️',bg:'rgba(128,61,255,.1)',t:'Draft “Client Win Story” is ready for review',s:'2 hours ago',href:'threadline-plan.html'},
+      {ic:'📅',bg:'rgba(59,130,246,.1)',t:'3 open slots in your rhythm this week',s:'5 hours ago',href:'threadline-plan.html'},
+      {ic:'⚡',bg:'rgba(245,165,36,.14)',t:'Threadline added 4 fresh ideas to Spark Bank',s:'Yesterday',href:'threadline-spark-bank.html'},
+    ];
+    const isRead=()=>{ try{ return localStorage.getItem(NKEY)==='1'; }catch(e){ return false; } };
+    const setRead=()=>{ try{ localStorage.setItem(NKEY,'1'); }catch(e){} };
+    const st=document.createElement('style');
+    st.textContent=
+      '.tlnp{position:fixed;width:min(360px,calc(100vw - 24px));background:var(--surface,#fff);border:1px solid var(--line,#e6e9f1);border-radius:16px;box-shadow:0 18px 50px rgba(20,20,60,.16);z-index:90;overflow:hidden;animation:tlnpop .16s ease}'+
+      '@keyframes tlnpop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}'+
+      '.tlnh{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line-2,#eef1f7)}'+
+      '.tlnh b{font-size:14px}'+
+      '.tlnm{background:none;border:none;color:var(--violet,#803dff);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit}'+
+      '.tlni{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;text-decoration:none;color:inherit;border-bottom:1px solid var(--line-2,#eef1f7);cursor:pointer}'+
+      '.tlni:hover{background:var(--surface-2,#f2f4f9)}'+
+      '.tlni.seen{opacity:.7}'+
+      '.tlnic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;flex-shrink:0}'+
+      '.tlnt{min-width:0;flex:1}'+
+      '.tlnt b{display:block;font-size:13px;font-weight:700;line-height:1.35}'+
+      '.tlnt span{font-size:11.5px;color:var(--faint,#8b96ad)}'+
+      '.tlnd{width:8px;height:8px;border-radius:50%;background:var(--coral,#fb7185);margin-top:6px;flex-shrink:0}'+
+      '.tlnf{padding:10px 16px;font-size:11.5px;color:var(--faint,#8b96ad);text-align:center}';
+    document.head.appendChild(st);
+    bell.removeAttribute('onclick');
+    bell.setAttribute('aria-label','Notifications');
+    const badge=bell.querySelector('i');
+    function syncBadge(){ if(badge) badge.style.display=isRead()?'none':''; }
+    syncBadge();
+    let panel=null;
+    function close(){ if(panel){ panel.remove(); panel=null; document.removeEventListener('click',onDoc,true); } }
+    function onDoc(e){ if(panel&&!panel.contains(e.target)&&!bell.contains(e.target)) close(); }
+    function open(){
+      const r=bell.getBoundingClientRect(), read=isRead();
+      panel=document.createElement('div'); panel.className='tlnp';
+      panel.style.top=(r.bottom+8)+'px';
+      panel.style.right=Math.max(12,window.innerWidth-r.right)+'px';
+      panel.innerHTML='<div class="tlnh"><b>Notifications</b>'+(read?'':'<button class="tlnm">Mark all read</button>')+'</div>'
+        +ITEMS.map(it=>'<div class="tlni'+(read?' seen':'')+'" data-href="'+it.href+'">'
+          +'<span class="tlnic" style="background:'+it.bg+'">'+it.ic+'</span>'
+          +'<span class="tlnt"><b>'+it.t+'</b><span>'+it.s+'</span></span>'
+          +(read?'':'<span class="tlnd"></span>')+'</div>').join('')
+        +'<div class="tlnf">You’re all caught up ✨</div>';
+      document.body.appendChild(panel);
+      const mk=panel.querySelector('.tlnm');
+      if(mk) mk.addEventListener('click',function(e){ e.stopPropagation(); setRead(); syncBadge(); close(); open(); });
+      panel.querySelectorAll('.tlni').forEach(function(row){
+        row.addEventListener('click',function(){ setRead(); syncBadge(); location.href=row.getAttribute('data-href'); });
+      });
+      setTimeout(function(){ document.addEventListener('click',onDoc,true); },0);
+    }
+    bell.addEventListener('click',function(e){ e.stopPropagation(); panel?close():open(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initNotifs); else initNotifs();
 })();

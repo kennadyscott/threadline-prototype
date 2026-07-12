@@ -226,13 +226,23 @@ input,select{font-family:inherit}
 .findcard p{color:var(--muted);font-size:12.5px;margin:5px 0 12px}
 .findcard button{background:var(--grad2);color:#fff;font-weight:800;font-size:13px;padding:10px 17px;border-radius:11px}
 
-/* locked overlay */
-.lockov{position:absolute;inset:0;background:rgba(247,248,251,.72);backdrop-filter:blur(2.5px);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:5;text-align:center;padding:20px}
-.lockov b{font-size:13.5px}
-.lockov p{color:var(--muted);font-size:11.5px;max-width:34ch}
-.lockov .la{display:flex;gap:8px;margin-top:4px}
+/* sample-data preview (pre-connection) */
 .lb{border:1.5px solid var(--line);border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface)}
 .lb.pri{background:var(--grad2);color:#fff;border-color:transparent}
+.pvb{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:linear-gradient(120deg,rgba(128,61,255,.08),rgba(59,130,246,.05) 60%,rgba(34,211,238,.05));border:1px solid rgba(128,61,255,.22);border-radius:14px;padding:14px 18px;margin-top:14px}
+.pvb b{font-size:14px}
+.pvb p{color:var(--muted);font-size:12.5px;margin-top:2px}
+.pvb .lb.pri{font-size:13px;padding:10px 16px;border-radius:11px}
+.connectbar{transition:box-shadow .3s}
+.connectbar.flash{box-shadow:0 0 0 2.5px var(--violet);border-radius:12px}
+.panel.preview{position:relative;overflow:hidden}
+.panel.preview>*:not(.prevov):not(.ph){filter:blur(5px) saturate(.9);pointer-events:none;user-select:none}
+.prevov{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;cursor:pointer;background:linear-gradient(180deg,rgba(247,248,251,0),rgba(247,248,251,.38))}
+.pvbadge{background:var(--surface);border:1px solid rgba(128,61,255,.3);color:var(--violet);font-weight:800;font-size:11.5px;letter-spacing:.04em;padding:7px 14px;border-radius:999px;box-shadow:var(--shadow-sm)}
+.metric.pv .mv{filter:blur(7px);user-select:none}
+.metric.pv .mc{color:var(--violet);font-weight:700}
+.on2.pv{filter:blur(7px);user-select:none}
+.sv2 b.pv2{filter:blur(6px);user-select:none}
 
 /* modals */
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:50px 20px;overflow-y:auto}
@@ -305,6 +315,7 @@ svg.defs{position:absolute;width:0;height:0}
       </div>
 
       <div class="connectbar" id="connectbar"></div>
+      <div id="pvbanner"></div>
       <div class="metrics" id="metrics"></div>
       <div class="overview" id="overview"></div>
 
@@ -456,10 +467,10 @@ const METRICS=[
 ];
 function renderMetrics(){
   $('#metrics').innerHTML=METRICS.map(([ic,bg,l,v,d,needs])=>{
-    const locked=needs&&!anyConn();
-    return `<div class="metric${locked?' locked':''}"><div class="mh"><span class="mi" style="background:${bg}">${ic}</span>${l}</div>
-      <div class="mv">${locked?'—':v}${locked?'':`<span class="md up">▲ ${d.replace('+','')}</span>`}</div>
-      <div class="mc">${locked?'Connect to unlock':'vs previous 30 days'}</div></div>`; }).join('');
+    const pv=needs&&!anyConn();
+    return `<div class="metric${pv?' pv':''}"><div class="mh"><span class="mi" style="background:${bg}">${ic}</span>${l}</div>
+      <div class="mv">${v}<span class="md up">▲ ${d.replace('+','')}</span></div>
+      <div class="mc">${pv?'Sample data':'vs previous 30 days'}</div></div>`; }).join('');
 }
 
 /* ---------- overview (system health, §5) ---------- */
@@ -472,7 +483,7 @@ const OV=[
 ];
 function renderOverview(){
   $('#overview').innerHTML=OV.map(([n,l,d,a,target])=>`<div class="ovc" onclick="document.getElementById('${target}').scrollIntoView({behavior:'smooth'})">
-    <div class="on2">${anyConn()?n:'—'}</div><div class="ol2">${l}</div><div class="od2">${d}</div><div class="oa2">${a} →</div></div>`).join('');
+    <div class="on2${anyConn()?'':' pv'}">${n}</div><div class="ol2">${l}</div><div class="od2">${d}</div><div class="oa2">${a} →</div></div>`).join('');
 }
 
 /* ---------- repurpose center (§28) ---------- */
@@ -483,7 +494,7 @@ const EXTS=[
   ['🧵','Series: “Clarity Checks” — a recurring audit','Series Generator'],
 ];
 function renderRepurpose(){
-  if(!anyConn()){ lockPanel('repPanel','Strong content worth extending'); $('#replist').innerHTML=''; return; } unlockPanel('repPanel');
+  previewPanel('repPanel');
   $('#replist').innerHTML=`<div style="font-weight:800;font-size:13.5px;margin-bottom:3px">${esc(strip(B.messaging.primary))}</div>
   <div style="font-size:11px;color:var(--faint);font-weight:700;margin-bottom:10px">High performer · +62% vs avg · pick the extensions worth building</div>
   ${EXTS.map(([ic,t,ch])=>`<div class="ext" onclick="this.classList.toggle('on')"><span class="xck">✓</span><span style="font-size:14px">${ic}</span>${t}<span class="xf">${ch}</span></div>`).join('')}
@@ -499,7 +510,7 @@ function repBuild(){ const n=document.querySelectorAll('#replist .ext.on').lengt
 
 /* ---------- series performance (§15–17) ---------- */
 function renderSeriesPerf(){
-  if(!anyConn()){ lockPanel('serPanel','Series trends, patterns & refresh recommendations'); $('#serperf').innerHTML=''; return; } unlockPanel('serPanel');
+  previewPanel('serPanel');
   const s0=SNAME[0]||'Series', s4=SNAME[4]||SNAME[1]||'Series';
   $('#serperf').innerHTML=`
   <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(128,61,255,.1)">🧵</div>
@@ -524,7 +535,7 @@ const E=[14,17,15,24,31,26,19,17,21,19,23,18,25,22,20,27,24,21,18,23,26,24,29,26
 const C2=[5,6,5,9,12,10,7,6,8,7,9,7,10,8,7,11,9,8,6,9,10,9,12,10,8,10,9,11,10,13];
 function linePath(arr,max,w,h){ return arr.map((v,i)=>`${i===0?'M':'L'}${(i/(arr.length-1)*w).toFixed(1)},${(h-(v/max)*h).toFixed(1)}`).join(' '); }
 function renderChart(){
-  if(!anyConn()){ $('#chart').innerHTML=''; lockPanel('chartPanel','Reach, engagement & click trends'); return; } unlockPanel('chartPanel');
+  previewPanel('chartPanel');
   const w=560,h=180,max=100;
   $('#chart').innerHTML=`<svg viewBox="0 0 ${w} ${h+22}">
     ${[0,.25,.5,.75,1].map(f=>`<line x1="0" x2="${w}" y1="${(h*f).toFixed(1)}" y2="${(h*f).toFixed(1)}" stroke="#eef1f7" stroke-width="1"/>`).join('')}
@@ -555,7 +566,7 @@ const TOP={
     ['Stop posting. Start connecting.','Text Post · LinkedIn','176','📝','rgba(34,211,238,.14)',0]],
 };
 function renderTop(){
-  if(!anyConn()){ $('#toptabs').innerHTML=''; $('#toplist').innerHTML=''; lockPanel('topPanel','Your best posts, ranked by goal'); return; } unlockPanel('topPanel');
+  previewPanel('topPanel');
   $('#toptabs').innerHTML=[['engagement','By engagement'],['reach','By reach'],['clicks','By clicks']].map(([k,l])=>`<button class="t2${topTab===k?' on':''}" onclick="topTab='${k}';renderTop()">${l}</button>`).join('');
   const unit=topTab==='engagement'?'Eng. rate':topTab==='reach'?'Reach':'Clicks';
   $('#toplist').innerHTML=TOP[topTab].map(([t,m,v,ic,bg,gem])=>`<div class="toprow" onclick="toast('Scorecard: goal performance, comparisons, strongest signal, likely reasons, next step')">
@@ -566,17 +577,17 @@ function renderTop(){
 /* ---------- best series / donut / types ---------- */
 function renderBestSeries(){
   const rates=['7.6%','6.4%','5.9%','5.2%','4.1%'];
-  $('#bestseries').innerHTML=SNAME.slice(0,5).map((n,i)=>`<div class="srow2"><div class="si2" style="background:${SCOLOR[i]}1a;color:${SCOLOR[i]}">✦</div><b>${esc(n)}</b><div class="sv2"><b>${anyConn()?rates[i]:'—'}</b><span>Eng. rate</span></div></div>`).join('');
+  $('#bestseries').innerHTML=SNAME.slice(0,5).map((n,i)=>`<div class="srow2"><div class="si2" style="background:${SCOLOR[i]}1a;color:${SCOLOR[i]}">✦</div><b>${esc(n)}</b><div class="sv2"><b class="${anyConn()?'':'pv2'}">${rates[i]}</b><span>Eng. rate</span></div></div>`).join('');
 }
 function renderPlatform(){
-  if(!anyConn()){ lockPanel('platPanel','Where engagement actually happens'); return; } unlockPanel('platPanel');
+  previewPanel('platPanel');
   const P=[['LinkedIn','#0a66c2',52,'6.4K'],['Instagram','#dd2a7b',31,'3.8K'],['Email','#54607a',9,'1.1K'],['TikTok','#111',5,'620'],['Other','#b8c0d0',3,'380']];
   let acc=0; const segs=P.map(([n,c,pct])=>{ const a=acc*3.6,b=(acc+pct)*3.6; acc+=pct; return `${c} ${a}deg ${b}deg`; }).join(', ');
   $('#donut').style.background=`conic-gradient(${segs})`; $('#donut').dataset.n='12.4K\nTotal';
   $('#platleg').innerHTML=P.map(([n,c,pct,v])=>`<div class="lr"><span class="ld" style="background:${c}"></span>${n}<span class="ln">${pct}% (${v})</span></div>`).join('');
 }
 function renderTypes(){
-  if(!anyConn()){ lockPanel('typePanel','Eng. rate by format, vs last month'); return; } unlockPanel('typePanel');
+  previewPanel('typePanel');
   const T=[['🗂','rgba(128,61,255,.1)','Carousels','7.2%','▲ 21%',1],['🎬','rgba(251,113,133,.12)','Reels','6.8%','▲ 34%',1],['📷','rgba(32,184,120,.12)','Stories','5.6%','▲ 18%',1],['📝','rgba(59,130,246,.1)','Text Posts','4.9%','▲ 12%',1],['📹','rgba(245,165,36,.14)','Videos','4.3%','▼ 6%',0],['🔗','rgba(34,211,238,.14)','Links/Articles','3.1%','▼ 3%',0]];
   $('#types').innerHTML=`<tr><td style="font-size:10px;font-weight:800;color:var(--faint);text-transform:uppercase">Content type</td><td class="er" style="font-size:10px;color:var(--faint);text-transform:uppercase">Eng. rate</td><td class="vs" style="font-size:10px;color:var(--faint);text-transform:uppercase">vs last month</td></tr>`
    +T.map(([ic,bg,n,r,d,up])=>`<tr><td><span class="tn2"><span class="ti2" style="background:${bg}">${ic}</span>${n}</span></td><td class="er">${r}</td><td class="vs ${up?'up':'dn2'}">${d}</td></tr>`).join('');
@@ -584,7 +595,7 @@ function renderTypes(){
 
 /* ---------- high performers ---------- */
 function renderHi(){
-  if(!anyConn()){ lockPanel('hiPanel','High performers — with likely reasons & replicate'); $('#hilist').innerHTML=''; return; } unlockPanel('hiPanel');
+  previewPanel('hiPanel');
   $('#hilist').innerHTML=`
   <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(128,61,255,.1)">🗂</div>
     <div style="min-width:0"><div class="ht">${esc(strip(B.messaging.primary))}</div><div class="hm">${esc(SNAME[0]||'Series')} · LinkedIn · Jul 2</div><span class="goalpill">🎯 Goal: Comments</span></div>
@@ -611,7 +622,7 @@ function renderHi(){
 
 /* ---------- content to evaluate ---------- */
 function renderLo(){
-  if(!anyConn()){ lockPanel('loPanel','Underperformers — with a guided “Evaluate why”'); $('#lolist').innerHTML=''; return; } unlockPanel('loPanel');
+  previewPanel('loPanel');
   $('#lolist').innerHTML=`
   <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(59,130,246,.1)">🖼</div>
     <div style="min-width:0"><div class="ht">Three ways to improve your approach</div><div class="hm">Educational · Instagram carousel · Jun 20</div><span class="goalpill">🎯 Goal: Saves</span></div>
@@ -694,9 +705,13 @@ function renderGaps(){
 }
 
 /* ---------- lock helpers ---------- */
-function lockPanel(id,label){ const p=document.getElementById(id); if(!p) return; let ov=p.querySelector('.lockov');
-  if(!ov){ ov=el('div','lockov',`<div style="font-size:22px">🔌</div><b>${label}</b><p>Connect an account to unlock — or log outcomes manually.</p><div class="la"><button class="lb pri" onclick="connect('ig')">Connect Instagram</button><button class="lb" onclick="openLog()">Log manually</button></div>`); p.appendChild(ov); } }
-function unlockPanel(id){ const p=document.getElementById(id); const ov=p&&p.querySelector('.lockov'); if(ov) ov.remove(); }
+function previewPanel(id){ const p=document.getElementById(id); if(!p) return;
+  const ov=p.querySelector('.prevov');
+  if(anyConn()){ p.classList.remove('preview'); if(ov) ov.remove(); return; }
+  p.classList.add('preview');
+  if(!ov){ const o=el('div','prevov','<span class="pvbadge">👁 Sample preview</span>'); o.onclick=scrollToConnect; p.appendChild(o); } }
+function scrollToConnect(){ const c=document.getElementById('connectbar'); c.scrollIntoView({behavior:'smooth',block:'center'}); c.classList.add('flash'); setTimeout(()=>c.classList.remove('flash'),1500); }
+function renderBanner(){ $('#pvbanner').innerHTML=anyConn()?'':`<div class="pvb"><div><b>📊 You’re previewing Analytics with sample data</b><p>Everything below shows what your dashboard will look like — none of it is your real performance yet.</p></div><button class="lb pri" onclick="scrollToConnect()">Connect accounts for analytics</button></div>`; }
 
 /* ---------- replicate modal ---------- */
 const REP_OPTS=['Topic','Hook pattern','Content structure','CTA style','All recommended elements'];
@@ -744,7 +759,7 @@ function closeLog(){ $('#logOverlay').classList.remove('on'); }
 function saveLog(){ closeLog(); toast('Logged — manual outcomes change how Threadline evaluates the piece'); }
 
 /* ---------- render ---------- */
-function render(){ renderConnect(); renderMetrics(); renderOverview(); renderChart(); renderTop(); renderBestSeries(); renderPlatform(); renderTypes(); renderHi(); renderLo(); renderNoticed(); renderRecos(); renderRepurpose(); renderSeriesPerf(); renderGaps(); }
+function render(){ renderConnect(); renderBanner(); renderMetrics(); renderOverview(); renderChart(); renderTop(); renderBestSeries(); renderPlatform(); renderTypes(); renderHi(); renderLo(); renderNoticed(); renderRecos(); renderRepurpose(); renderSeriesPerf(); renderGaps(); }
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2800); }
 render();
 </script>
