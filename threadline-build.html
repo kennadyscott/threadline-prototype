@@ -358,8 +358,37 @@ function p3(){ renderProg();
   };
 }
 
+/* ---------- pillars, personalized to their inputs ---------- */
+function fallbackPillars(){
+  const aud=shortPhrase(state.audWho,6)||'your audience';
+  const nm=state.name||'your brand';
+  const bel=shortPhrase(state.believe,9);
+  PILLARS[0].n='Make It Simple';   PILLARS[0].p='Practical guidance that helps '+aud+' get real results without the overwhelm.';
+  PILLARS[1].n='Behind the Brand'; PILLARS[1].p='The process, decisions, and real story behind '+nm+'.';
+  PILLARS[2].n='Proof & Stories';  PILLARS[2].p='Real people, real outcomes — the moments that build trust.';
+  PILLARS[3].n='Point of View';    PILLARS[3].p=bel?('The beliefs you stand for — starting with \u201c'+bel+'.\u201d'):'The beliefs and takes that make your brand impossible to ignore.';
+}
+async function personalizePillars(){
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You design content pillar systems for brands. Given a brand, its audience, and its beliefs, name 4 distinct content pillars specific to THIS brand\u2019s domain (never about content marketing unless the brand IS content marketing). They should roughly cover: practical value for the audience, behind-the-scenes, proof/stories, and point of view — but named in the brand\u2019s own world. Each pillar: a 2-4 word name and one sentence under 18 words describing what it covers for this brand.',
+      messages:[{role:'user',content:'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nTheir struggle: '+(state.audPain||'?')+'\nWe believe: '+(state.believe||'?')+'\nThe industry gets it wrong when: '+(state.wrong||'?')}],
+      max_tokens:600,
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{pillars:{type:'array',minItems:4,maxItems:4,items:{type:'object',properties:{n:{type:'string'},p:{type:'string'}},required:['n','p'],additionalProperties:false}}},required:['pillars'],additionalProperties:false}}}
+    })});
+    if(!r.ok) return;
+    const d=await r.json();
+    const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return;
+    const j=JSON.parse(t);
+    if(!j.pillars||j.pillars.length<4) return;
+    j.pillars.slice(0,4).forEach((x,i)=>{ if(x.n)PILLARS[i].n=x.n; if(x.p)PILLARS[i].p=x.p; });
+    const wrap=document.getElementById('pillars');
+    if(wrap&&wrap.querySelectorAll('.pillar').length===4){ wrap.innerHTML=PILLARS.map((pp,i)=>pillarHTML(pp,i)).join(''); bindPillars(); }
+  }catch(e){}
+}
+
 /* ---------- Phase 4: Pillars ---------- */
-function p4(){ renderProg();
+function p4(){ renderProg(); fallbackPillars();
   stage(`
     <div class="kick">✦ What you'll be known for</div>
     <h2 class="q">Here are your <span class="grad-text">content pillars.</span></h2>
@@ -372,6 +401,7 @@ function p4(){ renderProg();
     </div>`);
   renderProg();
   bindPillars();
+  personalizePillars();
 }
 function pillarHTML(p,i){ return `<div class="pillar" data-i="${i}"><div class="pc" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><h4>${esc(p.n)} <span class="pmix">${p.mix}</span></h4><p>${esc(p.p)}</p></div><button class="verdict" data-del title="Remove">✕</button></div>`; }
 function bindPillars(){ document.querySelectorAll('#pillars .pillar [data-del]').forEach(b=>b.onclick=e=>{ e.target.closest('.pillar').remove(); }); }
