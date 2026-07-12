@@ -113,21 +113,18 @@ input,textarea,select{font-family:inherit}
 .ibchip{border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:800;font-size:11.5px;color:var(--muted);background:var(--surface);cursor:pointer}
 .ibchip.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
 .ibfilters{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.ibgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:12px}
-@media(max-width:1100px){.ibgrid{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.ibgrid{grid-template-columns:1fr}}
-.ibc{border:1px solid var(--line);border-radius:13px;padding:12px 13px;background:var(--surface-2);display:flex;flex-direction:column;gap:6px}
-.ibtop{display:flex;align-items:center;gap:7px}
+.iblist{display:flex;flex-direction:column;margin-top:10px}
+.ibr{display:flex;align-items:center;gap:10px;padding:7px 8px;border-bottom:1px solid var(--line-2);border-radius:10px}
+.ibr:last-of-type{border-bottom:none}
+.ibr:hover{background:var(--surface-2)}
 .ibic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
-.ibty{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-.ibpick{margin-left:auto;font-size:10px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.09);padding:3px 8px;border-radius:999px;white-space:nowrap}
-.ibc b{font-size:13.5px;line-height:1.35}
-.ibc p{font-size:11.5px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.ibmeta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto}
-.ibpil{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:3px 9px;border-radius:999px}
-.ibwhen{font-size:10.5px;color:var(--faint);white-space:nowrap}
-.ibbtns{display:flex;gap:7px;margin-top:2px}
-.ibb{flex:1;border:1.5px solid var(--line);border-radius:9px;padding:7px 0;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface);cursor:pointer}
+.ibrt{font-size:13px;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ibpick{font-size:10px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.09);padding:3px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.ibpil{font-size:10.5px;font-weight:800;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:3px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.ibwhen{font-size:10.5px;color:var(--faint);white-space:nowrap;flex-shrink:0;min-width:64px;text-align:right}
+@media(max-width:820px){.ibpil,.ibwhen{display:none}}
+.ibrbtns{display:flex;gap:6px;flex-shrink:0}
+.ibb{border:1.5px solid var(--line);border-radius:9px;padding:5px 11px;font-weight:800;font-size:11.5px;color:var(--muted);background:var(--surface);cursor:pointer;white-space:nowrap}
 .ibb.pri{color:var(--violet);border-color:rgba(128,61,255,.35)}
 .ibb:hover{border-color:var(--violet);color:var(--violet)}
 .ibmore{margin-top:11px;width:100%;border:1.5px dashed var(--line);border-radius:10px;padding:9px;font-weight:800;font-size:12.5px;color:var(--violet);background:none;cursor:pointer}
@@ -781,12 +778,14 @@ let ibPillar='all', ibOpen=false;
 function ibPick(ci){ ibPillar=['all'].concat(IBP)[ci]||'all'; renderIdeaBank(); }
 function ibFiltered(){ return IDEAS.filter(i=>!i.posted&&(ibPillar==='all'||i.pillar===ibPillar)); }
 function ibCard(i){ const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
-  return `<div class="ibc"><div class="ibtop"><span class="ibic" style="background:${tm.bg}">${tm.ic}</span><span class="ibty" style="color:${tm.c}">${i.type}</span>${i.pick?'<span class="ibpick">\u2726 Threadline pick</span>':''}</div>
-    <b>${esc(i.t)}</b><p>${esc(i.sum)}</p>
-    <div class="ibmeta"><span class="ibpil">${esc(i.pillar||'Needs a home')}</span><span class="ibwhen">${i.when||''}</span></div>
-    <div class="ibbtns"><button class="ibb pri" onclick="ibBuild(${i.id})">Build \u2192</button><button class="ibb" onclick="ibSchedule(${i.id})">Schedule</button></div></div>`; }
+  return `<div class="ibr" title="${esc(i.sum)}"><span class="ibic" style="background:${tm.bg}">${tm.ic}</span>
+    <b class="ibrt">${esc(i.t)}</b>
+    ${i.pick?'<span class="ibpick">\u2726 Pick</span>':''}
+    <span class="ibpil">${esc(i.pillar||'Needs a home')}</span>
+    <span class="ibwhen">${i.when||''}</span>
+    <span class="ibrbtns"><button class="ibb pri" onclick="ibBuild(${i.id})">Build \u2192</button><button class="ibb" onclick="ibSchedule(${i.id})">Schedule</button></span></div>`; }
 function renderIdeaBank(){
-  const list=ibFiltered(); const total=IDEAS.filter(i=>!i.posted).length; const shown=ibOpen?list:list.slice(0,3);
+  const list=ibFiltered(); const total=IDEAS.filter(i=>!i.posted).length; const shown=ibOpen?list:list.slice(0,4);
   $('#ibank').innerHTML=`
     <div class="ibhead">
       <div><h3>\u{1F4A1} Idea Bank <span class="ibn">${total}</span></h3><p>Sparks and ideas that aren\u2019t scheduled yet \u2014 build one out, or give it a date below.</p></div>
@@ -794,8 +793,8 @@ function renderIdeaBank(){
     </div>
     <div class="ibchips">${['all'].concat(IBP).map((pn,ci)=>`<button class="ibchip${ibPillar===pn?' on':''}" onclick="ibPick(${ci})">${pn==='all'?'All pillars':esc(pn)}</button>`).join('')}</div>
     ${ibOpen?`<div class="ibfilters"><button class="csel" onclick="toast('Filter by type \u2014 Idea, Question, Client Story, Observation, Trend\u2026')">\u2726 Type</button><button class="csel" onclick="toast('Filter by source \u2014 notes, voice, conversations, Threadline')">\u{1F4CE} Source</button><button class="csel" onclick="toast('Sort \u2014 newest, strongest thread, best fit for open slots')">\u2195 Sort</button><button class="csel" onclick="toast('1 archived idea \u2014 seasonal, parked until relevant')">\u{1F5C2} Archived</button></div>`:''}
-    <div class="ibgrid">${shown.map(ibCard).join('')||'<div class="ibempty">No ideas in this pillar yet \u2014 add one, or ask Threadline in Build.</div>'}</div>
-    ${list.length>3||ibOpen?`<button class="ibmore" onclick="ibOpen=!ibOpen;renderIdeaBank()">${ibOpen?'Show less \u25B4':'View all '+list.length+' ideas \u25BE'}</button>`:''}`;
+    <div class="iblist">${shown.map(ibCard).join('')||'<div class="ibempty">No ideas in this pillar yet \u2014 add one, or ask Threadline in Build.</div>'}</div>
+    ${list.length>4||ibOpen?`<button class="ibmore" onclick="ibOpen=!ibOpen;renderIdeaBank()">${ibOpen?'Show less \u25B4':'View all '+list.length+' ideas \u25BE'}</button>`:''}`;
 }
 function ibBuild(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return; location.href='threadline-build-page.html?seed='+encodeURIComponent(i.t); }
 function ibSchedule(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return;

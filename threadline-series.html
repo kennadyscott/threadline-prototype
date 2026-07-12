@@ -81,6 +81,15 @@ input,textarea,select{font-family:inherit}
 .tab.on .n{background:rgba(128,61,255,.12);color:var(--violet)}
 
 /* generator inputs */
+.genlead{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(120deg,rgba(128,61,255,.08),rgba(59,130,246,.05) 60%,rgba(34,211,238,.05));border:1px solid rgba(128,61,255,.22);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+.gltxt{min-width:0;flex:1}
+.genlead h3{font-size:16px}
+.genlead p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.defchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.defchips span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:700;font-size:11.5px;color:var(--muted);max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.genacts{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.adjbtn{border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:800;font-size:12.5px;color:var(--muted);background:var(--surface);cursor:pointer}
+.adjbtn:hover{border-color:var(--violet);color:var(--violet)}
 .genbox{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:16px;box-shadow:var(--shadow-sm)}
 .grow2{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:13px}
 .grow3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:13px;margin-top:13px;align-items:end}
@@ -335,22 +344,37 @@ const TABS=[['gen','Generator'],['active','Active series'],['tpl','Templates']];
 function renderTabs(){ $('#tabs').innerHTML=TABS.map(([k,l])=>`<button class="tab${tab===k?' on':''}" onclick="setTab('${k}')">${l}${k==='active'?` <span class="n">${ACTIVE.length}</span>`:''}</button>`).join(''); }
 function setTab(k){ tab=k; render(); }
 
+let genAdjust=false;
 /* ---------- generator view ---------- */
 function genView(){
   const topic='Helping '+lc(AUD_SHORT)+' get '+(strip(B.positioning.achieve)?lc(strip(B.positioning.achieve)).replace(/\.$/,''):'real results without the overwhelm');
-  return `<div class="genbox">
+  return `<div class="genlead">
+    <div class="gltxt"><h3>✦ Your first series is one tap away</h3>
+    <p>Threadline pre-filled everything from your brand — generate now, adjust only if you want to.</p>
+    <div class="defchips">
+      <span>🧵 ${esc(topic)}</span>
+      <span>🎯 Build trust &amp; authority</span>
+      <span>👥 ${esc(AUD_SHORT)}</span>
+      <span>🗓 Weekly</span>
+      <span>▤ Mixed formats</span>
+    </div></div>
+    <div class="genacts">
+      <button class="genbtn" onclick="generate()">✦ Generate series ideas</button>
+      <button class="adjbtn" onclick="genAdjust=!genAdjust;render()">${genAdjust?'Hide options ▴':'Adjust options ▾'}</button>
+    </div>
+  </div>
+  ${genAdjust?`<div class="genbox">
     <div class="grow2">
       <div class="gf"><label>Topic / Theme</label><textarea id="g-topic">${esc(topic)}</textarea></div>
       <div class="gf"><label>Goal</label><select><option>Build trust &amp; authority</option><option>Educate</option><option>Show proof</option><option>Create connection</option><option>Support an offer</option></select></div>
-      <div class="gf"><label>Audience</label><select><option>${esc(AUD_SHORT)}</option><option>Secondary audience</option><option>Custom…</option></select></div>
+      <div class="gf"><label>Audience</label><select><option>${esc(AUD_SHORT)}</option><option>Custom…</option></select></div>
     </div>
     <div class="grow3">
-      <div class="gf"><label>Preferred formats</label><select><option>Carousel, short video, text</option><option>Short-form video</option><option>Text posts</option><option>Mixed — let Threadline pick</option></select></div>
+      <div class="gf"><label>Preferred formats</label><select><option>Mixed — let Threadline pick</option><option>Carousel, short video, text</option><option>Short-form video</option><option>Text posts</option></select></div>
       <div class="gf"><label>Cadence</label><select><option>Weekly</option><option>Biweekly</option><option>Monthly</option><option>Let Threadline recommend</option></select></div>
       <div class="gf"><label>Content pillar</label><select><option>Let Threadline suggest</option>${B.pillars.map(p=>`<option>${p[0]}</option>`).join('')}</select></div>
-      <button class="genbtn" onclick="generate()">✦ Generate series ideas</button>
     </div>
-  </div>
+  </div>`:''}
   <div class="reflect" id="reflect"></div>
   <div class="thinking" id="think"><span>Threadline is designing series directions</span><span class="dots"><i></i><i></i><i></i></span></div>
   <div id="results">${generated?resultsHTML():''}</div>`;
@@ -378,7 +402,8 @@ function conceptHTML(c){
   </div>`;
 }
 function generate(){
-  const t=$('#g-topic').value.trim();
+  const tf=$('#g-topic');
+  const t=tf?tf.value.trim():('Helping '+lc(AUD_SHORT)+' get '+(strip(B.positioning.achieve)?lc(strip(B.positioning.achieve)).replace(/\.$/,''):'real results without the overwhelm'));
   $('#results').innerHTML=''; $('#reflect').classList.remove('on'); $('#think').classList.add('on');
   setTimeout(()=>{
     $('#think').classList.remove('on');
