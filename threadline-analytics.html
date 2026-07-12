@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Analytics</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --green:#20b878;--amber:#f5a524;
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);--shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em;line-height:1.15}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit}
+.mark{display:inline-block;width:28px;height:28px;flex-shrink:0}.mark svg{width:100%;height:100%;display:block}
+
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+@media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{background:var(--surface);border-right:1px solid var(--line-2);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;padding:2px 10px 18px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nitem{display:flex;flex-direction:column;padding:9px 12px;border-radius:12px;text-align:left;transition:.13s}
+.nitem b{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:9px}
+.nitem span{font-size:11.5px;color:var(--faint);margin-left:25px;margin-top:1px}
+.nitem:hover{background:var(--surface-2)}
+.nitem.on{background:rgba(128,61,255,.08)}
+.nitem.on b{color:var(--violet)}
+.nitem .ic{width:16px;text-align:center}
+.sfoot{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.wsrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer}
+.wsrow:hover{background:var(--surface-2)}
+.avv{width:32px;height:32px;border-radius:9px;background:var(--grad2);color:#fff;font-weight:900;font-size:12.5px;display:grid;place-items:center;flex-shrink:0}
+.avv.round{border-radius:50%}
+.wsrow .wt b{display:block;font-size:13px;font-weight:800}
+.wsrow .wt span{font-size:11.5px;color:var(--faint)}
+.setrow{display:flex;align-items:center;gap:9px;padding:9px 12px;color:var(--muted);font-weight:700;font-size:13.5px;border-radius:10px}
+.setrow:hover{background:var(--surface-2)}
+
+.main{min-width:0;padding-bottom:70px}
+.topbar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(247,248,251,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.search{flex:0 1 340px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:var(--faint);font-size:14px;cursor:text}
+.search .kbd{margin-left:auto;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
+.bell{position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.bell:hover{background:var(--surface-2)}
+.bell i{position:absolute;top:4px;right:4px;background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.newspark{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
+.newspark:hover{filter:brightness(1.06)}
+
+.content{padding:26px 28px 0;max-width:1240px;margin:0 auto}
+.greet h1{font-size:clamp(24px,3vw,30px)}
+.greet p{color:var(--muted);font-size:14.5px;margin-top:4px}
+
+/* filters row */
+.frow{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.fsel{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:9px 14px;font-weight:700;font-size:13px;color:var(--ink)}
+.fsel:hover{border-color:var(--violet)}
+.fsel span{color:var(--faint);font-weight:800;font-size:11px}
+.frow .sp{flex:1}
+.exp{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:9px 15px;font-weight:800;font-size:13px;color:var(--muted)}
+.exp:hover{border-color:var(--violet);color:var(--violet)}
+.reviewbtn{display:inline-flex;align-items:center;gap:7px;background:var(--grad2);color:#fff;border-radius:11px;padding:10px 16px;font-weight:800;font-size:13px;box-shadow:0 6px 16px rgba(128,61,255,.22)}
+
+/* connect strip */
+.connectbar{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.conn{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:var(--surface);border-radius:11px;padding:7px 11px;font-weight:700;font-size:12px;transition:.13s}
+.conn .ci{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0}
+.conn .cs{display:block;font-size:10px;font-weight:700;color:var(--faint)}
+.conn button{font-weight:800;font-size:11px;color:var(--violet);margin-left:4px;border:1px solid rgba(128,61,255,.3);border-radius:7px;padding:3px 9px}
+.conn.ok{border-color:rgba(32,184,120,.4)}
+.conn.ok .cs{color:#178a5a}
+.conn.na .cs{color:#b57708}
+
+/* overview cards (system health) */
+.overview{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+@media(max-width:1100px){.overview{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.overview{grid-template-columns:1fr 1fr}}
+.ovc{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px 14px;cursor:pointer;transition:.13s}
+.ovc:hover{border-color:var(--violet);transform:translateY(-1px)}
+.ovc .on2{font-family:'Satoshi';font-weight:900;font-size:19px}
+.ovc .ol2{font-weight:800;font-size:12px;margin-top:1px}
+.ovc .od2{font-size:10.5px;color:var(--faint);margin-top:1px}
+.ovc .oa2{font-size:11px;font-weight:800;color:var(--violet);margin-top:6px}
+
+/* repurpose center */
+.ext{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font-size:12.5px;font-weight:700;transition:.12s}
+.ext:hover{border-color:#cfc3f5}
+.ext.on{border-color:var(--violet);background:rgba(128,61,255,.04)}
+.ext .xck{width:17px;height:17px;border-radius:5px;border:2px solid var(--line);display:grid;place-items:center;font-size:9px;font-weight:900;color:transparent;flex-shrink:0}
+.ext.on .xck{background:var(--violet);border-color:var(--violet);color:#fff}
+.ext span.xf{color:var(--faint);font-weight:700;font-size:11px;margin-left:auto}
+
+/* metric cards */
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px}
+@media(max-width:1100px){.metrics{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}}
+.metric{background:var(--surface);border:1px solid var(--line);border-radius:15px;padding:15px;box-shadow:var(--shadow-sm)}
+.metric .mh{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:var(--muted)}
+.metric .mi{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px}
+.metric .mv{font-family:'Satoshi';font-weight:900;font-size:24px;margin-top:8px;display:flex;align-items:baseline;gap:8px}
+.metric .md{font-size:11.5px;font-weight:800}
+.metric .mc{font-size:10.5px;color:var(--faint);margin-top:2px;font-weight:600}
+.up{color:#178a5a}.dn2{color:#c83a56}
+.metric.locked .mv{color:var(--faint)}
+
+/* panels & grid rows */
+.grid2{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-top:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:14px;margin-top:14px}
+.gridhalf{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:1050px){.grid2,.grid3,.gridhalf{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow-sm);min-width:0;position:relative}
+.ph{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
+.ph h3{font-size:15px}
+.ph .sub{color:var(--muted);font-size:12px}
+.ph .act{margin-left:auto;font-weight:800;font-size:12px;color:var(--violet);white-space:nowrap}
+.ph .act:hover{text-decoration:underline}
+
+/* chart */
+.chartlegend{display:flex;gap:14px;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.chartlegend i{display:inline-block;width:14px;height:3.5px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.chart svg{width:100%;height:auto;display:block}
+
+/* top content list */
+.tabs2{display:flex;gap:6px;margin-bottom:10px}
+.t2{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:700;font-size:11.5px;color:var(--muted)}
+.t2.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
+.toprow{display:flex;align-items:center;gap:11px;padding:9px 4px;border-bottom:1px dashed var(--line-2);cursor:pointer;border-radius:8px}
+.toprow:hover{background:var(--surface-2)}
+.toprow:last-child{border-bottom:none}
+.toprow .th{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.toprow .tt{font-weight:800;font-size:12.5px;line-height:1.3}
+.toprow .tm{font-size:10.5px;color:var(--faint);font-weight:700}
+.toprow .tv{margin-left:auto;text-align:right;flex-shrink:0}
+.toprow .tv b{font-size:14px}
+.toprow .tv span{display:block;font-size:9.5px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+.gem{font-size:9.5px;font-weight:800;color:#b57708;background:rgba(245,165,36,.14);border-radius:6px;padding:2px 7px;margin-left:6px}
+
+/* series list & donut & types */
+.srow2{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px dashed var(--line-2)}
+.srow2:last-child{border-bottom:none}
+.srow2 .si2{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.srow2 b{font-size:13px}
+.srow2 .sv2{margin-left:auto;text-align:right}
+.srow2 .sv2 b{font-size:13.5px}
+.srow2 .sv2 span{display:block;font-size:9.5px;color:var(--faint);font-weight:800;text-transform:uppercase}
+.donutwrap{display:flex;gap:16px;align-items:center;padding:6px 0}
+.donut{width:120px;height:120px;border-radius:50%;position:relative;flex-shrink:0}
+.donut::after{content:attr(data-n);position:absolute;inset:20px;background:var(--surface);border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;text-align:center;white-space:pre}
+.leg .lr{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--muted);padding:2px 0}
+.leg .ld{width:8px;height:8px;border-radius:50%}
+.leg .ln{margin-left:auto;font-weight:800;color:var(--ink);padding-left:12px}
+.ttable{width:100%;border-collapse:collapse}
+.ttable td{padding:8px 4px;border-bottom:1px dashed var(--line-2);font-size:12.5px}
+.ttable tr:last-child td{border-bottom:none}
+.ttable .tn2{font-weight:800;display:flex;align-items:center;gap:8px}
+.ttable .ti2{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px}
+.ttable .er{font-weight:900;text-align:right}
+.ttable .vs{text-align:right;font-weight:800;font-size:11.5px}
+
+/* high performers / evaluate */
+.hcard{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:11px}
+.hcard .htop{display:flex;align-items:flex-start;gap:10px}
+.hcard .hth{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.hcard .ht{font-weight:800;font-size:13.5px;line-height:1.3}
+.hcard .hm{font-size:11px;color:var(--faint);font-weight:700;margin-top:2px}
+.hcard .delta{margin-left:auto;font-weight:900;font-size:13px;white-space:nowrap}
+.goalpill{display:inline-flex;font-size:10px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.08);border-radius:6px;padding:2px 8px;margin-top:6px}
+.reasons{margin-top:9px;background:var(--surface-2);border-radius:10px;padding:9px 12px}
+.reasons h6{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.reasons li{list-style:none;font-size:11.5px;color:var(--muted);padding:1.5px 0 1.5px 12px;position:relative;line-height:1.4}
+.reasons li::before{content:"";position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--violet)}
+.hacts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.pa{border:1.5px solid var(--line);border-radius:8px;padding:5px 11px;font-weight:800;font-size:11px;color:var(--muted)}
+.pa:hover{border-color:var(--violet);color:var(--violet)}
+.pa.pri{background:var(--grad2);color:#fff;border-color:transparent}
+.pa.done{border-color:var(--green);color:#178a5a;pointer-events:none}
+
+/* noticed + recommendations */
+.notice{border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:10px}
+.notice .nt{font-weight:800;font-size:13px;line-height:1.35}
+.notice .nd{color:var(--muted);font-size:12px;margin-top:3px;line-height:1.5}
+.conf{display:inline-flex;font-size:9.5px;font-weight:800;border-radius:6px;padding:2.5px 8px;margin-top:7px}
+.c-strong{background:rgba(32,184,120,.12);color:#178a5a}
+.c-mod{background:rgba(59,130,246,.12);color:#2563eb}
+.c-early{background:rgba(245,165,36,.14);color:#b57708}
+.nacts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.reco{display:flex;gap:11px;border:1px solid var(--line);border-radius:13px;padding:13px;margin-bottom:10px}
+.reco .ri{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.reco .rt{font-weight:800;font-size:13px;line-height:1.35;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.prio{font-size:9.5px;font-weight:800;border-radius:6px;padding:2px 7px}
+.p-high{background:rgba(251,113,133,.13);color:#e05575}
+.p-quick{background:rgba(32,184,120,.12);color:#178a5a}
+.p-test{background:rgba(59,130,246,.12);color:#2563eb}
+.reco .rd{color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.45}
+.reco .rsug{font-size:11.5px;font-weight:700;color:var(--ink);margin-top:5px;background:var(--surface-2);border-radius:8px;padding:6px 9px}
+
+/* gaps */
+.gaps{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.gaps{grid-template-columns:1fr}}
+.gaprow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px dashed var(--line-2);font-size:13px;font-weight:700}
+.gaprow:last-child{border-bottom:none}
+.gaprow .gv{margin-left:auto;font-size:11px;font-weight:800;color:var(--muted);background:var(--surface-2);border-radius:7px;padding:3px 9px}
+.gaprow .gt2{font-size:11px;font-weight:800}
+.findcard{background:linear-gradient(120deg,rgba(128,61,255,.08),rgba(59,130,246,.05));border:1px solid rgba(128,61,255,.18);border-radius:15px;padding:18px;text-align:center}
+.findcard b{font-size:14.5px}
+.findcard p{color:var(--muted);font-size:12.5px;margin:5px 0 12px}
+.findcard button{background:var(--grad2);color:#fff;font-weight:800;font-size:13px;padding:10px 17px;border-radius:11px}
+
+/* locked overlay */
+.lockov{position:absolute;inset:0;background:rgba(247,248,251,.72);backdrop-filter:blur(2.5px);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:5;text-align:center;padding:20px}
+.lockov b{font-size:13.5px}
+.lockov p{color:var(--muted);font-size:11.5px;max-width:34ch}
+.lockov .la{display:flex;gap:8px;margin-top:4px}
+.lb{border:1.5px solid var(--line);border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface)}
+.lb.pri{background:var(--grad2);color:#fff;border-color:transparent}
+
+/* modals */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:50px 20px;overflow-y:auto}
+.overlay.on{display:flex}
+.modal{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:540px;padding:24px;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal h3{font-size:17px;display:flex;align-items:center;gap:9px}
+.modal .msub{color:var(--muted);font-size:12.5px;margin:3px 0 14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:12.5px;color:var(--muted)}
+.chip:hover{border-color:var(--violet);color:var(--violet)}
+.chip.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
+.gen{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.gen b{font-size:13px}
+.gen .ga{display:flex;gap:6px;margin-top:8px}
+.msec{border-top:1px solid var(--line-2);margin-top:14px;padding-top:12px}
+.msec h5{font-size:12.5px;font-weight:800;margin-bottom:8px}
+.outc{display:flex;flex-direction:column;gap:7px}
+.outc button{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:11px;padding:10px 13px;font-weight:700;font-size:13px;text-align:left}
+.outc button:hover{border-color:var(--violet)}
+.outc button b{font-size:13px}
+.outc button span{color:var(--faint);font-size:11px;display:block;font-weight:600}
+.macts{display:flex;gap:10px;margin-top:14px}
+.macts .grow{flex:1}
+.mbtn{padding:11px 16px;border-radius:11px;font-weight:800;font-size:13.5px}
+.mbtn.pri{background:var(--grad2);color:#fff}
+.mbtn.ghost{color:var(--muted)}
+.mf{margin-bottom:12px}
+.mf label{display:block;font-weight:700;font-size:12px;margin-bottom:5px}
+.mf input,.mf select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;outline:none;background:var(--surface);color:var(--ink)}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:95;max-width:92vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+svg.defs{position:absolute;width:0;height:0}
+</style>
+</head>
+<body>
+<svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><span class="mark" id="lmark"></span>Threadline</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sfoot">
+      <div class="wsrow" onclick="toast('Workspace switcher — prototype')"><div class="avv" id="wsav">TB</div><div class="wt"><b id="wsname">Workspace</b><span>Workspace</span></div></div>
+      <div class="wsrow" onclick="toast('Profile — prototype')"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="wt"><b>Kennady Scott</b><span>Admin</span></div></div>
+      <button class="setrow" onclick="location.href='threadline-settings.html'">⚙︎ Settings</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search" onclick="toast('Global search — prototype')">🔍 Search anything... <span class="kbd">⌘ K</span></div>
+      <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
+      <button class="newspark" onclick="toast('New Spark — available on every page')">＋ New Spark</button>
+    </div>
+
+    <div class="content">
+      <div class="greet"><h1>Analytics <span style="font-size:20px">📊</span></h1><p>Understand what's working, why it's working, and what to build next.</p></div>
+
+      <div class="frow">
+        <button class="fsel" onclick="toast('Ranges: 7 / 30 / 90 days · quarter · custom — compare vs previous period, content average, or same series')">📅 Jun 8 – Jul 8, 2026 <span>▾</span></button>
+        <button class="fsel" onclick="toast('Filter by platform')">All platforms <span>▾</span></button>
+        <button class="fsel" onclick="toast('Filter by content type')">All content types <span>▾</span></button>
+        <button class="fsel" onclick="toast('Filter by series')">All series <span>▾</span></button>
+        <span class="sp"></span>
+        <button class="exp" onclick="toast('Export CSV / PDF')">⬆ Export</button>
+        <button class="reviewbtn" onclick="document.getElementById('recoPanel').scrollIntoView({behavior:'smooth'})">✦ Review recommendations</button>
+      </div>
+
+      <div class="connectbar" id="connectbar"></div>
+      <div class="metrics" id="metrics"></div>
+      <div class="overview" id="overview"></div>
+
+      <div class="grid2">
+        <div class="panel" id="chartPanel">
+          <div class="ph"><h3>Performance over time</h3><span class="sub">Key metrics across the selected range.</span><button class="act" onclick="toast('Daily · Weekly granularity')">Daily ▾</button></div>
+          <div class="chartlegend"><span><i style="background:#803dff"></i>Reach</span><span><i style="background:#20b878"></i>Engagements</span><span><i style="background:#f5a524"></i>Clicks</span></div>
+          <div class="chart" id="chart"></div>
+        </div>
+        <div class="panel" id="topPanel">
+          <div class="ph"><h3>Top performing content</h3><button class="act" onclick="toast('Full content library w/ scorecards')">View all →</button></div>
+          <div class="tabs2" id="toptabs"></div>
+          <div id="toplist"></div>
+        </div>
+      </div>
+
+      <div class="grid3">
+        <div class="panel"><div class="ph"><h3>Best performing series</h3><button class="act" onclick="location.href='threadline-series.html?tab=active'">View all →</button></div><div id="bestseries"></div></div>
+        <div class="panel" id="platPanel"><div class="ph"><h3>Engagement by platform</h3></div><div class="donutwrap"><div class="donut" id="donut"></div><div class="leg" id="platleg"></div></div></div>
+        <div class="panel" id="typePanel"><div class="ph"><h3>Content type performance</h3><button class="act" onclick="toast('Format deep-dive: volume, production time, best topics per format')">View all →</button></div><table class="ttable" id="types"></table></div>
+      </div>
+
+      <div class="gridhalf">
+        <div class="panel" id="hiPanel">
+          <div class="ph"><h3>High performers</h3><span class="sub">Above their goal, your average, or both.</span></div>
+          <div id="hilist"></div>
+        </div>
+        <div class="panel" id="loPanel">
+          <div class="ph"><h3>Content to evaluate</h3><span class="sub">Missed its goal or usual range — not "bad."</span></div>
+          <div id="lolist"></div>
+        </div>
+      </div>
+
+      <div class="gridhalf">
+        <div class="panel">
+          <div class="ph"><h3>✦ What Threadline noticed</h3><span class="sub">Patterns with evidence and confidence.</span><button class="act" onclick="toast('All insights — prototype')">View all →</button></div>
+          <div id="noticed"></div>
+        </div>
+        <div class="panel" id="recoPanel">
+          <div class="ph"><h3>Recommendations for next month</h3><span class="sub">Prioritized. 3–5 at a time, never a wall.</span></div>
+          <div id="recos"></div>
+        </div>
+      </div>
+
+      <div class="gridhalf">
+        <div class="panel" id="repPanel">
+          <div class="ph"><h3>Repurpose opportunities</h3><span class="sub">Strong content worth extending.</span></div>
+          <div id="replist"></div>
+        </div>
+        <div class="panel" id="serPanel">
+          <div class="ph"><h3>Series performance</h3><span class="sub">The recurring systems, not just posts.</span><button class="act" onclick="location.href='threadline-series.html?tab=active'">Manage →</button></div>
+          <div id="serperf"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <div class="ph"><h3>Content gaps &amp; opportunities</h3><span class="sub">Topics your audience cares about that you're not talking about (yet).</span></div>
+        <div class="gaps">
+          <div id="gaplist"></div>
+          <div class="findcard">✦<br><b>Find more opportunities</b><p>Use Threadline to discover content ideas around these topics.</p><button onclick="location.href='threadline-build-page.html?mode=idea'">Find ideas in Build →</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Replicate modal -->
+<div class="overlay" id="repOverlay"><div class="modal">
+  <h3>♻️ Replicate what worked</h3>
+  <p class="msub">Replicate never means copying the post — it means carrying the strongest <b>pattern</b> forward. What do you want to carry?</p>
+  <div class="chips" id="repChips"></div>
+  <div id="repResults"></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeRep()">Close</button><div class="grow"></div><button class="mbtn pri" id="repAll" style="display:none" onclick="closeRep();toast('3 directions saved to Spark Bank — pattern + source post attached')">Save all to Spark Bank</button></div>
+</div></div>
+
+<!-- Evaluate modal -->
+<div class="overlay" id="evalOverlay"><div class="modal">
+  <h3>🔍 Evaluate why</h3>
+  <p class="msub" id="evalSub"></p>
+  <div class="msec" style="border:none;margin-top:0;padding-top:0"><h5>Likely factors <span style="color:var(--faint);font-weight:600">(Threadline's read — correct it below)</span></h5>
+    <ul class="reasons" style="margin-top:0" id="evalReasons"></ul></div>
+  <div class="msec"><h5>Did anything unusual affect this post?</h5>
+    <div class="chips" id="evalCtx"></div></div>
+  <div class="msec" id="evalOutcome" style="display:none"><h5>Recommended outcome</h5><div class="outc" id="evalOutcomes"></div></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeEval()">Close</button></div>
+</div></div>
+
+<!-- Manual log -->
+<div class="overlay" id="logOverlay"><div class="modal">
+  <h3>✏️ Log outcomes manually</h3>
+  <p class="msub">For platforms without APIs — and for outcomes no API can see (inquiries, sales calls, replies). Manual outcomes change how Threadline evaluates a piece.</p>
+  <div class="mf"><label>Post</label><select id="log-post"></select></div>
+  <div class="mrow">
+    <div class="mf"><label>Impressions / views</label><input placeholder="e.g. 4,200" inputmode="numeric"></div>
+    <div class="mf"><label>Engagements</label><input placeholder="e.g. 180" inputmode="numeric"></div>
+  </div>
+  <div class="mf"><label>Qualitative outcome <span style="color:var(--faint);font-weight:500">(optional)</span></label><input placeholder="e.g. Led to two sales calls"></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeLog()">Cancel</button><div class="grow"></div><button class="mbtn pri" onclick="saveLog()">Save outcomes</button></div>
+</div></div>
+
+<script src="threadline-brand.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
+$('#lmark').innerHTML=MARK;
+
+const B=(window.loadBrand&&loadBrand())||defaultBrand();
+const lc=s=>{s=(s||'').trim();return s?s.charAt(0).toLowerCase()+s.slice(1):s;};
+const strip=s=>(s||'').replace(/<[^>]+>/g,'');
+$('#wsname').textContent=B.name;
+$('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const SCOLOR=['#803dff','#3b82f6','#22d3ee','#fb7185','#f5a524'];
+const SNAME=B.series.map(s=>s[0]);
+
+/* nav */
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['📊','Analytics','Measure what matters',1,'']];
+$('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:''}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
+
+/* ---------- connections ---------- */
+const CKEY='threadline.connections';
+let CONN={ig:0,yt:0,lipage:0};
+try{ CONN=Object.assign(CONN,JSON.parse(localStorage.getItem(CKEY)||'{}')); }catch(e){}
+function saveConn(){ try{ localStorage.setItem(CKEY,JSON.stringify(CONN)); }catch(e){} }
+function anyConn(){ return CONN.ig||CONN.yt||CONN.lipage; }
+const PLATFORMS=[
+  {k:'ig',n:'Instagram',ic:'ig',bg:'linear-gradient(135deg,#f58529,#dd2a7b,#8134af)',note:'Business account'},
+  {k:'yt',n:'YouTube',ic:'yt',bg:'#ff0033',note:'Free API'},
+  {k:'lipage',n:'LinkedIn Page',ic:'in',bg:'#0a66c2',note:'Company Pages'},
+  {k:'liperson',n:'LinkedIn personal',ic:'in',bg:'#54607a',na:1,note:'No API — log manually'},
+  {k:'x',n:'X / Twitter',ic:'𝕏',bg:'#111',na:1,note:'API cost-prohibitive'},
+];
+function connect(k){ CONN[k]=1; saveConn(); render(); toast(PLATFORMS.find(p=>p.k===k).n+' connected — pulling the last 90 days'); }
+function disconnect(k){ CONN[k]=0; saveConn(); render(); toast('Disconnected'); }
+function renderConnect(){
+  $('#connectbar').innerHTML=PLATFORMS.map(p=>{ const st=p.na?'na':(CONN[p.k]?'ok':'');
+    return `<div class="conn ${st}"><span class="ci" style="background:${p.bg}">${p.ic}</span><span>${p.n}<span class="cs">${p.na?p.note:(CONN[p.k]?'✓ Connected':p.note)}</span></span>${p.na?`<button onclick="openLog()">Log</button>`:(CONN[p.k]?`<button onclick="disconnect('${p.k}')">Manage</button>`:`<button onclick="connect('${p.k}')">Connect</button>`)}</div>`; }).join('');
+}
+
+/* ---------- metrics ---------- */
+const METRICS=[
+  ['✦','rgba(128,61,255,.12)','Total Reach','128.6K','+24%',1],
+  ['💚','rgba(32,184,120,.12)','Engagements','12.4K','+31%',1],
+  ['📅','rgba(59,130,246,.12)','Content Published','48','+9%',0],
+  ['🎯','rgba(245,165,36,.14)','Avg. Engagement Rate','6.2%','+18%',1],
+  ['🖱','rgba(251,113,133,.13)','Clicks','3.1K','+22%',1],
+];
+function renderMetrics(){
+  $('#metrics').innerHTML=METRICS.map(([ic,bg,l,v,d,needs])=>{
+    const locked=needs&&!anyConn();
+    return `<div class="metric${locked?' locked':''}"><div class="mh"><span class="mi" style="background:${bg}">${ic}</span>${l}</div>
+      <div class="mv">${locked?'—':v}${locked?'':`<span class="md up">▲ ${d.replace('+','')}</span>`}</div>
+      <div class="mc">${locked?'Connect to unlock':'vs previous 30 days'}</div></div>`; }).join('');
+}
+
+/* ---------- overview (system health, §5) ---------- */
+const OV=[
+  ['8','Strong performers','Above your normal range','See what worked','hiPanel'],
+  ['5','Repurpose opportunities','Worth extending or adapting','Build from these','repPanel'],
+  ['4','Needs attention','Missed a goal or usual range','Evaluate why','loPanel'],
+  ['3','Series momentum','Outperforming average content','View series','serPanel'],
+  ['2','Experiments ready','Patterns worth testing','Add to Plan','recoPanel'],
+];
+function renderOverview(){
+  $('#overview').innerHTML=OV.map(([n,l,d,a,target])=>`<div class="ovc" onclick="document.getElementById('${target}').scrollIntoView({behavior:'smooth'})">
+    <div class="on2">${anyConn()?n:'—'}</div><div class="ol2">${l}</div><div class="od2">${d}</div><div class="oa2">${a} →</div></div>`).join('');
+}
+
+/* ---------- repurpose center (§28) ---------- */
+const EXTS=[
+  ['🗂','Carousel: five examples of clear vs. clever','Instagram'],
+  ['✉️','Email: how to audit your own messaging','Newsletter'],
+  ['🎬','Reel: one quick before → after example','Instagram'],
+  ['🧵','Series: “Clarity Checks” — a recurring audit','Series Generator'],
+];
+function renderRepurpose(){
+  if(!anyConn()){ lockPanel('repPanel','Strong content worth extending'); $('#replist').innerHTML=''; return; } unlockPanel('repPanel');
+  $('#replist').innerHTML=`<div style="font-weight:800;font-size:13.5px;margin-bottom:3px">${esc(strip(B.messaging.primary))}</div>
+  <div style="font-size:11px;color:var(--faint);font-weight:700;margin-bottom:10px">High performer · +62% vs avg · pick the extensions worth building</div>
+  ${EXTS.map(([ic,t,ch])=>`<div class="ext" onclick="this.classList.toggle('on')"><span class="xck">✓</span><span style="font-size:14px">${ic}</span>${t}<span class="xf">${ch}</span></div>`).join('')}
+  <div class="nacts" style="margin-top:10px">
+    <button class="pa pri" onclick="repBuild()">Build selected</button>
+    <button class="pa" onclick="toast('All 4 saved to Spark Bank — source post & metric attached')">Save all to Spark Bank</button>
+    <button class="pa" onclick="toast('Added to Plan — placement preview respects your cadence')">Add to Plan</button>
+  </div>`;
+}
+function repBuild(){ const n=document.querySelectorAll('#replist .ext.on').length;
+  if(!n){ toast('Pick at least one extension'); return; }
+  location.href='threadline-build-page.html?seed='+encodeURIComponent('Repurpose: '+strip(B.messaging.primary)); }
+
+/* ---------- series performance (§15–17) ---------- */
+function renderSeriesPerf(){
+  if(!anyConn()){ lockPanel('serPanel','Series trends, patterns & refresh recommendations'); $('#serperf').innerHTML=''; return; } unlockPanel('serPanel');
+  const s0=SNAME[0]||'Series', s4=SNAME[4]||SNAME[1]||'Series';
+  $('#serperf').innerHTML=`
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(128,61,255,.1)">🧵</div>
+    <div style="min-width:0"><div class="ht">${esc(s0)}</div><div class="hm">12 installments · Best format: LinkedIn text · Trend: Growing</div></div>
+    <span class="delta up">+34% vs avg</span></div>
+    <div class="reasons"><h6>Strongest pattern</h6><ul><li>Contrarian openings drive the outperformance</li><li>Recommendation: continue weekly; build more posts around common assumptions</li></ul></div>
+    <div class="hacts"><button class="pa pri" onclick="location.href='threadline-build-page.html?mode=idea'">Generate more ideas</button>
+      <button class="pa" onclick="openRep()">Replicate pattern</button>
+      <button class="pa" onclick="location.href='threadline-series.html?tab=active'">Adjust series</button></div></div>
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(245,165,36,.14)">🧵</div>
+    <div style="min-width:0"><div class="ht">${esc(s4)}</div><div class="hm">10 installments · High topic overlap · Trend: Declining</div></div>
+    <span class="delta dn2">−27% vs avg</span></div>
+    <div class="reasons"><h6>Likely factors</h6><ul><li>Topic fatigue — similar angles repeated recently</li><li>Recommendation: refresh the concept or reduce cadence — not retire yet</li></ul></div>
+    <div class="hacts"><button class="pa pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Refresh series: ${esc(s4).replace(/'/g,'’')} — narrow the focus and add a stronger recurring structure')">Refresh in Build</button>
+      <button class="pa" onclick="toast('Cadence reduced to biweekly for future occurrences only')">Reduce cadence</button>
+      <button class="pa" onclick="toast('Merge suggestions: 1 overlapping series found')">Merge</button></div></div>`;
+}
+
+/* ---------- chart ---------- */
+const R=[52,58,49,72,88,79,61,55,63,60,67,58,71,66,62,74,69,63,58,66,72,68,75,70,64,71,66,73,69,76];
+const E=[14,17,15,24,31,26,19,17,21,19,23,18,25,22,20,27,24,21,18,23,26,24,29,26,21,25,23,28,25,31];
+const C2=[5,6,5,9,12,10,7,6,8,7,9,7,10,8,7,11,9,8,6,9,10,9,12,10,8,10,9,11,10,13];
+function linePath(arr,max,w,h){ return arr.map((v,i)=>`${i===0?'M':'L'}${(i/(arr.length-1)*w).toFixed(1)},${(h-(v/max)*h).toFixed(1)}`).join(' '); }
+function renderChart(){
+  if(!anyConn()){ $('#chart').innerHTML=''; lockPanel('chartPanel','Reach, engagement & click trends'); return; } unlockPanel('chartPanel');
+  const w=560,h=180,max=100;
+  $('#chart').innerHTML=`<svg viewBox="0 0 ${w} ${h+22}">
+    ${[0,.25,.5,.75,1].map(f=>`<line x1="0" x2="${w}" y1="${(h*f).toFixed(1)}" y2="${(h*f).toFixed(1)}" stroke="#eef1f7" stroke-width="1"/>`).join('')}
+    <path d="${linePath(R,max,w,h)}" fill="none" stroke="#803dff" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="${linePath(E,max,w,h)}" fill="none" stroke="#20b878" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="${linePath(C2,max,w,h)}" fill="none" stroke="#f5a524" stroke-width="2.2" stroke-linejoin="round"/>
+    ${['Jun 8','Jun 15','Jun 22','Jun 29','Jul 6'].map((d,i)=>`<text x="${(i/4*(w-40)+2).toFixed(0)}" y="${h+16}" font-size="10" font-weight="700" fill="#8b96ad" font-family="Satoshi">${d}</text>`).join('')}
+  </svg>`;
+}
+
+/* ---------- top content ---------- */
+let topTab='engagement';
+const TOP={
+  engagement:[[strip(B.messaging.primary),'Carousel · LinkedIn','9.8%','🗂','rgba(128,61,255,.1)',0],
+    ['The real reason consistency is hard','Reel · Instagram','8.7%','🎬','rgba(251,113,133,.12)',0],
+    [(B.audience.questions[0]||'The question they ask'),'Carousel · LinkedIn','7.1%','🖼','rgba(59,130,246,.1)',0],
+    ['Behind the work: our process','Story · Instagram','6.3%','📷','rgba(245,165,36,.14)',0],
+    ['Stop posting. Start connecting.','Text Post · LinkedIn','5.9%','📝','rgba(34,211,238,.14)',1]],
+  reach:[['The real reason consistency is hard','Reel · Instagram','14.2K','🎬','rgba(251,113,133,.12)',0],
+    [strip(B.messaging.primary),'Carousel · LinkedIn','11.8K','🗂','rgba(128,61,255,.1)',0],
+    ['Myth: You need to be everywhere','Short video · TikTok','9.4K','📣','rgba(34,211,238,.14)',0],
+    ['Behind the work: our process','Story · Instagram','6.1K','📷','rgba(245,165,36,.14)',0],
+    [(B.audience.questions[0]||'The question they ask'),'Carousel · LinkedIn','5.7K','🖼','rgba(59,130,246,.1)',0]],
+  clicks:[['Offer: how we work','Text Post · LinkedIn','412','🔗','rgba(128,61,255,.1)',0],
+    [(B.audience.questions[1]||'The pricing question'),'Email','388','✉️','rgba(59,130,246,.1)',1],
+    [strip(B.messaging.primary),'Carousel · LinkedIn','244','🗂','rgba(128,61,255,.1)',0],
+    ['A client’s before → after','Carousel · Instagram','201','📈','rgba(32,184,120,.12)',0],
+    ['Stop posting. Start connecting.','Text Post · LinkedIn','176','📝','rgba(34,211,238,.14)',0]],
+};
+function renderTop(){
+  if(!anyConn()){ $('#toptabs').innerHTML=''; $('#toplist').innerHTML=''; lockPanel('topPanel','Your best posts, ranked by goal'); return; } unlockPanel('topPanel');
+  $('#toptabs').innerHTML=[['engagement','By engagement'],['reach','By reach'],['clicks','By clicks']].map(([k,l])=>`<button class="t2${topTab===k?' on':''}" onclick="topTab='${k}';renderTop()">${l}</button>`).join('');
+  const unit=topTab==='engagement'?'Eng. rate':topTab==='reach'?'Reach':'Clicks';
+  $('#toplist').innerHTML=TOP[topTab].map(([t,m,v,ic,bg,gem])=>`<div class="toprow" onclick="toast('Scorecard: goal performance, comparisons, strongest signal, likely reasons, next step')">
+    <div class="th" style="background:${bg}">${ic}</div><div style="min-width:0"><div class="tt">${esc(t)}${gem?'<span class="gem">Hidden gem</span>':''}</div><div class="tm">${m}</div></div>
+    <div class="tv"><b>${v}</b><span>${unit}</span></div></div>`).join('');
+}
+
+/* ---------- best series / donut / types ---------- */
+function renderBestSeries(){
+  const rates=['7.6%','6.4%','5.9%','5.2%','4.1%'];
+  $('#bestseries').innerHTML=SNAME.slice(0,5).map((n,i)=>`<div class="srow2"><div class="si2" style="background:${SCOLOR[i]}1a;color:${SCOLOR[i]}">✦</div><b>${esc(n)}</b><div class="sv2"><b>${anyConn()?rates[i]:'—'}</b><span>Eng. rate</span></div></div>`).join('');
+}
+function renderPlatform(){
+  if(!anyConn()){ lockPanel('platPanel','Where engagement actually happens'); return; } unlockPanel('platPanel');
+  const P=[['LinkedIn','#0a66c2',52,'6.4K'],['Instagram','#dd2a7b',31,'3.8K'],['Email','#54607a',9,'1.1K'],['TikTok','#111',5,'620'],['Other','#b8c0d0',3,'380']];
+  let acc=0; const segs=P.map(([n,c,pct])=>{ const a=acc*3.6,b=(acc+pct)*3.6; acc+=pct; return `${c} ${a}deg ${b}deg`; }).join(', ');
+  $('#donut').style.background=`conic-gradient(${segs})`; $('#donut').dataset.n='12.4K\nTotal';
+  $('#platleg').innerHTML=P.map(([n,c,pct,v])=>`<div class="lr"><span class="ld" style="background:${c}"></span>${n}<span class="ln">${pct}% (${v})</span></div>`).join('');
+}
+function renderTypes(){
+  if(!anyConn()){ lockPanel('typePanel','Eng. rate by format, vs last month'); return; } unlockPanel('typePanel');
+  const T=[['🗂','rgba(128,61,255,.1)','Carousels','7.2%','▲ 21%',1],['🎬','rgba(251,113,133,.12)','Reels','6.8%','▲ 34%',1],['📷','rgba(32,184,120,.12)','Stories','5.6%','▲ 18%',1],['📝','rgba(59,130,246,.1)','Text Posts','4.9%','▲ 12%',1],['📹','rgba(245,165,36,.14)','Videos','4.3%','▼ 6%',0],['🔗','rgba(34,211,238,.14)','Links/Articles','3.1%','▼ 3%',0]];
+  $('#types').innerHTML=`<tr><td style="font-size:10px;font-weight:800;color:var(--faint);text-transform:uppercase">Content type</td><td class="er" style="font-size:10px;color:var(--faint);text-transform:uppercase">Eng. rate</td><td class="vs" style="font-size:10px;color:var(--faint);text-transform:uppercase">vs last month</td></tr>`
+   +T.map(([ic,bg,n,r,d,up])=>`<tr><td><span class="tn2"><span class="ti2" style="background:${bg}">${ic}</span>${n}</span></td><td class="er">${r}</td><td class="vs ${up?'up':'dn2'}">${d}</td></tr>`).join('');
+}
+
+/* ---------- high performers ---------- */
+function renderHi(){
+  if(!anyConn()){ lockPanel('hiPanel','High performers — with likely reasons & replicate'); $('#hilist').innerHTML=''; return; } unlockPanel('hiPanel');
+  $('#hilist').innerHTML=`
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(128,61,255,.1)">🗂</div>
+    <div style="min-width:0"><div class="ht">${esc(strip(B.messaging.primary))}</div><div class="hm">${esc(SNAME[0]||'Series')} · LinkedIn · Jul 2</div><span class="goalpill">🎯 Goal: Comments</span></div>
+    <span class="delta up">+62% vs avg</span></div>
+    <div class="reasons"><h6>Likely reasons</h6><ul>
+      <li>Clear contrarian hook tied to a recurring audience frustration</li>
+      <li>Specific point of view — no hedging</li>
+      <li>Short, direct opening; published in the strongest channel window</li></ul></div>
+    <div class="hacts"><button class="pa pri" onclick="openRep()">♻️ Replicate</button>
+      <button class="pa" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Follow-up: '+${JSON.stringify(strip(B.messaging.primary))})">Create follow-up</button>
+      <button class="pa" onclick="toast('Repurposing — carousel, email & reel versions queued as linked items')">Repurpose</button>
+      <button class="pa" onclick="this.classList.add('done');this.textContent='✓ Spark saved';toast('Insight saved to Spark Bank — source post & metric attached')">＋ Spark</button></div></div>
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(32,184,120,.12)">📈</div>
+    <div style="min-width:0"><div class="ht">A client’s before → after, in their words</div><div class="hm">${esc(SNAME[2]||'Series')} · Instagram · Jun 25</div><span class="goalpill">🎯 Goal: Saves</span></div>
+    <span class="delta up">+38% vs avg</span></div>
+    <div class="reasons"><h6>Likely reasons</h6><ul><li>Real numbers in the first line</li><li>Proof told in the client’s voice, not yours</li></ul></div>
+    <div class="hacts"><button class="pa pri" onclick="openRep()">♻️ Replicate</button><button class="pa" onclick="location.href='threadline-series.html'">Build a series</button><button class="pa" onclick="this.classList.add('done');this.textContent='✓ Spark saved';toast('Saved to Spark Bank')">＋ Spark</button></div></div>
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(245,165,36,.14)">💎</div>
+    <div style="min-width:0"><div class="ht">How we price our work <span class="gem">Hidden gem</span></div><div class="hm">Text Post · LinkedIn · Jun 18</div><span class="goalpill">🎯 Goal: Clicks</span></div>
+    <span class="delta" style="color:#b57708">Low reach</span></div>
+    <div class="reasons"><h6>Why it’s not a low performer</h6><ul><li>Reached fewer people — but appears connected to <b>3 qualified inquiries</b> (logged manually)</li><li>Business outcome beats reach; worth a follow-up, not a retirement</li></ul></div>
+    <div class="hacts"><button class="pa pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Part two: how we price our work')">Build part two</button><button class="pa" onclick="openLog()">✏️ Log outcome</button></div></div>`;
+}
+
+/* ---------- content to evaluate ---------- */
+function renderLo(){
+  if(!anyConn()){ lockPanel('loPanel','Underperformers — with a guided “Evaluate why”'); $('#lolist').innerHTML=''; return; } unlockPanel('loPanel');
+  $('#lolist').innerHTML=`
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(59,130,246,.1)">🖼</div>
+    <div style="min-width:0"><div class="ht">Three ways to improve your approach</div><div class="hm">Educational · Instagram carousel · Jun 20</div><span class="goalpill">🎯 Goal: Saves</span></div>
+    <span class="delta dn2">−38% vs avg</span></div>
+    <div class="hacts"><button class="pa pri" onclick="openEval('Three ways to improve your approach')">🔍 Evaluate why</button>
+      <button class="pa" onclick="toast('Slide 2 held the strongest insight — building a post around that point alone')">Repurpose strongest section</button>
+      <button class="pa" onclick="toast('Saved for later — timing may have been the issue')">Save for later</button></div></div>
+  <div class="hcard"><div class="htop"><div class="hth" style="background:rgba(245,165,36,.14)">☕</div>
+    <div style="min-width:0"><div class="ht">Refill your content cup</div><div class="hm">${esc(SNAME[4]||SNAME[0]||'Series')} · Instagram · Jun 27</div><span class="goalpill">🎯 Goal: Engagement</span></div>
+    <span class="delta dn2">−27% vs avg</span></div>
+    <div class="hacts"><button class="pa pri" onclick="openEval('Refill your content cup')">🔍 Evaluate why</button>
+      <button class="pa" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Test as short video: Refill your content cup')">Test a new format</button>
+      <button class="pa" onclick="toast('Retired — the topic is archived; the series keeps its cadence')">Retire</button></div></div>
+  <div style="border:1.5px dashed var(--line);border-radius:12px;padding:11px 14px;font-size:12px;color:var(--muted)">Everything else is within your normal range. <b>Review repurpose opportunities instead →</b></div>`;
+}
+
+/* ---------- what threadline noticed ---------- */
+const NOTICED=[
+  {t:'Posts that challenge a common assumption are associated with +41% engagement',
+   d:'Consistent across 24 pieces over three months. The pattern holds on LinkedIn and Instagram, strongest in '+(SNAME[0]||'your POV series')+'.',
+   conf:['c-strong','Strong pattern — 24 pieces'],acts:[['Replicate hook pattern',()=>openRep()],['Generate 5 new hooks','threadline-build-page.html?mode=sharpen']]},
+  {t:'Client stories reach fewer people but appear connected to ~2× profile visits',
+   d:'Repeated across 8 pieces. Reach is the wrong goal for these — trust signals are the value.',
+   conf:['c-mod','Moderate confidence — 8 pieces'],acts:[['Set goal: profile visits',null,'Goal updated for client-story content'],['More proof in Plan','threadline-plan.html']]},
+  {t:'Educational carousels perform best when slide 1 names a clear outcome',
+   d:'Early signal — based on 3 posts. Worth testing deliberately before treating it as a rule.',
+   conf:['c-early','Early signal — 3 posts'],acts:[['Run it as an experiment',null,'Experiment created: outcome-first vs. question-first covers · 4 installments · goal: saves'],['Apply to next carousel','threadline-plan.html']]},
+  {t:'Your audience is most active mid-week',
+   d:'Wednesdays and Thursdays drive the highest engagement — likely contributing to your Wednesday series outperformance.',
+   conf:['c-mod','Moderate confidence — 6 weeks'],acts:[['Post more mid-week',null,'Planner rule updated: prefer Wed/Thu for high-priority pieces']]},
+  {t:'Direct “save this” CTAs are associated with more saves; question CTAs with more comments',
+   d:'Consistent with 11 pieces this quarter. Match the CTA to each piece’s goal instead of using one default.',
+   conf:['c-mod','Moderate confidence — 11 pieces'],acts:[['Update series defaults',null,'CTA defaults updated: save-CTAs for education, question-CTAs for discussion'],['Apply to upcoming content','threadline-plan.html']]},
+  {t:'Five comments asked how to create a series without repeating yourself',int:1,
+   d:'A recurring audience question is your clearest content request — answering it publicly builds trust before the ask.',
+   conf:['c-strong','Direct audience signal — 5 comments'],acts:[['Build a Q&A post','threadline-build-page.html?seed='+encodeURIComponent('How to run a content series without repeating yourself')],['Create a Spark',null,'Saved to Spark Bank — comments & source attached']]},
+  {t:'Your '+(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars[2]||B.pillars[0])[0]+' pillar gets the fewest posts but the highest click-through',int:1,
+   d:'Proof appears connected to buying behavior more than any other pillar. Consider raising it from 10% to 20% of next month’s Plan.',
+   conf:['c-mod','Moderate confidence — this quarter'],acts:[['Update Plan balance','threadline-plan.html'],['Build proof content','threadline-build-page.html?seed='+encodeURIComponent('A client result told in their words')]]},
+];
+function renderNoticed(){
+  NOTICED[2].int=1; NOTICED[3].int=1;
+  $('#noticed').innerHTML=NOTICED.filter(n=>anyConn()||n.int).map(n=>`<div class="notice"><div class="nt">${esc(n.t)}</div><div class="nd">${esc(n.d)}</div>
+    <span class="conf ${n.conf[0]}">${n.conf[1]}</span>
+    <div class="nacts">${n.acts.map(([l,href,msg])=>`<button class="pa" onclick="${typeof href==='function'?'openRep()':href?`location.href='${href}'`:`this.classList.add('done');this.textContent='✓ Done';toast('${msg}')`}">${l}</button>`).join('')}</div></div>`).join('')
+  +(anyConn()?'':`<div style="border:1.5px dashed var(--line);border-radius:12px;padding:11px 14px;font-size:12px;color:var(--muted)">🔌 2 engagement patterns are waiting on a connected account.</div>`);
+}
+
+/* ---------- recommendations ---------- */
+let RECOS=[
+  {ic:'✦',bg:'rgba(128,61,255,.1)',p:['p-high','High priority'],t:'Create a follow-up to your top post',
+   d:'It generated 62% more comments than average, and several comments asked for practical examples.',
+   sug:'Suggested: “Three places brands choose clever over clear”',
+   build:'threadline-build-page.html?seed='+encodeURIComponent('Three places brands choose clever over clear')},
+  {ic:'🎬',bg:'rgba(251,113,133,.12)',p:['p-quick','Quick win'],t:'Repurpose top LinkedIn posts into Reels',
+   d:'Reels are up 34% and your best text posts already have proven hooks.',
+   sug:'Start with your top 2 posts from June',build:'threadline-build-page.html?mode=repurpose'},
+  {ic:'🧵',bg:'rgba(32,184,120,.12)',p:['p-test','Worth testing'],t:'Launch a Q&A series from audience questions',
+   d:'“'+strip(B.audience.questions[0]||'What should I do next?')+'” and two related questions keep recurring in comments.',
+   sug:'Series Generator has a concept ready',build:'threadline-series.html'},
+  {ic:'📅',bg:'rgba(59,130,246,.1)',p:['p-quick','Quick win'],t:'Shift two posts to mid-week',
+   d:'Wednesdays and Thursdays drive your highest engagement; two next-week posts sit on Monday.',
+   sug:'Plan preview available',build:'threadline-plan.html?view=calendar'},
+];
+function renderRecos(){
+  $('#recos').innerHTML=RECOS.map((r,i)=>`<div class="reco"><div class="ri" style="background:${r.bg}">${r.ic}</div>
+    <div style="min-width:0"><div class="rt">${esc(r.t)} <span class="prio ${r.p[0]}">${r.p[1]}</span></div>
+    <div class="rd">Why: ${esc(r.d)}</div><div class="rsug">${esc(r.sug)}</div>
+    <div class="nacts"><button class="pa pri" onclick="location.href='${r.build}'">Build now</button>
+      <button class="pa" onclick="this.classList.add('done');this.textContent='✓ Saved';toast('Saved to Spark Bank — rationale attached')">Save Spark</button>
+      <button class="pa" onclick="toast('Posted to Plan — placement preview respects series cadence')">Post to Plan</button>
+      <button class="pa" onclick="dismissReco(${i})">Dismiss</button></div></div></div>`).join('');
+}
+function dismissReco(i){ RECOS.splice(i,1); renderRecos(); toast('Dismissed — future recommendations will adjust'); }
+
+/* ---------- gaps ---------- */
+function renderGaps(){
+  const G=[[strip(B.audience.questions[1]||'Pricing strategy').replace(/\?$/,''),'High volume','↑ Rising'],['Hiring & delegation','High volume','↑ Rising'],['Getting started (first steps)','Medium volume','↑ Rising'],['Tools & systems','Medium volume','→ Stable'],['Client onboarding','Medium volume','→ Stable']];
+  $('#gaplist').innerHTML=G.map(([t,v,tr])=>`<div class="gaprow">${esc(t)}<span class="gv">${v}</span><span class="gt2 ${tr.includes('↑')?'up':''}" style="min-width:64px;text-align:right">${tr}</span></div>`).join('');
+}
+
+/* ---------- lock helpers ---------- */
+function lockPanel(id,label){ const p=document.getElementById(id); if(!p) return; let ov=p.querySelector('.lockov');
+  if(!ov){ ov=el('div','lockov',`<div style="font-size:22px">🔌</div><b>${label}</b><p>Connect an account to unlock — or log outcomes manually.</p><div class="la"><button class="lb pri" onclick="connect('ig')">Connect Instagram</button><button class="lb" onclick="openLog()">Log manually</button></div>`); p.appendChild(ov); } }
+function unlockPanel(id){ const p=document.getElementById(id); const ov=p&&p.querySelector('.lockov'); if(ov) ov.remove(); }
+
+/* ---------- replicate modal ---------- */
+const REP_OPTS=['Topic','Hook pattern','Content structure','CTA style','All recommended elements'];
+function openRep(){ $('#repChips').innerHTML=REP_OPTS.map(o=>`<button class="chip" onclick="repPick(this,'${o}')">${o}</button>`).join(''); $('#repResults').innerHTML=''; $('#repAll').style.display='none'; $('#repOverlay').classList.add('on'); }
+function closeRep(){ $('#repOverlay').classList.remove('on'); }
+function repPick(btn,opt){
+  document.querySelectorAll('#repChips .chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on');
+  const hookBase='The thing your audience thinks is the problem isn’t the real problem.';
+  const ideas=[
+    'More content isn’t the answer — clearer content is.',
+    'Your '+lc((B.pillars[1]||B.pillars[0])[0])+' isn’t why people don’t trust you yet.',
+    'Motivation isn’t why '+lc(strip(B.audience.primary).split(',')[0]).replace(/\.$/,'')+' fall behind.',
+  ];
+  $('#repResults').innerHTML=`<div class="msec"><h5>Pattern carried forward: <span style="color:var(--violet)">${opt}</span></h5>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Original pattern: <i>“${hookBase}”</i> — new directions, not duplicates:</div>
+    ${ideas.map(i=>`<div class="gen"><b>${esc(i)}</b><div class="ga"><button class="pa" onclick="this.classList.add('done');this.textContent='✓ Saved';toast('Saved to Spark Bank')">＋ Spark</button><button class="pa" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(i).replace(/'/g,'’')}')">Build</button><button class="pa" onclick="toast('Posted to Plan')">Post to Plan</button></div></div>`).join('')}</div>`;
+  $('#repAll').style.display='';
+}
+
+/* ---------- evaluate modal ---------- */
+function openEval(title){
+  $('#evalSub').innerHTML='<b>'+esc(title)+'</b> — goal: Saves · 38% below average. Threadline separates observation from inference; correct anything that’s off.';
+  $('#evalReasons').innerHTML=['Broad topic with limited specificity','Hook doesn’t create enough tension','Similar topic published recently','CTA asks for comments, not saves'].map(r=>`<li>${r}</li>`).join('');
+  $('#evalCtx').innerHTML=['Poor timing','Weak visual','Audience mismatch','Technical issue','No unusual factor'].map(c=>`<button class="chip" onclick="evalCtx(this)">${c}</button>`).join('');
+  $('#evalOutcome').style.display='none';
+  $('#evalOverlay').classList.add('on');
+}
+function closeEval(){ $('#evalOverlay').classList.remove('on'); }
+function evalCtx(btn){
+  document.querySelectorAll('#evalCtx .chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on');
+  const ctx=btn.textContent;
+  $('#evalOutcome').style.display='';
+  $('#evalOutcomes').innerHTML=[
+    ['✏️','Revise & retry','Idea is strong; sharpen the hook and lead with a specific example.','threadline-build-page.html?seed='+encodeURIComponent('Revise: sharpen the hook and add one specific example')],
+    ['✂️','Repurpose selectively','Slide 2 holds the strongest insight — build a post around that point alone.',null,'Created a linked item from the strongest section'],
+    ['🎬','Test a new format','This topic may work better as a short video than a 7-slide carousel.','threadline-build-page.html?seed='+encodeURIComponent('Reformat as short video')],
+    ['🕐','Save for later',ctx==='Poor timing'?'You flagged timing — parking it for a better window.':'Context may have been wrong; revisit next month.',null,'Saved for later — timing noted'],
+    ['🗄','Retire','Only if it’s repetitive or off-brand — history is preserved.',null,'Retired — dismissals train future recommendations'],
+  ].map(([ic,t,d,href,msg])=>`<button onclick="${href?`location.href='${href}'`:`closeEval();toast('${msg}')`}"><span style="font-size:16px">${ic}</span><span><b>${t}</b><span>${d}</span></span></button>`).join('');
+}
+
+/* ---------- manual log ---------- */
+function openLog(){ $('#log-post').innerHTML=['How we price our work (LinkedIn personal)','Overwhelm is a clarity problem (X)','Myth: You need to be everywhere (LinkedIn personal)'].map(p=>`<option>${p}</option>`).join(''); $('#logOverlay').classList.add('on'); }
+function closeLog(){ $('#logOverlay').classList.remove('on'); }
+function saveLog(){ closeLog(); toast('Logged — manual outcomes change how Threadline evaluates the piece'); }
+
+/* ---------- render ---------- */
+function render(){ renderConnect(); renderMetrics(); renderOverview(); renderChart(); renderTop(); renderBestSeries(); renderPlatform(); renderTypes(); renderHi(); renderLo(); renderNoticed(); renderRecos(); renderRepurpose(); renderSeriesPerf(); renderGaps(); }
+function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2800); }
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Spark Bank</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --green:#20b878;--amber:#f5a524;
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);--shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em;line-height:1.15}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit}
+.mark{display:inline-block;width:28px;height:28px;flex-shrink:0}.mark svg{width:100%;height:100%;display:block}
+
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+@media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{background:var(--surface);border-right:1px solid var(--line-2);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;padding:2px 10px 18px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nitem{display:flex;flex-direction:column;padding:9px 12px;border-radius:12px;text-align:left;transition:.13s;position:relative}
+.nitem b{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:9px}
+.nitem span{font-size:11.5px;color:var(--faint);margin-left:25px;margin-top:1px}
+.nitem:hover{background:var(--surface-2)}
+.nitem.on{background:rgba(128,61,255,.08)}
+.nitem.on b{color:var(--violet)}
+.nitem .ic{width:16px;text-align:center}
+.nitem .cnt{position:absolute;right:12px;top:11px;background:rgba(128,61,255,.12);color:var(--violet);font-size:11px;font-weight:800;border-radius:8px;padding:2px 8px}
+.sfoot{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.wsrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer}
+.wsrow:hover{background:var(--surface-2)}
+.avv{width:32px;height:32px;border-radius:9px;background:var(--grad2);color:#fff;font-weight:900;font-size:12.5px;display:grid;place-items:center;flex-shrink:0}
+.avv.round{border-radius:50%}
+.wsrow .wt b{display:block;font-size:13px;font-weight:800}
+.wsrow .wt span{font-size:11.5px;color:var(--faint)}
+.setrow{display:flex;align-items:center;gap:9px;padding:9px 12px;color:var(--muted);font-weight:700;font-size:13.5px;border-radius:10px}
+.setrow:hover{background:var(--surface-2)}
+
+.main{min-width:0;padding-bottom:60px}
+.topbar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(247,248,251,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.search{flex:0 1 340px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:var(--faint);font-size:14px;cursor:text}
+.search .kbd{margin-left:auto;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
+.bell{position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.bell:hover{background:var(--surface-2)}
+.bell i{position:absolute;top:4px;right:4px;background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.newspark{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
+.newspark:hover{filter:brightness(1.06)}
+
+.content{display:grid;grid-template-columns:1fr 360px;gap:22px;padding:26px 28px 0;max-width:1440px}
+@media(max-width:1150px){.content{grid-template-columns:1fr}.detail{display:none}}
+.colmain{min-width:0}
+.greet h1{font-size:clamp(24px,3vw,30px)}
+.greet p{color:var(--muted);font-size:14.5px;margin-top:4px}
+
+/* welcome */
+.welcome{position:relative;margin-top:16px;background:linear-gradient(120deg,rgba(128,61,255,.09),rgba(59,130,246,.06));border:1px solid rgba(128,61,255,.2);border-radius:16px;padding:15px 18px;display:flex;align-items:center;gap:13px}
+.welcome .wi{width:40px;height:40px;border-radius:12px;background:var(--surface);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.welcome b{font-size:14.5px}
+.welcome p{color:var(--muted);font-size:13px}
+.welcome .wx{margin-left:auto;color:var(--faint);font-weight:900;font-size:16px;padding:6px}
+.welcome .wx:hover{color:var(--ink)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;margin-top:20px;border-bottom:1.5px solid var(--line-2)}
+.tab{padding:10px 16px;font-weight:800;font-size:14px;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1.5px;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--ink)}
+.tab.on{color:var(--violet);border-bottom-color:var(--violet)}
+.tab .n{background:var(--surface-2);color:var(--muted);font-size:11px;font-weight:800;border-radius:7px;padding:1px 7px}
+.tab.on .n{background:rgba(128,61,255,.12);color:var(--violet)}
+
+/* filter bar */
+.fbar{display:flex;align-items:center;gap:9px;margin:16px 0 4px;flex-wrap:wrap}
+.fsel{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:8px 13px;font-weight:700;font-size:13px;color:var(--muted)}
+.fsel:hover{border-color:var(--violet);color:var(--violet)}
+.fbar .sp{flex:1}
+.vtog{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.vtog button{padding:8px 11px;font-size:13px;color:var(--faint)}
+.vtog button.on{background:var(--surface-2);color:var(--ink)}
+
+/* picks banner */
+.picksbar{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid rgba(128,61,255,.25);border-radius:15px;padding:13px 16px;margin-top:14px;box-shadow:var(--shadow-sm)}
+.picksbar .pi{width:40px;height:40px;border-radius:12px;background:rgba(128,61,255,.1);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.picksbar b{font-size:14px}
+.picksbar p{color:var(--muted);font-size:12.5px}
+.picksbar .see{margin-left:auto;border:1.5px solid var(--violet);color:var(--violet);border-radius:10px;padding:8px 15px;font-weight:800;font-size:13px;white-space:nowrap}
+.picksbar .see:hover{background:rgba(128,61,255,.06)}
+.picksbar .wx{color:var(--faint);font-weight:900;padding:6px}
+
+/* bulk bar */
+.bulk{display:none;align-items:center;gap:10px;background:var(--slate);color:#fff;border-radius:13px;padding:10px 16px;margin-top:14px;animation:fade .25s ease}
+.bulk.on{display:flex}
+.bulk b{font-size:13.5px}
+.bulk button{border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:7px 13px;font-weight:800;font-size:12.5px;color:#fff}
+.bulk button:hover{background:rgba(255,255,255,.12)}
+.bulk .x{margin-left:auto;border:none;font-weight:900}
+
+/* spark list */
+.list{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.row{display:flex;gap:13px;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:15px 16px;cursor:pointer;transition:.14s;animation:fade .25s ease;position:relative}
+.row:hover{border-color:#cfc3f5}
+.row.sel{border-color:var(--violet);box-shadow:0 0 0 3px rgba(128,61,255,.08)}
+.ck{width:19px;height:19px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;margin-top:3px;display:grid;place-items:center;font-size:10px;font-weight:900;color:transparent;transition:.12s}
+.ck:hover{border-color:var(--violet)}
+.ck.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.ticon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.rbody{flex:1;min-width:0}
+.rtype{font-size:11px;font-weight:800;letter-spacing:.03em}
+.rtitle{font-weight:800;font-size:15px;margin-top:2px}
+.rsum{color:var(--muted);font-size:13px;margin-top:2px;line-height:1.45}
+.rmeta{color:var(--faint);font-size:11.5px;margin-top:6px}
+.rside{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex-shrink:0}
+.slabel{font-size:11px;font-weight:800;border-radius:999px;padding:4px 11px;white-space:nowrap}
+.sl-v{background:rgba(128,61,255,.1);color:var(--violet)}
+.sl-g{background:rgba(32,184,120,.1);color:#178a5a}
+.sl-b{background:rgba(59,130,246,.1);color:var(--blue)}
+.sl-a{background:rgba(245,165,36,.14);color:#b57708}
+.sl-c{background:rgba(34,211,238,.14);color:#0e7f95}
+.racts{display:flex;gap:8px;align-items:center}
+.rb{border:1.5px solid var(--line);border-radius:9px;padding:7px 12px;font-weight:800;font-size:12px;color:var(--muted);white-space:nowrap;transition:.13s}
+.rb:hover{border-color:var(--violet);color:var(--violet)}
+.rb.pl{border-color:rgba(128,61,255,.35);color:var(--violet)}
+.posted{font-size:11px;font-weight:800;color:#178a5a;background:rgba(32,184,120,.08);border-radius:8px;padding:5px 10px}
+.more{color:var(--faint);font-weight:900;padding:4px 7px;border-radius:8px}
+.more:hover{background:var(--surface-2);color:var(--ink)}
+.pager{display:flex;align-items:center;gap:8px;margin-top:18px;color:var(--faint);font-size:13px;font-weight:600}
+.pager .grow{flex:1}
+.pager button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);font-weight:800;font-size:12.5px;color:var(--muted)}
+.pager button.on{background:var(--grad2);color:#fff;border-color:transparent}
+
+/* needs a home queue card */
+.nhcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px;box-shadow:var(--shadow-sm)}
+.nhcard .nq{font-weight:800;font-size:14px;margin-bottom:4px}
+.nhcard .nsub{color:var(--muted);font-size:12.5px;margin-bottom:12px}
+.homechips{display:flex;flex-wrap:wrap;gap:7px}
+.hchip{border:1.5px solid var(--line);border-radius:999px;padding:6px 13px;font-weight:700;font-size:12.5px;color:var(--muted)}
+.hchip:hover{border-color:var(--violet);color:var(--violet)}
+.hchip.best{border-color:rgba(128,61,255,.4);color:var(--violet);background:rgba(128,61,255,.05)}
+
+/* detail panel */
+.detail{position:sticky;top:78px;height:fit-content}
+.dcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow-sm)}
+.dhead{display:flex;align-items:flex-start;gap:12px}
+.dhead .ticon{width:46px;height:46px;font-size:20px}
+.dtypep{font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;display:inline-block}
+.dtitle{font-size:19px;font-weight:900;line-height:1.25;margin-top:5px}
+.dhead .dside{margin-left:auto;display:flex;gap:4px}
+.dside button{color:var(--faint);font-size:15px;padding:5px 7px;border-radius:8px}
+.dside button:hover{background:var(--surface-2);color:var(--ink)}
+.dmeta{color:var(--faint);font-size:12px;margin:8px 0 2px}
+.dsec{border-top:1px solid var(--line-2);margin-top:14px;padding-top:13px}
+.dsec h5{font-size:13px;font-weight:800;margin-bottom:6px}
+.dsec p{font-size:13.5px;color:var(--muted);line-height:1.55}
+.dsec ul{margin:4px 0 0 2px;list-style:none}
+.dsec li{font-size:13px;color:var(--muted);padding:3px 0 3px 14px;position:relative}
+.dsec li::before{content:"";position:absolute;left:0;top:11px;width:5px;height:5px;border-radius:50%;background:var(--violet)}
+.homebox{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:13px;padding:11px 13px;margin-top:8px;cursor:pointer;transition:.13s}
+.homebox:hover{border-color:var(--violet)}
+.homebox .hi{width:36px;height:36px;border-radius:10px;background:rgba(245,165,36,.14);display:grid;place-items:center;font-size:15px}
+.homebox b{display:block;font-size:13.5px}
+.homebox span{font-size:11.5px;color:var(--faint)}
+.bestfit{margin-left:auto;font-size:10.5px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.1);border-radius:7px;padding:3px 9px}
+.dacts{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.da{width:100%;padding:12px;border-radius:12px;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.13s}
+.da.pri{background:var(--grad2);color:#fff;box-shadow:0 6px 16px rgba(128,61,255,.25)}
+.da.pri:hover{filter:brightness(1.06)}
+.da.sec{border:1.5px solid var(--line);color:var(--ink)}
+.da.sec:hover{border-color:var(--violet);color:var(--violet)}
+.nhpanel{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;margin-top:16px;box-shadow:var(--shadow-sm)}
+.nhpanel .hi{width:42px;height:42px;border-radius:12px;background:rgba(245,165,36,.14);display:grid;place-items:center;font-size:18px}
+.nhpanel b{font-size:13.5px;display:block}
+.nhpanel span{color:var(--muted);font-size:12px}
+.nhpanel button{margin-left:auto;border:1.5px solid var(--violet);color:var(--violet);border-radius:10px;padding:8px 13px;font-weight:800;font-size:12.5px;white-space:nowrap}
+
+/* series mini-menu */
+.minimenu{position:fixed;z-index:80;background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:6px;display:none;min-width:210px}
+.minimenu.on{display:block}
+.minimenu button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:9px;font-weight:700;font-size:13px}
+.minimenu button:hover{background:var(--surface-2)}
+
+/* new spark modal + plan drawer */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(3px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding:60px 20px}
+.overlay.on{display:flex}
+.modal{background:var(--surface);border-radius:20px;box-shadow:var(--shadow);width:100%;max-width:520px;padding:24px;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.modal h3{font-size:18px;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.mf{margin-bottom:13px}
+.mf label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}
+.mf input,.mf textarea,.mf select{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;color:var(--ink);outline:none}
+.mf textarea{min-height:70px;resize:vertical}
+.mf input:focus,.mf textarea:focus{border-color:var(--violet)}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dupe{display:none;background:rgba(245,165,36,.09);border:1px solid rgba(245,165,36,.3);border-radius:11px;padding:11px 13px;font-size:12.5px;margin-bottom:13px}
+.dupe.on{display:block}
+.dupe b{display:block;font-size:12.5px;margin-bottom:3px}
+.dupe .dact{margin-top:7px;display:flex;gap:7px}
+.dupe .dact button{border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-weight:700;font-size:11.5px;background:var(--surface)}
+.macts{display:flex;gap:10px;margin-top:14px}
+.macts .grow{flex:1}
+.mbtn{padding:11px 17px;border-radius:11px;font-weight:800;font-size:13.5px}
+.mbtn.pri{background:var(--grad2);color:#fff}
+.mbtn.sec{border:1.5px solid var(--line)}
+.mbtn.ghost{color:var(--muted)}
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:70;display:none}
+.scrim.on{display:block}
+.drawer{position:fixed;top:0;right:-420px;bottom:0;width:400px;max-width:92vw;background:var(--surface);z-index:75;box-shadow:-16px 0 50px rgba(20,20,60,.18);transition:right .3s ease;padding:24px;overflow-y:auto}
+.drawer.on{right:0}
+.drawer h3{font-size:17px;margin-bottom:4px}
+.drawer .dsub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.df{margin-bottom:14px}
+.df label{display:block;font-weight:700;font-size:12.5px;margin-bottom:6px}
+.df input,.df select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;outline:none;background:var(--surface);color:var(--ink)}
+.radio{display:flex;flex-direction:column;gap:7px}
+.radio label{display:flex;align-items:center;gap:9px;font-weight:600;font-size:13.5px;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;margin:0}
+.radio input{width:auto;accent-color:var(--violet)}
+.dbtns{display:flex;gap:10px;margin-top:20px}
+.dbtns .grow{flex:1}
+.dbtn{padding:12px 18px;border-radius:11px;font-weight:800;font-size:14px}
+.dbtn.pri{background:var(--grad2);color:#fff}
+.dbtn.ghost{color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:95;display:flex;align-items:center;gap:12px}
+.toast.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.toast button{color:var(--cyan);font-weight:800}
+svg.defs{position:absolute;width:0;height:0}
+</style>
+</head>
+<body>
+<svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><span class="mark" id="lmark"></span>Threadline</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sfoot">
+      <div class="wsrow" onclick="toast('Workspace switcher — prototype')"><div class="avv" id="wsav">TB</div><div class="wt"><b id="wsname">Workspace</b><span>Workspace</span></div></div>
+      <div class="wsrow" onclick="toast('Profile — prototype')"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="wt"><b>Kennady Scott</b><span>Admin</span></div></div>
+      <button class="setrow" onclick="location.href='threadline-settings.html'">⚙︎ Settings</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search" onclick="toast('Global search — Sparks, Series, Plan, brand & assets')">🔍 Search anything... <span class="kbd">⌘ K</span></div>
+      <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
+      <button class="newspark" onclick="openSpark()">＋ New Spark</button>
+    </div>
+
+    <div class="content">
+      <div class="colmain">
+        <div class="greet"><h1>Spark Bank</h1><p>Save ideas, questions, stories, and observations. Threadline helps turn them into content.</p></div>
+        <div id="welcome"></div>
+        <div class="tabs" id="tabs"></div>
+        <div class="fbar">
+          <button class="fsel" onclick="toast('Filter by Spark type')">⚙ All types ▾</button>
+          <button class="fsel" onclick="toast('Filter by pillar')">◫ All pillars ▾</button>
+          <button class="fsel" onclick="toast('Filter by status')">◔ All status ▾</button>
+          <button class="fsel" onclick="toast('Filter by source')">▣ All sources ▾</button>
+          <button class="fsel" onclick="toast('More filters: strength, owner, attachments, Plan home…')">≡ More filters</button>
+          <span class="sp"></span>
+          <button class="fsel" onclick="toast('Sort: Newest · Strongest fit · Most timely · Best Plan match')">Sort: Newest ▾</button>
+          <div class="vtog"><button onclick="toast('Card grid view — prototype')">▦</button><button class="on">☰</button></div>
+        </div>
+        <div id="picksbar"></div>
+        <div class="bulk" id="bulk">
+          <b id="bulkN">2 selected</b>
+          <button onclick="bulkPlan()">Post to Plan</button>
+          <button onclick="toast('Assign pillar — pick one for all selected')">Assign pillar</button>
+          <button onclick="toast('Added to series reserve')">Add to Series</button>
+          <button onclick="bulkArchive()">Archive</button>
+          <button class="x" onclick="clearChecks()">✕</button>
+        </div>
+        <div class="list" id="list"></div>
+        <div class="pager"><span id="showing"></span><span class="grow"></span>
+          <button onclick="toast('Previous page')">‹</button><button class="on">1</button><button onclick="toast('Page 2 — prototype')">2</button><span>…</span><button onclick="toast('Page 10 — prototype')">10</button><button onclick="toast('Next page')">›</button>
+        </div>
+      </div>
+
+      <div class="detail" id="detail"></div>
+    </div>
+  </div>
+</div>
+
+<div class="minimenu" id="minimenu"></div>
+
+<div class="overlay" id="sparkOverlay"><div class="modal">
+  <h3>✦ New Spark</h3>
+  <div class="mf"><label>What do you not want to forget?</label><textarea id="sp-title" placeholder="Type the thought — Threadline can title it for you."></textarea></div>
+  <div class="dupe" id="dupe"><b>⚠ You may already have something similar</b><span id="dupeText"></span>
+    <div class="dact"><button onclick="saveSpark(true)">Keep both</button><button onclick="closeSpark();toast('Merged — sources, notes & dates preserved')">Merge</button><button onclick="closeSpark();toast('Added as a note on the existing Spark')">Add as note</button></div>
+  </div>
+  <div class="mrow">
+    <div class="mf"><label>Pillar <span style="color:var(--faint);font-weight:500">(optional)</span></label><select id="sp-pillar"></select></div>
+    <div class="mf"><label>Series <span style="color:var(--faint);font-weight:500">(optional)</span></label><select id="sp-series"></select></div>
+  </div>
+  <div class="macts">
+    <button class="mbtn ghost" onclick="closeSpark()">Cancel</button>
+    <div class="grow"></div>
+    <button class="mbtn sec" onclick="saveAndBuild()">Save &amp; Build</button>
+    <button class="mbtn pri" onclick="saveSpark()">Save to Spark Bank</button>
+  </div>
+</div></div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <h3>Post to Plan</h3>
+  <p class="dsub">Threadline pre-filled this from the Spark and your open slots.</p>
+  <div class="df"><label>Title</label><input id="d-title"></div>
+  <div class="df"><label>Series / pillar</label><select id="d-series"></select></div>
+  <div class="df"><label>Placement</label><div class="radio" id="d-place"></div></div>
+  <div class="df"><label>Format</label><select id="d-format"><option>LinkedIn post</option><option>Carousel</option><option>Reel</option><option>Static post</option><option>Email</option></select></div>
+  <div class="dbtns"><button class="dbtn ghost" onclick="closeDrawer()">Cancel</button><div class="grow"></div><button class="dbtn pri" onclick="confirmPlan()">Post to Plan</button></div>
+</div>
+
+<script src="threadline-brand.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
+$('#lmark').innerHTML=MARK;
+
+const B=(window.loadBrand&&loadBrand())||defaultBrand();
+const lc=s=>{s=(s||'').trim();return s?s.charAt(0).toLowerCase()+s.slice(1):s;};
+const strip=s=>(s||'').replace(/<[^>]+>/g,'');
+$('#wsname').textContent=B.name;
+$('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const POV_PILLAR=(B.pillars.find(p=>/view|talk|pov|perspective/i.test(p[0]))||B.pillars[B.pillars.length-1])[0];
+const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars[Math.min(2,B.pillars.length-1)])[0];
+const BTS_PILLAR=(B.pillars.find(p=>/behind|process|work/i.test(p[0]))||B.pillars[1]||B.pillars[0])[0];
+
+/* ---------- nav ---------- */
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['✎','Build','Think, create, build',0,'threadline-build-page.html'],['⚡','Spark Bank','Your idea library',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+function renderNav(){ $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span>${on?`<span class="cnt">${SPARKS.filter(s=>!s.archived).length}</span>`:''}</button>`).join(''); }
+
+/* ---------- spark data (generated from the brand model) ---------- */
+const TYPES={
+  Idea:{ic:'✦',bg:'rgba(128,61,255,.1)',c:'#803dff'},
+  Question:{ic:'❓',bg:'rgba(251,113,133,.12)',c:'#e05575'},
+  'Client Story':{ic:'💚',bg:'rgba(32,184,120,.12)',c:'#178a5a'},
+  Observation:{ic:'💡',bg:'rgba(245,165,36,.14)',c:'#b57708'},
+  'Trend/News':{ic:'📣',bg:'rgba(34,211,238,.14)',c:'#0e7f95'},
+  'Personal Note':{ic:'✏️',bg:'rgba(59,130,246,.1)',c:'#3b82f6'},
+  'Customer Language':{ic:'💬',bg:'rgba(128,61,255,.08)',c:'#803dff'},
+  'Point of View':{ic:'☀️',bg:'rgba(245,165,36,.14)',c:'#b57708'},
+};
+function mkAngles(topic){ return ['The hidden cost of getting this wrong','3 signs this is what your audience is fighting','Myth vs. reality: what actually works','A simple framework they can use today']; }
+let SPARKS=[
+  {type:'Idea',t:strip(B.messaging.primary),sum:'Too many brands try to sound smart instead of being clear. Clarity builds trust faster.',when:'Added today · 10:42 AM',src:'From notes',label:['Strong thread','sl-v'],home:POV_PILLAR,homeKind:'pillar',pick:1,mine:1,
+   why:'This connects to your audience’s frustration with confusing messaging and overcomplicated solutions.',angles:['The hidden cost of being too clever','3 signs your messaging is confusing your audience','Clarity vs. cleverness: real world examples','A simple framework for clearer messaging'],pickWhy:'Your Plan is education-heavy this week; a belief piece adds point of view.'},
+  {type:'Question',t:B.audience.questions[0]||'What do clients ask before hiring us?',sum:'There are patterns in the questions we get on discovery calls.',when:'Added 2 days ago',src:'From conversation',label:['Great for Q&A','sl-a'],home:B.pillars[0][0],homeKind:'pillar',pick:1,mine:1,
+   why:'Your audience literally asks this — answering it publicly builds trust before the first call.',angles:['Answer it straight — no fluff','Turn the top 3 questions into a carousel','The question behind the question','What we wish people asked instead'],pickWhy:'It could fill your open Q&A-friendly slot and supports your trust-building goal.'},
+  {type:'Client Story',t:'The moment our client saw the biggest shift',sum:'After we simplified their approach, everything started compounding.',when:'Added 3 days ago',src:'From client story',label:['Proof opportunity','sl-g'],home:PROOF_PILLAR,homeKind:'pillar',pick:1,mine:1,
+   why:'Most of your recent content teaches. A story adds the proof that makes the teaching believable.',angles:['Before → after, in their words','The one change that mattered','What we almost got wrong','The result nobody expected'],pickWhy:'Your plan lacks proof content this week.'},
+  {type:'Observation',t:strip(B.messaging.pov),sum:'The real problem is rarely effort — it’s direction.',when:'Added 4 days ago',src:'From voice note',label:['Strong thread','sl-v'],home:POV_PILLAR,homeKind:'pillar',pick:1,mine:1,
+   why:'This is your sharpest point of view — the thing only you will say plainly.',angles:mkAngles(),pickWhy:'POV content is under-represented in your current mix.'},
+  {type:'Trend/News',t:'More conversation around AI fatigue',sum:'People are craving real ideas and human perspectives right now.',when:'Added 5 days ago',src:'From article',label:['Timely','sl-c'],home:null,homeKind:null,mine:0,
+   why:'A timely angle that positions your human, direct approach against the noise.',angles:['Why human perspective wins right now','What AI content is teaching us about trust','The parts of your work that can’t be automated','A take on the trend, in your voice']},
+  {type:'Personal Note',t:'Behind the scenes: why we changed our process',sum:'The backstory will help people understand our approach better.',when:'Added 6 days ago',src:'From note',label:['Perfect for BTS','sl-b'],home:BTS_PILLAR,homeKind:'pillar',mine:1,
+   why:'Process stories humanize the brand and pre-answer “how do you work?”',angles:['The old way vs. the new way','What broke and what we learned','The decision we debated for weeks','What clients noticed after the change']},
+  {type:'Customer Language',t:(B.audience.language[0]||'"I just want this to work."').replace(/^"|"$/g,''),sum:'Their exact words — worth keeping verbatim for hooks and headlines.',when:'Added 1 week ago',src:'From customer feedback',label:['Needs context','sl-a'],home:null,homeKind:null,mine:1,
+   why:'Verbatim audience language is your best raw material for hooks that land.',angles:['Use it as the opening line','The post that answers it directly','Why they say this (and what they mean)','Turn it into a poll or question post']},
+  {type:'Point of View',t:strip(B.messaging.beliefs).split('.')[0]+'.',sum:'A core belief worth staking out publicly.',when:'Added 1 week ago',src:'From onboarding',label:['Evergreen','sl-g'],home:null,homeKind:null,mine:0,tl:1,
+   why:'It came straight from your brand foundation — a belief your positioning is built on.',angles:['State it plainly, defend it simply','The story of when you learned it','What the industry says instead — and why it fails','How it changes what you recommend']},
+];
+SPARKS.forEach((s,i)=>{ s.id=i; s.archived=0; s.posted=0; });
+let ARCHIVED_SEED={type:'Idea',t:'Holiday promo idea from last year',sum:'Seasonal — parked until it’s relevant again.',when:'Archived 3 weeks ago',src:'From note',label:['Best for later','sl-a'],home:null,archived:1,mine:1,why:'Archived: not timely right now. It stays searchable and restorable.',angles:['Refresh for this season','Repurpose the strongest hook','Connect to a current offer','Archive permanently']};
+ARCHIVED_SEED.id=SPARKS.length; SPARKS.push(ARCHIVED_SEED);
+
+/* ---------- state ---------- */
+let tab='all', selId=0, checks=new Set(), picksDismissed=false;
+const TABS=[['all','All Sparks'],['mine','My Sparks'],['picks','Threadline Picks'],['home','Needs a Home'],['arch','Archived']];
+function inTab(s){
+  if(tab==='arch') return s.archived;
+  if(s.archived) return false;
+  if(tab==='mine') return s.mine;
+  if(tab==='picks') return s.pick;
+  if(tab==='home') return !s.home && !s.posted;
+  return true;
+}
+function counts(){ return { picks:SPARKS.filter(s=>s.pick&&!s.archived).length, home:SPARKS.filter(s=>!s.home&&!s.posted&&!s.archived).length, all:SPARKS.filter(s=>!s.archived).length }; }
+
+/* ---------- render ---------- */
+function renderTabs(){ const c=counts();
+  $('#tabs').innerHTML=TABS.map(([k,l])=>`<button class="tab${tab===k?' on':''}" onclick="setTab('${k}')">${l}${k==='picks'?` <span class="n">${c.picks}</span>`:k==='home'?` <span class="n">${c.home}</span>`:''}</button>`).join('');
+}
+function setTab(k){ tab=k; checks.clear(); render(); }
+function renderPicksbar(){
+  const c=counts();
+  $('#picksbar').innerHTML=(tab==='all'&&!picksDismissed)?`<div class="picksbar"><div class="pi">✦</div><div><b>Threadline Picks</b><p>Ideas our AI thinks could drive the most impact right now.</p></div><button class="see" onclick="setTab('picks')">See picks (${c.picks})</button><button class="wx" onclick="picksDismissed=true;renderPicksbar()">×</button></div>`:'';
+}
+function rowHTML(s){
+  const ty=TYPES[s.type]||TYPES.Idea;
+  return `<div class="row${s.id===selId?' sel':''}" data-id="${s.id}" onclick="select(${s.id})">
+    <span class="ck${checks.has(s.id)?' on':''}" onclick="event.stopPropagation();toggleCheck(${s.id})">✓</span>
+    <div class="ticon" style="background:${ty.bg}">${ty.ic}</div>
+    <div class="rbody">
+      <div class="rtype" style="color:${ty.c}">${s.type}${s.tl?' · <span style="color:var(--faint)">Threadline-created</span>':''}</div>
+      <div class="rtitle">${esc(s.t)}</div>
+      <div class="rsum">${esc(s.sum)}</div>
+      <div class="rmeta">${s.when} · ${s.src}${s.home?` · Suggested home: <b style="color:var(--muted)">${s.home}</b>`:''}</div>
+    </div>
+    <div class="rside">
+      <span class="slabel ${s.label[1]}">${s.label[0]}</span>
+      <div class="racts">
+        ${s.posted?`<span class="posted">✓ Posted to Plan</span>`:`<button class="rb pl" onclick="event.stopPropagation();openDrawer(${s.id})">📅 Post to Plan</button>`}
+        <button class="rb" onclick="event.stopPropagation();buildThis(${s.id})">Build this ▾</button>
+        <button class="more" onclick="event.stopPropagation();moreMenu(event,${s.id})">⋯</button>
+      </div>
+    </div>
+  </div>`;
+}
+function nhQueueHTML(){
+  const c=counts();
+  if(tab!=='home'||!c.home) return '';
+  return `<div class="nhcard"><div class="nq">✦ Let Threadline organize these</div><div class="nsub">${c.home} Sparks don’t have a home yet. I can assign pillars, cluster related ideas, or suggest Plan slots.</div>
+  <div class="homechips"><button class="hchip best" onclick="autoOrganize()">✦ Organize them for me</button><button class="hchip" onclick="toast('Cluster view: 2 of these relate to trust — possible series')">Show clusters</button><button class="hchip" onclick="toast('Bulk assign — pick a pillar')">Bulk assign pillar</button></div></div>`;
+}
+function render(){
+  renderTabs(); renderPicksbar(); renderNav();
+  const rows=SPARKS.filter(inTab);
+  if(!inTab(SPARKS[selId]||{})) selId=rows.length?rows[0].id:-1;
+  $('#list').innerHTML=rows.map(rowHTML).join('')||`<div style="padding:40px;text-align:center;color:var(--muted)">
+    <div style="font-size:34px;margin-bottom:8px">${tab==='home'?'🏠':'✨'}</div>
+    <b>${tab==='home'?'Every Spark has a direction.':'Nothing here yet.'}</b>
+    <div style="font-size:13px;margin-top:4px">${tab==='home'?'Your ideas are organized and ready when you need them.':'Capture a thought or build with Threadline.'}</div></div>`;
+  $('#list').insertAdjacentHTML('afterbegin',nhQueueHTML());
+  $('#showing').textContent=`Showing 1–${rows.length} of ${tab==='all'?'58':rows.length} sparks`;
+  renderBulk(); renderDetail();
+}
+function select(id){ selId=id; render(); }
+function toggleCheck(id){ checks.has(id)?checks.delete(id):checks.add(id); render(); }
+function clearChecks(){ checks.clear(); render(); }
+function renderBulk(){ const n=checks.size; $('#bulk').classList.toggle('on',n>0); $('#bulkN').textContent=n+' selected'; }
+function bulkArchive(){ [...checks].forEach(id=>SPARKS[id].archived=1); const n=checks.size; checks.clear(); render(); toastUndo(n+' Sparks archived',()=>{ SPARKS.forEach(s=>{ if(s.archived&&s.id!==ARCHIVED_SEED.id) s.archived=0; }); render(); }); }
+function bulkPlan(){ const n=checks.size; toast(`Planner preview: placing ${n} Sparks across the next 3 weeks, preserving pillar balance & series cadence`); [...checks].forEach(id=>SPARKS[id].posted=1); checks.clear(); render(); }
+function autoOrganize(){
+  SPARKS.filter(s=>!s.home&&!s.archived).forEach((s,i)=>{ s.home=[POV_PILLAR,B.pillars[0][0],BTS_PILLAR][i%3]; s.homeKind='pillar'; });
+  render(); toast('Organized — every Spark now has a suggested pillar. Review and adjust anytime.');
+}
+
+/* ---------- detail panel ---------- */
+function renderDetail(){
+  const s=SPARKS[selId];
+  const c=counts();
+  const nh=`<div class="nhpanel"><div class="hi">🏠</div><div><b>Needs a Home</b><span>${c.home} sparks don’t have a home yet.</span></div><button onclick="setTab('home')">Review now →</button></div>`;
+  if(!s){ $('#detail').innerHTML=nh; return; }
+  const ty=TYPES[s.type]||TYPES.Idea;
+  $('#detail').innerHTML=`<div class="dcard">
+    <div class="dhead">
+      <div class="ticon" style="background:${ty.bg}">${ty.ic}</div>
+      <div style="min-width:0"><span class="dtypep" style="background:${ty.bg};color:${ty.c}">${s.type}</span><div class="dtitle">${esc(s.t)}</div></div>
+      <div class="dside"><button onclick="toast('Bookmarked')">🔖</button><button onclick="moreMenu(event,${s.id})">⋯</button></div>
+    </div>
+    <div class="dmeta">${s.when} · ${s.src}${s.tl?' · <b>Threadline-created</b>':''}</div>
+    <div class="dsec"><h5>The spark</h5><p>${esc(s.sum)}</p></div>
+    <div class="dsec"><h5>Why this matters</h5><p>${esc(s.why)}</p></div>
+    <div class="dsec"><h5>Potential angles</h5><ul>${s.angles.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>
+    <div class="dsec"><h5>Suggested home</h5>
+      ${s.home?`<div class="homebox" onclick="toast('Opening ${esc(s.home)}…')"><div class="hi">💡</div><div><b>${esc(s.home)}</b><span>${s.homeKind==='series'?'Series reserve':'Share your point of view'}</span></div><span class="bestfit">Best fit</span></div>`
+      :`<div class="homebox" onclick="assignHome(${s.id})"><div class="hi">🏠</div><div><b>No home yet</b><span>Assign a pillar or series</span></div><span class="bestfit" style="background:rgba(245,165,36,.14);color:#b57708">Assign</span></div>`}
+    </div>
+    <div class="dacts">
+      <button class="da pri" onclick="buildThis(${s.id})">Build into content →</button>
+      ${s.posted?`<button class="da sec" style="border-color:rgba(32,184,120,.4);color:#178a5a">✓ Posted to Plan</button>`:`<button class="da sec" onclick="openDrawer(${s.id})">📅 Post to Plan</button>`}
+      <button class="da sec" onclick="seriesMenu(event,${s.id})">＋ Add to a series</button>
+      <button class="da sec" onclick="archiveOne(${s.id})">🗄 Archive spark</button>
+    </div>
+  </div>${nh}`;
+}
+function assignHome(id){ SPARKS[id].home=B.pillars[0][0]; SPARKS[id].homeKind='pillar'; render(); toast('Assigned to '+B.pillars[0][0]+' — change anytime'); }
+function archiveOne(id){ SPARKS[id].archived=1; render(); toastUndo('Spark archived — still searchable',()=>{ SPARKS[id].archived=0; render(); }); }
+function buildThis(id){ location.href='threadline-build-page.html?seed='+encodeURIComponent(SPARKS[id].t); }
+
+/* ---------- menus ---------- */
+function moreMenu(e,id){ e.stopPropagation();
+  menuAt(e,[['🔖 Bookmark',()=>toast('Bookmarked')],['＋ Add to a series',ev=>seriesMenu(ev,id)],['✦ Create a series from this',()=>location.href='threadline-series.html'],['🏠 Assign a home',()=>assignHome(id)],['🗄 Archive',()=>archiveOne(id)]]);
+}
+function seriesMenu(e,id){ e.stopPropagation();
+  menuAt(e,B.series.map(s=>[s[0],()=>{ SPARKS[id].home=s[0]; SPARKS[id].homeKind='series'; render(); toast('Added to “'+s[0]+'” reserve'); }]).concat([['＋ Create a new series',()=>location.href='threadline-series.html']]));
+}
+function menuAt(e,items){
+  const m=$('#minimenu'); m.innerHTML=items.map((it,i)=>`<button data-i="${i}">${it[0]}</button>`).join('');
+  m.querySelectorAll('button').forEach((b,i)=>b.onclick=ev=>{ ev.stopPropagation(); m.classList.remove('on'); items[i][1](ev); });
+  m.classList.add('on');
+  const x=Math.min(e.clientX,window.innerWidth-230), y=Math.min(e.clientY,window.innerHeight-items.length*40-16);
+  m.style.left=x+'px'; m.style.top=y+'px';
+}
+document.addEventListener('click',()=>$('#minimenu').classList.remove('on'));
+
+/* ---------- welcome ---------- */
+const WKEY='threadline.sparksWelcomed';
+function renderWelcome(){
+  let seen=false; try{ seen=!!localStorage.getItem(WKEY); }catch(e){}
+  $('#welcome').innerHTML=seen?'':`<div class="welcome"><div class="wi">✨</div><div><b>We gave your first ideas a place to land.</b><p>Threadline created starter Sparks from your brand foundation — audience questions, beliefs, and pillars.</p></div><button class="wx" onclick="try{localStorage.setItem('${WKEY}','1')}catch(e){};renderWelcome()">×</button></div>`;
+}
+
+/* ---------- new spark modal + dupe detection ---------- */
+function openSpark(){ $('#sp-pillar').innerHTML='<option value="">No pillar</option>'+B.pillars.map(p=>`<option>${p[0]}</option>`).join('');
+  $('#sp-series').innerHTML='<option value="">No series</option>'+B.series.map(s=>`<option>${s[0]}</option>`).join('');
+  $('#dupe').classList.remove('on'); $('#sparkOverlay').classList.add('on'); setTimeout(()=>$('#sp-title').focus(),50); }
+function closeSpark(){ $('#sparkOverlay').classList.remove('on'); $('#sp-title').value=''; }
+$('#sp-title').addEventListener('input',()=>{
+  const v=$('#sp-title').value.toLowerCase(); if(v.length<12){ $('#dupe').classList.remove('on'); return; }
+  const words=v.split(/\W+/).filter(w=>w.length>4);
+  const hit=SPARKS.find(s=>!s.archived && words.filter(w=>(s.t+' '+s.sum).toLowerCase().includes(w)).length>=2);
+  if(hit){ $('#dupeText').textContent='“'+hit.t+'” ('+hit.when.toLowerCase()+')'; $('#dupe').classList.add('on'); } else $('#dupe').classList.remove('on');
+});
+function saveSpark(force){
+  const v=$('#sp-title').value.trim(); if(!v){ $('#sp-title').focus(); return; }
+  const pillar=$('#sp-pillar').value, series=$('#sp-series').value;
+  const s={type:'Idea',t:v.length>64?v.slice(0,64)+'…':v,sum:v.length>64?v:'Captured just now — Threadline can title and expand it.',when:'Added just now',src:'From note',label:['New','sl-b'],home:series||pillar||null,homeKind:series?'series':(pillar?'pillar':null),mine:1,archived:0,posted:0,
+    why:'Freshly captured — Threadline will suggest angles once you build it.',angles:['Find the strongest angle','Clarify the message','Connect it to an offer','See if it could become a series'],id:SPARKS.length};
+  SPARKS.unshift(s); SPARKS.forEach((x,i)=>x.id=i);
+  closeSpark(); tab='all'; selId=0; render(); toast('Saved to Spark Bank'+(s.home?' · '+s.home:''));
+}
+function saveAndBuild(){ const v=$('#sp-title').value.trim(); if(!v){ $('#sp-title').focus(); return; } location.href='threadline-build-page.html?seed='+encodeURIComponent(v); }
+
+/* ---------- plan drawer ---------- */
+let drawerId=null;
+function openDrawer(id){ drawerId=id; const s=SPARKS[id];
+  $('#d-title').value=s.t;
+  $('#d-series').innerHTML=B.series.map(x=>`<option${x[0]===s.home?' selected':''}>${x[0]}</option>`).join('')+B.pillars.map(p=>`<option${p[0]===s.home?' selected':''}>Pillar: ${p[0]}</option>`).join('');
+  $('#d-place').innerHTML=[['Open slot — Wednesday (recommended)',1],['Next available series slot',0],['Pick a week',0],['Add without a date',0]].map(([t,ck])=>`<label><input type="radio" name="place" ${ck?'checked':''}>${t}</label>`).join('');
+  $('#scrim').classList.add('on'); $('#drawer').classList.add('on');
+}
+function closeDrawer(){ $('#scrim').classList.remove('on'); $('#drawer').classList.remove('on'); }
+function confirmPlan(){ if(drawerId!=null){ SPARKS[drawerId].posted=1; } closeDrawer(); render(); toast('Posted to Plan — linked to the original Spark'); }
+
+/* ---------- toast ---------- */
+function toast(msg){ toastUndo(msg,null); }
+function toastUndo(msg,undo){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); }
+  t.innerHTML=esc(msg)+(undo?' <button id="undoB">Undo</button>':''); if(undo) t.querySelector('#undoB').onclick=()=>{ undo(); t.classList.remove('show'); };
+  t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),undo?4200:2600); }
+
+(function(){ const t=new URLSearchParams(location.search).get('tab'); if(t&&TABS.some(x=>x[0]===t)) tab=t; })();
+renderWelcome(); render();
+</script>
+</body>
+</html>

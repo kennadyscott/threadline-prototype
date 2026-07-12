@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Build your brand together</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);--shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;
+  background:radial-gradient(1100px 700px at 82% -12%,#efeaff 0,transparent 55%),radial-gradient(900px 700px at -12% 12%,#e6f2ff 0,transparent 55%),var(--bg);
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em;line-height:1.12}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+textarea,input{font-family:inherit}
+.grad-text{background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mark{width:30px;height:30px;flex-shrink:0}.mark svg{width:100%;height:100%;display:block}
+
+/* header + progress */
+.top{position:sticky;top:0;z-index:20;background:rgba(247,248,251,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.topin{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:14px 24px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:17px}
+.prog{margin-left:auto;display:flex;gap:6px;align-items:center}
+.pstep{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--faint)}
+.pstep .b{width:22px;height:6px;border-radius:4px;background:var(--line)}
+.pstep.on .b{background:var(--grad2)}.pstep.on{color:var(--violet)}
+.pstep.done .b{background:var(--violet);opacity:.5}
+@media(max-width:640px){.pstep span{display:none}}
+.savebtn{margin-left:14px;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--muted);border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:10px;transition:.14s;white-space:nowrap}
+.savebtn:hover{border-color:var(--violet);color:var(--violet)}
+.savebtn::before{content:"↓";font-weight:900}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.wrap{max-width:680px;margin:0 auto;padding:36px 24px 90px}
+.stage{display:none;animation:fade .35s ease}
+.stage.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.kick{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
+h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
+.lead{color:var(--muted);font-size:16.5px;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:700;font-size:14.5px;margin-bottom:8px}
+.field textarea,.field input{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 15px;font-size:15.5px;color:var(--ink);outline:none;transition:.12s}
+.field textarea{min-height:96px;resize:vertical;line-height:1.55}
+.field textarea:focus,.field input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(128,61,255,.12)}
+.hint{color:var(--faint);font-size:13px;margin-top:7px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.row2{grid-template-columns:1fr}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:13px;font-weight:800;font-size:15.5px;transition:.15s}
+.btn.solid{background:var(--grad2);color:#fff;box-shadow:0 8px 20px rgba(128,61,255,.26)}
+.btn.solid:hover{filter:brightness(1.06)}.btn.solid:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.btn.ghost{color:var(--muted)}.btn.ghost:hover{color:var(--ink)}
+.nav{display:flex;align-items:center;gap:12px;margin-top:26px}
+.nav .grow{flex:1}
+
+/* Threadline "thought partner" card */
+.ai{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--violet);border-radius:16px;padding:18px 20px;margin-top:22px;box-shadow:var(--shadow-sm);animation:fade .4s ease}
+.ai .who{display:flex;align-items:center;gap:9px;font-weight:800;font-size:13px;color:var(--violet);margin-bottom:10px}
+.ai .who .mark{width:20px;height:20px}
+.ai p{font-size:15.5px;color:var(--ink);margin-bottom:10px;line-height:1.55}
+.ai p b{font-weight:800}
+.ai .soft{color:var(--muted);font-size:14px}
+.thinking{display:flex;align-items:center;gap:9px;color:var(--violet);font-weight:700;font-size:14px;margin-top:22px}
+.dots{display:inline-flex;gap:4px}.dots i{width:6px;height:6px;border-radius:50%;background:var(--violet);animation:bob 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+
+/* choice cards */
+.choices{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.choice{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;transition:.14s;cursor:pointer}
+.choice:hover{border-color:var(--violet)}
+.choice.sel{border-color:var(--violet);box-shadow:0 0 0 3px rgba(128,61,255,.12);background:rgba(128,61,255,.03)}
+.choice .ct{font-weight:800;font-size:15.5px;display:flex;align-items:center;gap:8px}
+.choice .cd{color:var(--muted);font-size:14px;margin-top:5px}
+.choice .cl{font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+.verdicts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.verdict{border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.verdict:hover{border-color:var(--violet);color:var(--ink)}
+.verdict.sel{border-color:var(--violet);background:rgba(128,61,255,.06);color:var(--violet)}
+
+.persona{background:linear-gradient(180deg,rgba(128,61,255,.05),transparent);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:6px}
+.persona .pn{font-family:'Satoshi';font-weight:900;font-size:19px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.persona .av{width:34px;height:34px;border-radius:50%;background:var(--grad2)}
+.persona p{font-size:15px;color:var(--ink);line-height:1.6}
+
+.sample{border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.14s;background:var(--surface)}
+.sample:hover{border-color:var(--violet)}
+.sample.sel{border-color:var(--violet);box-shadow:0 0 0 3px rgba(128,61,255,.12)}
+.sample .sl{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.sample .stext{font-size:15.5px;font-weight:600}
+
+.pillar{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:11px;background:var(--surface);display:flex;gap:14px;align-items:flex-start}
+.pillar .pc{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:grid;place-items:center;font-weight:900;color:#fff;font-size:15px}
+.pillar .pmix{margin-left:auto;font-weight:800;font-size:13px;color:var(--violet);background:rgba(128,61,255,.08);padding:3px 9px;border-radius:8px;white-space:nowrap}
+.pillar h4{font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px}
+.pillar p{color:var(--muted);font-size:13.5px;margin-top:3px}
+
+/* completion */
+.done-wrap{text-align:center}
+.burst{font-size:50px;margin-bottom:10px}
+.built{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:20px 0 24px}
+.built span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:700;font-size:13.5px;color:var(--ink);display:inline-flex;align-items:center;gap:7px}
+.built span .ck{color:#20b878;font-weight:900}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0 18px}
+.action{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:20px 16px;text-align:center;cursor:pointer;transition:.15s}
+.action:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.action .ai-ic{font-size:24px;margin-bottom:8px}
+.action b{display:block;font-size:15px;margin-bottom:4px}
+.action span{color:var(--muted);font-size:12.5px}
+.action.primary{border-color:var(--violet);background:rgba(128,61,255,.04)}
+.closer{margin-top:20px;font-size:16px;font-weight:700}
+@media(max-width:640px){.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top"><div class="topin">
+  <div class="brand"><span class="mark"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tl" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tl)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg></span>Threadline</div>
+  <div class="prog" id="prog"></div>
+  <button class="savebtn" id="saveBtn" title="Your progress is saved automatically">Save &amp; exit</button>
+</div></div>
+
+<div class="wrap" id="wrap"></div>
+
+<script src="threadline-brand.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'' };
+
+const PHASES=['Idea','Audience','Positioning','Voice','Pillars'];
+let step=0; // 0..4 phases, 5 = done
+
+const PILLARS=[
+  {n:'Think Clearly',c:'#803dff',mix:'30%',p:'Help your audience make stronger decisions before they create more content.'},
+  {n:'Behind the Work',c:'#3b82f6',mix:'25%',p:'Show the process and thinking that builds trust in how you operate.'},
+  {n:'Proof & Outcomes',c:'#22d3ee',mix:'25%',p:'Demonstrate the results and transformation people can expect.'},
+  {n:'Point of View',c:'#fb7185',mix:'20%',p:'Share the beliefs and takes that make your brand impossible to ignore.'},
+];
+const POSITIONING=[
+  {k:'Direction A',t:'The strategic partner',d:'Focused on clarity, structure, and expert guidance. You help people make sharper decisions.'},
+  {k:'Direction B',t:'The supportive companion',d:'Focused on relief, encouragement, and building together. You take the weight off.'},
+  {k:'Direction C',t:'The momentum engine',d:'Focused on movement, consistency, and turning ideas into action fast.'},
+];
+const VOICES=[
+  {l:'Polished',t:'Develop a repeatable content strategy aligned to your brand’s goals.'},
+  {l:'Warm',t:'Let’s build a content rhythm that actually works for you.'},
+  {l:'Bold',t:'Stop posting randomly. Build a system.'},
+  {l:'Playful',t:'Your blank content calendar has had enough power for one lifetime.'},
+];
+
+function renderProg(){
+  const p=$('#prog'); p.innerHTML='';
+  PHASES.forEach((name,i)=>{
+    const cls='pstep'+(i===step?' on':'')+(i<step||step===5?' done':'');
+    p.appendChild(el('div',cls,`<span>${name}</span><span class="b"></span>`));
+  });
+}
+
+/* ---------- reusable stage builder ---------- */
+function stage(inner){ const w=$('#wrap'); w.innerHTML=''; const s=el('div','stage on'); s.innerHTML=inner; w.appendChild(s); window.scrollTo({top:0,behavior:'smooth'}); return s; }
+function thinkThenReveal(container, buildCard){
+  const t=el('div','thinking','<span>Threadline is thinking</span><span class="dots"><i></i><i></i><i></i></span>');
+  container.appendChild(t);
+  setTimeout(()=>{ t.remove(); const card=buildCard(); container.appendChild(card); const nx=document.querySelector('.stage.on [data-next]'); if(nx)nx.style.display='inline-flex'; },850);
+}
+
+/* ---------- Phase 1: Idea ---------- */
+function p1(){
+  const s=stage(`
+    <div class="kick">✦ Let's start with your idea</div>
+    <h2 class="q">Tell us what you're <span class="grad-text">building.</span></h2>
+    <p class="lead">Type it, paste rough notes, think out loud—however it comes out. We'll find the thread together.</p>
+    <div class="field"><label>What's it called? <span style="color:var(--faint);font-weight:500">(a working name is fine)</span></label>
+      <input id="name" placeholder="e.g. Still Skincare" value="${esc(state.name)}">
+      <div class="hint">Don't overthink it—you can rename it anytime.</div>
+    </div>
+    <div class="field"><label>What are you building?</label>
+      <textarea id="idea" placeholder="e.g. I'm starting a skincare brand for women over 40 who feel overwhelmed by 10-step routines and just want something simple that works.">${esc(state.idea)}</textarea>
+      <div class="hint">A few sentences is plenty. The more honest, the better.</div>
+    </div>
+    <div class="field"><label>Why did you decide to create this? <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <textarea id="why" placeholder="What made you feel this needed to exist?">${esc(state.why)}</textarea>
+    </div>
+    <div id="reflect"></div>
+    <div class="nav">
+      <button class="btn ghost" data-next style="display:none" onclick="adv(1,p2)">Continue →</button>
+      <div class="grow"></div>
+      <button class="btn solid" id="go1">Let's look at this together</button>
+    </div>`);
+  $('#go1').onclick=()=>{
+    state.name=$('#name').value.trim(); state.idea=$('#idea').value.trim(); state.why=$('#why').value.trim();
+    if(!state.idea){ $('#idea').focus(); return; }
+    $('#go1').style.display='none';
+    thinkThenReveal($('#reflect'), ()=>{
+      const kw=findKeyword(state.idea);
+      const card=el('div','ai');
+      card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Threadline</div>
+        <p>Here's what I'm hearing: you're building <b>${esc(trimIdea(state.idea))}</b>.</p>
+        ${kw?`<p class="soft">You mentioned <b>"${esc(kw)}"</b> — that feels central. Is it the <b>product benefit</b>, the <b>brand personality</b>, or both? Hold that thought; it'll shape everything downstream.</p>`:`<p class="soft">There's a real thread here. Let's pull on it.</p>`}`;
+      return card;
+    });
+  };
+}
+
+/* ---------- Phase 2: Audience ---------- */
+function p2(){ renderProg();
+  const s=stage(`
+    <div class="kick">✦ Who it's for</div>
+    <h2 class="q">Now, who are we <span class="grad-text">building for?</span></h2>
+    <p class="lead">Let's get past "women 25–45." The sharper this is, the more your content will land.</p>
+    <div class="field"><label>Who do you most want to help?</label><input id="audWho" placeholder="e.g. solo founders doing their own marketing" value="${esc(state.audWho)}"></div>
+    <div class="field"><label>What's making that hard for them right now?</label><input id="audPain" placeholder="e.g. plenty of ideas, no system to develop them" value="${esc(state.audPain)}"></div>
+    <div class="field"><label>What are they tired of hearing from brands like yours?</label><input id="audTired" placeholder="e.g. 'just post more' / generic AI content" value="${esc(state.audTired)}"></div>
+    <div id="reflect"></div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(0,p1)">← Back</button>
+      <button class="btn ghost" data-next style="display:none" onclick="adv(2,p3)">Continue →</button>
+      <div class="grow"></div>
+      <button class="btn solid" id="go2">Meet my customer</button>
+    </div>`);
+  renderProg();
+  $('#go2').onclick=()=>{
+    state.audWho=$('#audWho').value.trim(); state.audPain=$('#audPain').value.trim(); state.audTired=$('#audTired').value.trim();
+    if(!state.audWho){ $('#audWho').focus(); return; }
+    $('#go2').style.display='none';
+    thinkThenReveal($('#reflect'), ()=>{
+      const card=el('div','ai');
+      card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Here's who I picture</div>
+        <div class="persona"><div class="pn"><span class="av"></span>Meet Jamie</div>
+          <p>Jamie is ${esc(state.audWho||'building something real')}, and ${esc(state.audPain||'the ideas are there — the structure isn\'t')}. She doesn't lack ideas; she lacks a system for developing them${state.audTired?`, and she's tired of ${esc(state.audTired)}`:''}. She wants help — but not content that erases her voice.</p></div>
+        <p class="soft" style="margin-top:12px">Does this feel like her?</p>
+        <div class="verdicts">
+          <button class="verdict">That's exactly right</button>
+          <button class="verdict">Somewhat right</button>
+          <button class="verdict">Too broad</button>
+          <button class="verdict">Missing something</button>
+        </div>`;
+      card.querySelectorAll('.verdict').forEach(b=>b.onclick=()=>{ card.querySelectorAll('.verdict').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.persona=b.textContent; });
+      return card;
+    });
+  };
+}
+
+/* ---------- Phase 3: Positioning ---------- */
+function p3(){ renderProg();
+  stage(`
+    <div class="kick">✦ Your angle</div>
+    <h2 class="q">Why this brand, <span class="grad-text">for this audience?</span></h2>
+    <p class="lead">Finish a few sentences — instinct first, don't overthink.</p>
+    <div class="field"><label>We believe…</label><input id="believe" placeholder="…the hard part isn't posting, it's knowing what to say." value="${esc(state.believe)}"></div>
+    <div class="field"><label>The industry gets this wrong when…</label><input id="wrong" placeholder="…it treats content like a volume game." value="${esc(state.wrong)}"></div>
+    <div class="field"><label>After working with us, people feel…</label><input id="feel" placeholder="…clear, confident, and back in control." value="${esc(state.feel)}"></div>
+    <div id="reflect"></div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(1,p2)">← Back</button>
+      <button class="btn ghost" data-next style="display:none" onclick="adv(3,p4)">Continue →</button>
+      <div class="grow"></div>
+      <button class="btn solid" id="go3">Show me directions</button>
+    </div>`);
+  renderProg();
+  $('#go3').onclick=()=>{
+    state.believe=$('#believe').value.trim(); state.wrong=$('#wrong').value.trim(); state.feel=$('#feel').value.trim();
+    $('#go3').style.display='none';
+    thinkThenReveal($('#reflect'), ()=>{
+      const card=el('div','ai');
+      card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Three ways to stand</div>
+        <p class="soft">There are a few strong directions inside what you said. None is wrong — they lead to different brands. Which pulls you?</p>
+        <div class="choices">${POSITIONING.map((d,i)=>`<button class="choice" data-i="${i}"><div class="cl">${d.k}</div><div class="ct">${d.t}</div><div class="cd">${d.d}</div></button>`).join('')}</div>`;
+      card.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{ card.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.positioning=POSITIONING[+b.dataset.i].t; });
+      return card;
+    });
+  };
+}
+
+/* ---------- Phase 4: Voice ---------- */
+function p4(){ renderProg();
+  stage(`
+    <div class="kick">✦ How you sound</div>
+    <h2 class="q">Let's make it <span class="grad-text">sound like you.</span></h2>
+    <p class="lead">Same message, four voices. Which one feels most like the brand you're building?</p>
+    <div class="choices" id="voices">${VOICES.map((v,i)=>`<button class="sample" data-i="${i}"><div class="sl">${v.l}</div><div class="stext">${v.t}</div></button>`).join('')}</div>
+    <div class="row2" style="margin-top:18px">
+      <div class="field" style="margin:0"><label>Three words that describe your brand</label><input id="words" placeholder="warm, sharp, honest" value="${esc(state.words)}"></div>
+      <div class="field" style="margin:0"><label>Three it should never be</label><input id="never" placeholder="corporate, salesy, generic" value="${esc(state.neverWords)}"></div>
+    </div>
+    <div id="reflect"></div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(2,p3)">← Back</button>
+      <button class="btn ghost" data-next style="display:none" onclick="adv(4,p5)">Continue →</button>
+      <div class="grow"></div>
+      <button class="btn solid" id="go4">Build my voice</button>
+    </div>`);
+  renderProg();
+  document.querySelectorAll('#voices .sample').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#voices .sample').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.voicePick=VOICES[+b.dataset.i].l; });
+  $('#go4').onclick=()=>{
+    state.words=$('#words').value.trim(); state.neverWords=$('#never').value.trim();
+    if(!state.voicePick){ document.querySelector('#voices').scrollIntoView({behavior:'smooth'}); return; }
+    $('#go4').style.display='none';
+    thinkThenReveal($('#reflect'), ()=>{
+      const v=state.voicePick; const card=el('div','ai');
+      const samples={
+        Polished:['Build a content system that reflects your strategy.','A clearer way to plan what you publish.'],
+        Warm:['Let’s turn what you already know into content that feels like you.','You bring the ideas — we’ll help you shape them.'],
+        Bold:['Stop guessing what to post. Start building a system.','Your best ideas deserve better than a blank calendar.'],
+        Playful:['Your ideas called. They’re ready to be more than notes.','Less staring at the calendar, more building.'],
+      }[v]||['','' ];
+      card.innerHTML=`<div class="who"><span class="mark">${MARK}</span> Your voice, drafted</div>
+        <p>You lead with a <b>${esc(v.toLowerCase())}</b> voice${state.words?`, built on <b>${esc(state.words)}</b>`:''}${state.neverWords?`, and never <b>${esc(state.neverWords)}</b>`:''}.</p>
+        <p class="soft">Here's how that sounds in the wild — does this feel like you?</p>
+        <div class="sample" style="cursor:default;margin-top:8px"><div class="sl">Sample headline</div><div class="stext">${esc(samples[0])}</div></div>
+        <div class="sample" style="cursor:default;margin-top:8px"><div class="sl">Sample caption</div><div class="stext" style="font-weight:500;font-size:14.5px">${esc(samples[1])}</div></div>`;
+      return card;
+    });
+  };
+}
+
+/* ---------- Phase 5: Pillars ---------- */
+function p5(){ renderProg();
+  stage(`
+    <div class="kick">✦ What you'll be known for</div>
+    <h2 class="q">Here are your <span class="grad-text">content pillars.</span></h2>
+    <p class="lead">Based on everything so far, these are the threads worth pulling. Keep what fits — rename, remove, or ask for alternatives.</p>
+    <div id="pillars">${PILLARS.map((p,i)=>pillarHTML(p,i)).join('')}</div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(3,p4)">← Back</button>
+      <div class="grow"></div>
+      <button class="btn solid" onclick="adv(5,done)">These look right →</button>
+    </div>`);
+  renderProg();
+  bindPillars();
+}
+function pillarHTML(p,i){ return `<div class="pillar" data-i="${i}"><div class="pc" style="background:${p.c}">${p.n[0]}</div><div style="flex:1"><h4>${esc(p.n)} <span class="pmix">${p.mix}</span></h4><p>${esc(p.p)}</p></div><button class="verdict" data-del title="Remove">✕</button></div>`; }
+function bindPillars(){ document.querySelectorAll('#pillars .pillar [data-del]').forEach(b=>b.onclick=e=>{ e.target.closest('.pillar').remove(); }); }
+
+/* ---------- Completion ---------- */
+function done(){ step=5; renderProg(); try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand) saveBrand(compileFromBuild(state, PILLARS)); }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+  const built=['Positioning','Audience profile','Brand voice','Content pillars','Visual direction'];
+  stage(`<div class="done-wrap">
+    <div class="burst">🎉</div>
+    <div class="kick">Foundation ready</div>
+    <h2 class="q" style="margin-top:10px">${state.name?`<b>${esc(state.name)}</b>'s foundation`:'Your brand foundation'} <span class="grad-text">is ready.</span></h2>
+    <p class="lead" style="max-width:44ch;margin:12px auto 0">${state.positioning?`We shaped this around <b>${esc(state.positioning)}</b>${state.voicePick?`, in a <b>${esc(state.voicePick.toLowerCase())}</b> voice`:''}.`:'Threadline has pulled your thinking into a working foundation.'}</p>
+    <div class="built">${built.map(b=>`<span><span class="ck">✓</span> ${b}</span>`).join('')}</div>
+    <div style="max-width:470px;margin:26px auto 0">
+      <p style="font-size:17.5px;font-weight:800;margin-bottom:8px">We've built your foundation. Let's <span class="grad-text">review it together.</span></p>
+      <p style="color:var(--muted);font-size:14.5px;margin-bottom:22px">You'll approve each piece—positioning, audience, voice, pillars, visuals—one slide at a time. Then Threadline activates your content engine.</p>
+      <button class="btn solid" style="padding:15px 30px;font-size:16px" onclick="location.href='threadline-review.html'">Review my brand foundation →</button>
+    </div>
+  </div>`);
+  renderProg();
+}
+
+const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="url(#tl)" stroke-width="3.4" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
+function trimIdea(s){ s=s.trim().replace(/[.!?,;:\s]+$/,''); return s.length>140?s.slice(0,140)+'…':s; }
+function findKeyword(s){ const kws=['simplicity','simple','relief','overwhelm','overwhelmed','calm','confidence','clarity','trust','community','honest','effortless','support','momentum','freedom']; const low=s.toLowerCase(); for(const k of kws){ if(low.includes(k)) return k; } return ''; }
+
+/* ---------- save / resume ---------- */
+const SAVE_KEY='threadline.build';
+const CAP={name:'name',idea:'idea',why:'why',audWho:'audWho',audPain:'audPain',audTired:'audTired',believe:'believe',wrong:'wrong',feel:'feel',words:'words',never:'neverWords'};
+function captureCurrent(){ for(const id in CAP){ const e=document.getElementById(id); if(e) state[CAP[id]]=e.value.trim(); } }
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({state,step,at:Date.now()})); }catch(e){} }
+function loadSaved(){ try{ const r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function saveProgress(){ captureCurrent(); persist(); toast('Progress saved — pick up anytime.'); }
+function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+function resetState(){ for(const k in state) state[k]=''; }
+const PHASE_FN=[p1,p2,p3,p4,p5,done];
+function go(n){ step=Math.max(0,Math.min(5,n)); renderProg(); PHASE_FN[step](); }
+function adv(n,fn){ captureCurrent(); step=n; persist(); (fn||PHASE_FN[n])(); }
+function resumePrompt(saved){
+  stage(`<div style="text-align:center;padding-top:26px">
+    <div class="kick" style="justify-content:center">✦ Welcome back</div>
+    <h2 class="q" style="margin-top:10px">Pick up where you <span class="grad-text">left off?</span></h2>
+    <p class="lead" style="max-width:46ch;margin:12px auto 26px">You were on <b>${esc(PHASES[Math.min(saved.step||0,4)])}</b>. Everything you told Threadline is saved and waiting.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn ghost" id="fresh">Start over</button>
+      <button class="btn solid" id="resume">Resume →</button>
+    </div></div>`);
+  document.getElementById('resume').onclick=()=>{ Object.assign(state, saved.state||{}); go(saved.step||0); };
+  document.getElementById('fresh').onclick=()=>{ try{localStorage.removeItem(SAVE_KEY);}catch(e){} resetState(); go(0); };
+}
+
+document.getElementById('saveBtn').onclick=saveProgress;
+const _saved=loadSaved();
+if(_saved && _saved.state && (_saved.state.idea || (_saved.step||0)>0)){ renderProg(); resumePrompt(_saved); }
+else { renderProg(); p1(); }
+</script>
+</body>
+</html>

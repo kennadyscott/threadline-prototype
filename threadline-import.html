@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Bring your brand in</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --green:#20b878;--amber:#f5a524;
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);--shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;
+  background:radial-gradient(1100px 700px at 82% -12%,#efeaff 0,transparent 55%),radial-gradient(900px 700px at -12% 12%,#e6f2ff 0,transparent 55%),var(--bg);
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em;line-height:1.12}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+textarea,input{font-family:inherit}
+.grad-text{background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mark{width:30px;height:30px;flex-shrink:0}.mark svg{width:100%;height:100%;display:block}
+
+.top{position:sticky;top:0;z-index:20;background:rgba(247,248,251,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.topin{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:14px 24px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:17px}
+.prog{margin-left:auto;display:flex;gap:6px;align-items:center}
+.pstep{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--faint)}
+.pstep .b{width:22px;height:6px;border-radius:4px;background:var(--line)}
+.pstep.on .b{background:var(--grad2)}.pstep.on{color:var(--violet)}
+.pstep.done .b{background:var(--violet);opacity:.5}
+@media(max-width:640px){.pstep span{display:none}}
+.savebtn{margin-left:14px;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px;color:var(--muted);border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:10px;transition:.14s;white-space:nowrap}
+.savebtn:hover{border-color:var(--violet);color:var(--violet)}
+.savebtn::before{content:"↓";font-weight:900}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.wrap{max-width:680px;margin:0 auto;padding:36px 24px 90px}
+.stage{display:none;animation:fade .35s ease}.stage.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.kick{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
+h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
+.lead{color:var(--muted);font-size:16.5px;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:700;font-size:14.5px;margin-bottom:8px}
+.field textarea,.field input{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:14px 15px;font-size:15.5px;color:var(--ink);outline:none;transition:.12s}
+.field textarea{min-height:88px;resize:vertical;line-height:1.55}
+.field textarea:focus,.field input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(128,61,255,.12)}
+.hint{color:var(--faint);font-size:13px;margin-top:7px}
+.urlrow{display:flex;gap:10px}.urlrow input{flex:1}
+.analyze{white-space:nowrap;border:1.5px solid var(--violet);color:var(--violet);background:rgba(128,61,255,.05);border-radius:12px;padding:0 16px;font-weight:800;font-size:14px;transition:.14s}
+.analyze:hover{background:rgba(128,61,255,.1)}
+.analyze:disabled{opacity:.6;cursor:default}
+.drop{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:14px;padding:14px 16px;background:var(--surface);cursor:pointer;transition:.14s}
+.drop:hover{border-color:var(--violet)}
+.drop .di{width:38px;height:38px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;font-size:18px}
+.drop .dt b{display:block;font-size:14.5px}.drop .dt span{font-size:12.5px;color:var(--faint)}
+.drop.filled{border-style:solid;border-color:var(--green);background:rgba(32,184,120,.04)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:13px;font-weight:800;font-size:15.5px;transition:.15s}
+.btn.solid{background:var(--grad2);color:#fff;box-shadow:0 8px 20px rgba(128,61,255,.26)}
+.btn.solid:hover{filter:brightness(1.06)}.btn.solid:disabled{opacity:.5;cursor:not-allowed;filter:none}
+.btn.ghost{color:var(--muted)}.btn.ghost:hover{color:var(--ink)}
+.nav{display:flex;align-items:center;gap:12px;margin-top:26px}.nav .grow{flex:1}
+
+.ai{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--violet);border-radius:16px;padding:18px 20px;margin-top:22px;box-shadow:var(--shadow-sm);animation:fade .4s ease}
+.ai .who{display:flex;align-items:center;gap:9px;font-weight:800;font-size:13px;color:var(--violet);margin-bottom:10px}
+.ai .who .mark{width:20px;height:20px}
+.ai p{font-size:15.5px;color:var(--ink);margin-bottom:10px;line-height:1.55}.ai p b{font-weight:800}
+.thinking{display:flex;align-items:center;gap:9px;color:var(--violet);font-weight:700;font-size:14px;margin-top:22px}
+.dots{display:inline-flex;gap:4px}.dots i{width:6px;height:6px;border-radius:50%;background:var(--violet);animation:bob 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+
+/* snapshot card */
+.snap{border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:6px}
+.snap .sh{background:linear-gradient(135deg,rgba(128,61,255,.07),rgba(59,130,246,.05));padding:20px;border-bottom:1px solid var(--line-2)}
+.snap .sh .bn{font-family:'Satoshi';font-weight:900;font-size:22px}
+.snap .sh .bs{color:var(--muted);font-size:14.5px;margin-top:4px}
+.snap .sb{padding:18px 20px}
+.srow{padding:13px 0;border-bottom:1px solid var(--line-2)}.srow:last-child{border-bottom:none}
+.srow .sl{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.tags{display:flex;flex-wrap:wrap;gap:7px}
+.tag{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:5px 11px;font-weight:700;font-size:13px;color:var(--ink)}
+.tag .x{color:var(--faint);font-weight:900;cursor:pointer;font-size:14px;line-height:1}.tag .x:hover{color:var(--coral)}
+.tag.src{background:rgba(128,61,255,.06);border-color:rgba(128,61,255,.15);color:var(--violet)}
+.swatches{display:flex;gap:8px}
+.sw{width:34px;height:34px;border-radius:9px;border:1px solid rgba(0,0,0,.08)}
+.srow .sv{font-size:15px;color:var(--ink)}
+
+/* audit */
+.auditcard{border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm);padding:22px;margin-top:6px}
+.scorewrap{display:flex;align-items:center;gap:20px;padding-bottom:20px;border-bottom:1px solid var(--line-2);margin-bottom:18px}
+.ring{width:96px;height:96px;flex-shrink:0}
+.ring circle{fill:none;stroke-width:10}.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:url(#tl);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1s ease}
+.ring-txt{font-family:'Satoshi';font-weight:900;font-size:26px;fill:var(--ink)}
+.scoremeta .st{font-family:'Satoshi';font-weight:900;font-size:19px}
+.scoremeta .sd{color:var(--muted);font-size:14px;margin-top:3px}
+.dim{margin:12px 0}
+.dim .dr{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:6px}
+.dim .dr .dv{font-weight:800}
+.bar{height:8px;border-radius:5px;background:var(--surface-2);overflow:hidden}
+.barfill{height:100%;border-radius:5px;transition:width 1s ease}
+.audlists{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+@media(max-width:600px){.audlists{grid-template-columns:1fr}}
+.audcol h4{font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.audcol.str h4{color:var(--green)}.audcol.gap h4{color:var(--amber)}
+.aitem{display:flex;gap:9px;padding:11px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;line-height:1.45}
+.aitem .ic{font-weight:900;flex-shrink:0}
+.audcol.str .aitem{background:rgba(32,184,120,.06)}.audcol.str .ic{color:var(--green)}
+.audcol.gap .aitem{background:rgba(245,165,36,.07);flex-direction:column;gap:8px}
+.audcol.gap .ic{color:var(--amber)}
+.aitem .fix{align-self:flex-start;border:1.5px solid var(--violet);color:var(--violet);background:var(--surface);border-radius:9px;padding:6px 12px;font-weight:800;font-size:12.5px;transition:.14s}
+.aitem .fix:hover{background:var(--violet);color:#fff}
+.aitem .gt{font-weight:700;display:flex;gap:9px}
+
+/* completion */
+.done-wrap{text-align:center}
+.burst{font-size:48px;margin-bottom:6px}
+.built{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 22px}
+.built span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:700;font-size:13.5px;color:var(--ink);display:inline-flex;align-items:center;gap:7px}
+.built span .ck{color:var(--green);font-weight:900}
+.nextbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;text-align:left;margin:0 auto 22px;max-width:440px}
+.nextbox .nl{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+.nextbox .ni{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14.5px;font-weight:600}
+.nextbox .ni .nk{color:var(--violet);font-weight:900}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0 18px}
+.action{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:20px 16px;text-align:center;cursor:pointer;transition:.15s}
+.action:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.action .ai-ic{font-size:24px;margin-bottom:8px}
+.action b{display:block;font-size:15px;margin-bottom:4px}.action span{color:var(--muted);font-size:12.5px}
+.action.primary{border-color:var(--violet);background:rgba(128,61,255,.04)}
+.closer{margin-top:18px;font-size:16px;font-weight:700}
+@media(max-width:640px){.actions{grid-template-columns:1fr}}
+svg.defs{position:absolute;width:0;height:0}
+</style>
+</head>
+<body>
+<svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+<div class="top"><div class="topin">
+  <div class="brand"><span class="mark">__MARK__</span>Threadline</div>
+  <div class="prog" id="prog"></div>
+  <button class="savebtn" id="saveBtn" title="Your progress is saved automatically">Save &amp; exit</button>
+</div></div>
+
+<div class="wrap" id="wrap"></div>
+
+<script src="threadline-brand.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
+document.querySelector('.brand .mark').innerHTML=MARK;
+
+const state={ name:'', url:'', logo:'', voice:'', content:'', colors:'' };
+let snap=null, audit=null, analyzed=false;
+const PHASES=['Import','Snapshot','Audit'];
+let step=0; // 0 import,1 snapshot,2 audit,3 done
+
+function renderProg(){ const p=$('#prog'); p.innerHTML='';
+  PHASES.forEach((name,i)=>{ const cls='pstep'+(i===step?' on':'')+(i<step||step===3?' done':''); p.appendChild(el('div',cls,`<span>${name}</span><span class="b"></span>`)); });
+}
+function stage(inner){ const w=$('#wrap'); w.innerHTML=''; const s=el('div','stage on'); s.innerHTML=inner; w.appendChild(s); window.scrollTo({top:0,behavior:'smooth'}); return s; }
+function thinkThenReveal(container, label, buildCard){
+  const t=el('div','thinking',`<span>${label}</span><span class="dots"><i></i><i></i><i></i></span>`);
+  container.appendChild(t);
+  setTimeout(()=>{ t.remove(); container.appendChild(buildCard()); const nx=document.querySelector('.stage.on [data-next]'); if(nx)nx.style.display='inline-flex'; },950);
+}
+function domain(u){ return (u||'').replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0]; }
+
+/* ---------- Phase 1: Import intake ---------- */
+function p1(){ renderProg();
+  stage(`
+    <div class="kick">✦ Bring your brand in</div>
+    <h2 class="q">Let's get your brand <span class="grad-text">into Threadline.</span></h2>
+    <p class="lead">Add whatever you already have. Threadline will organize it, learn your voice, and show you exactly where it's strong—and where it isn't.</p>
+    <div class="field"><label>Brand name</label><input id="name" placeholder="e.g. Still Skincare" value="${esc(state.name)}"></div>
+    <div class="field"><label>Website <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <div class="urlrow"><input id="url" placeholder="stillskincare.com" value="${esc(state.url)}"><button class="analyze" id="analyze">✦ Analyze my site</button></div>
+      <div class="hint" id="analyzeHint">Threadline will read your site to pull your voice, colors, and themes.</div>
+    </div>
+    <div class="field"><label>Logo <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <div class="drop" id="drop"><div class="di">🖼️</div><div class="dt"><b id="dropName">Upload your logo</b><span>PNG, SVG or JPG</span></div></div>
+    </div>
+    <div class="field"><label>Your brand voice, guidelines, or notes <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <textarea id="voice" placeholder="Paste anything—your tone rules, mission, about page, style notes...">${esc(state.voice)}</textarea></div>
+    <div class="field"><label>A few recent posts or captions <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <textarea id="content" placeholder="Paste 2–3 posts. Threadline learns your themes from what you actually publish.">${esc(state.content)}</textarea></div>
+    <div class="field"><label>Brand colors <span style="color:var(--faint);font-weight:500">(optional)</span></label>
+      <input id="colors" placeholder="#0F172A, #803DFF, #F7F8FB" value="${esc(state.colors)}"></div>
+    <div class="nav">
+      <div class="grow"></div>
+      <button class="btn solid" id="go1">Organize my brand →</button>
+    </div>`);
+  renderProg();
+  // logo upload (mocked)
+  $('#drop').onclick=()=>{ const d=$('#drop'); state.logo='logo.svg'; d.classList.add('filled'); d.querySelector('.di').textContent='✓'; $('#dropName').textContent='logo.svg added'; };
+  // analyze site (mocked reflect)
+  $('#analyze').onclick=()=>{
+    const u=$('#url').value.trim(); if(!u){ $('#url').focus(); return; } state.url=u;
+    const b=$('#analyze'); b.disabled=true; b.textContent='Reading…';
+    setTimeout(()=>{
+      analyzed=true;
+      if(!$('#voice').value.trim()) $('#voice').value='Warm, plain-spoken, and reassuring. We cut the jargon and the 10-step routines. Confident but never clinical.';
+      if(!$('#colors').value.trim()) $('#colors').value='#1B2A4A, #803DFF, #F4EFE9';
+      b.textContent='✓ Pulled from '+domain(u); b.style.borderColor='var(--green)'; b.style.color='var(--green)';
+      $('#analyzeHint').innerHTML='<b style="color:var(--green)">Done.</b> I pulled your voice and colors from '+esc(domain(u))+'. Add anything else, or organize what we’ve got.';
+    },1100);
+  };
+  $('#go1').onclick=()=>{ captureCurrent(); if(!state.name.trim()){ $('#name').focus(); return; } snap=buildSnap(); adv(1,p2); };
+}
+
+/* ---------- build the extracted snapshot (mocked, tailored) ---------- */
+function buildSnap(){
+  const cols = (state.colors||'').split(/[,\s]+/).map(c=>c.trim()).filter(c=>/^#?[0-9a-f]{3,8}$/i.test(c)).map(c=>c[0]==='#'?c:'#'+c);
+  return {
+    name: state.name.trim()||'Your brand',
+    summary: 'A clean, modern brand built on simplicity and trust—helping people cut the noise and feel in control.',
+    voice: ['Warm','Clear','Confident','Unfussy'],
+    colors: cols.length?cols:['#1B2A4A','#803DFF','#F4EFE9'],
+    audience: 'Busy people who value simplicity over complexity and want to feel understood, not sold to.',
+    themes: ['Simplify your routine','Behind the brand','Real results','Myth-busting'],
+    fromSite: analyzed
+  };
+}
+
+/* ---------- Phase 2: Snapshot ---------- */
+function p2(){ renderProg();
+  stage(`
+    <div class="kick">✦ Here's what I found</div>
+    <h2 class="q">This is your brand, <span class="grad-text">organized.</span></h2>
+    <p class="lead">I read everything you gave me${snap.fromSite?' (plus your site)':''} and pulled it into one place. Trim anything that's off—then we'll pressure-test it.</p>
+    <div id="reveal"></div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(0,p1)">← Back</button>
+      <button class="btn ghost" data-next style="display:none" onclick="adv(2,p3)">Run my brand audit →</button>
+      <div class="grow"></div>
+    </div>`);
+  renderProg();
+  thinkThenReveal($('#reveal'),'Threadline is reading your brand', ()=>{
+    const c=el('div','snap');
+    c.innerHTML=`
+      <div class="sh"><div class="bn">${esc(snap.name)}</div><div class="bs">${esc(snap.summary)}</div></div>
+      <div class="sb">
+        <div class="srow"><div class="sl">Brand voice</div><div class="tags" data-set="voice">${snap.voice.map(v=>tagHTML(v,snap.fromSite)).join('')}</div></div>
+        <div class="srow"><div class="sl">Colors</div><div class="swatches">${snap.colors.map(c=>`<div class="sw" style="background:${esc(c)}" title="${esc(c)}"></div>`).join('')}</div></div>
+        <div class="srow"><div class="sl">Who it's for</div><div class="sv">${esc(snap.audience)}</div></div>
+        <div class="srow"><div class="sl">Themes I noticed in your content</div><div class="tags" data-set="themes">${snap.themes.map(t=>tagHTML(t,true)).join('')}</div></div>
+      </div>`;
+    bindTags(c);
+    return c;
+  });
+}
+function tagHTML(t,src){ return `<span class="tag${src?' src':''}">${esc(t)}<span class="x" data-x>×</span></span>`; }
+function bindTags(root){ root.querySelectorAll('[data-x]').forEach(x=>x.onclick=e=>e.target.closest('.tag').remove()); }
+
+/* ---------- Phase 3: Audit ---------- */
+function buildAudit(){
+  return {
+    score:64, headline:'Strong brand — no system yet.',
+    sub:'Your identity and voice are real assets. What’s missing is a repeatable way to turn them into content—which is exactly what Threadline adds.',
+    dims:[
+      {n:'Visual identity',v:85,c:'var(--green)'},
+      {n:'Brand voice',v:78,c:'var(--green)'},
+      {n:'Audience definition',v:62,c:'var(--amber)'},
+      {n:'Positioning clarity',v:52,c:'var(--amber)'},
+      {n:'Content system',v:28,c:'var(--coral)'},
+    ],
+    strengths:[
+      'Your visual identity is consistent and recognizable.',
+      'Your voice is distinct, warm, and easy to spot.',
+    ],
+    gaps:[
+      {t:'Positioning isn’t sharp yet',d:'What makes you different reads as "simple & trustworthy"—true, but not ownable. Let’s sharpen the one thing only you can say.',cta:'Sharpen it',next:'Sharpen your positioning into one ownable line'},
+      {t:'No content system',d:'You have themes but no repeatable engine. This is where most of your time leaks—and where Threadline helps most.',cta:'Build my pillars',next:'Build a repeatable content system — pillars + calendar'},
+    ]
+  };
+}
+function p3(){ renderProg();
+  stage(`
+    <div class="kick">✦ Brand audit</div>
+    <h2 class="q">Here's where you're <span class="grad-text">strong—and where you're not.</span></h2>
+    <p class="lead">An honest read on what you've built. The gaps aren't criticism—they're your fastest wins.</p>
+    <div id="reveal"></div>
+    <div class="nav">
+      <button class="btn ghost" data-back onclick="adv(1,p2)">← Back</button>
+      <button class="btn ghost" data-next style="display:none" onclick="adv(3,done)">See my foundation →</button>
+      <div class="grow"></div>
+    </div>`);
+  renderProg();
+  audit=buildAudit();
+  thinkThenReveal($('#reveal'),'Threadline is auditing your brand', ()=>{
+    const C=2*Math.PI*43; const off=C*(1-audit.score/100);
+    const c=el('div','auditcard');
+    c.innerHTML=`
+      <div class="scorewrap">
+        <svg class="ring" viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="43"/><circle class="fg" cx="50" cy="50" r="43" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${C.toFixed(1)}"/><text class="ring-txt" x="50" y="58" text-anchor="middle">${audit.score}</text></svg>
+        <div class="scoremeta"><div class="st">${esc(audit.headline)}</div><div class="sd">${esc(audit.sub)}</div></div>
+      </div>
+      <div class="dims">${audit.dims.map(d=>`<div class="dim"><div class="dr"><span>${esc(d.n)}</span><span class="dv" style="color:${d.c}">${d.v}</span></div><div class="bar"><div class="barfill" style="width:0;background:${d.c}" data-w="${d.v}"></div></div></div>`).join('')}</div>
+      <div class="audlists">
+        <div class="audcol str"><h4>✓ Strengths</h4>${audit.strengths.map(s=>`<div class="aitem"><span class="ic">✓</span><span>${esc(s)}</span></div>`).join('')}</div>
+        <div class="audcol gap"><h4>△ Gaps to strengthen</h4>${audit.gaps.map(g=>`<div class="aitem"><div class="gt"><span class="ic">△</span><span>${esc(g.t)}</span></div><span style="color:var(--muted);font-size:13.5px;line-height:1.45">${esc(g.d)}</span><button class="fix">${esc(g.cta)} →</button></div>`).join('')}</div>
+      </div>`;
+    setTimeout(()=>c.querySelectorAll('.barfill').forEach(b=>{ b.style.width=b.dataset.w+'%'; }),80);
+    setTimeout(()=>{ const fg=c.querySelector('.ring .fg'); if(fg) fg.style.strokeDashoffset=off.toFixed(1); },120);
+    return c;
+  });
+}
+
+/* ---------- Completion ---------- */
+function done(){ step=3; renderProg(); try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand) saveBrand(compileFromImport(state, snap)); }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+  const captured=['Logo','Colors','Brand voice','Audience','Content themes'];
+  stage(`<div class="done-wrap">
+    <div class="burst">✨</div>
+    <div class="kick">Brand imported</div>
+    <h2 class="q" style="margin-top:8px">${esc(snap?snap.name:'Your brand')} is <span class="grad-text">in Threadline.</span></h2>
+    <p class="lead" style="max-width:46ch;margin:12px auto 0">Everything you had is organized and scored. Here's what's captured—and the two moves that'll strengthen it fastest.</p>
+    <div class="built">${captured.map(b=>`<span><span class="ck">✓</span> ${b}</span>`).join('')}</div>
+    <div class="nextbox"><div class="nl">△ Suggested next, from your audit</div>
+      ${(audit?audit.gaps:[]).map(g=>`<div class="ni"><span class="nk">→</span> ${esc(g.next||g.t)}</div>`).join('')}
+    </div>
+    <div style="max-width:470px;margin:22px auto 0">
+      <p style="font-size:17.5px;font-weight:800;margin-bottom:8px">Now let's <span class="grad-text">review it together.</span></p>
+      <p style="color:var(--muted);font-size:14.5px;margin-bottom:22px">You'll approve each piece—positioning, voice, pillars, visuals—one slide at a time. Then Threadline activates your content engine.</p>
+      <button class="btn solid" style="padding:15px 30px;font-size:16px" onclick="location.href='threadline-review.html'">Review my full brand →</button>
+    </div>
+  </div>`);
+  renderProg();
+}
+
+/* ---------- capture / save / resume ---------- */
+const SAVE_KEY='threadline.import';
+const CAP={name:'name',url:'url',voice:'voice',content:'content',colors:'colors'};
+function captureCurrent(){ for(const id in CAP){ const e=document.getElementById(id); if(e) state[CAP[id]]=e.value.trim(); } }
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({state,analyzed,step,at:Date.now()})); }catch(e){} }
+function loadSaved(){ try{ const r=localStorage.getItem(SAVE_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
+function saveProgress(){ captureCurrent(); persist(); toast('Progress saved — pick up anytime.'); }
+function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+function resetState(){ for(const k in state) state[k]=''; analyzed=false; }
+const PHASE_FN=[p1,p2,p3,done];
+function go(n){ step=Math.max(0,Math.min(3,n)); if(step>=1&&!snap) snap=buildSnap(); renderProg(); PHASE_FN[step](); }
+function adv(n,fn){ captureCurrent(); step=n; persist(); (fn||PHASE_FN[n])(); }
+function resumePrompt(saved){
+  stage(`<div style="text-align:center;padding-top:26px">
+    <div class="kick" style="justify-content:center">✦ Welcome back</div>
+    <h2 class="q" style="margin-top:10px">Pick up where you <span class="grad-text">left off?</span></h2>
+    <p class="lead" style="max-width:46ch;margin:12px auto 26px">You were on <b>${esc(PHASES[Math.min(saved.step||0,2)])}</b>. Everything you brought into Threadline is saved.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn ghost" id="fresh">Start over</button>
+      <button class="btn solid" id="resume">Resume →</button>
+    </div></div>`);
+  document.getElementById('resume').onclick=()=>{ Object.assign(state, saved.state||{}); analyzed=!!saved.analyzed; snap=buildSnap(); go(saved.step||0); };
+  document.getElementById('fresh').onclick=()=>{ try{localStorage.removeItem(SAVE_KEY);}catch(e){} resetState(); snap=null; go(0); };
+}
+
+document.getElementById('saveBtn').onclick=saveProgress;
+const _saved=loadSaved();
+if(_saved && _saved.state && (_saved.state.name || (_saved.step||0)>0)){ renderProg(); resumePrompt(_saved); }
+else { renderProg(); p1(); }
+</script>
+</body>
+</html>

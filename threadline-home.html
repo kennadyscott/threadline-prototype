@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Think it through. Build it out.</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;
+  --bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --grad:linear-gradient(120deg,#803dff,#3b82f6 55%,#22d3ee);
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);
+  --shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3{font-family:'Satoshi';font-weight:900;letter-spacing:-.025em;line-height:1.05}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* mark */
+.mark{width:34px;height:34px;flex-shrink:0}
+.mark svg{width:100%;height:100%;display:block}
+
+/* nav */
+nav{position:sticky;top:0;z-index:40;background:rgba(247,248,251,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line-2)}
+.navin{display:flex;align-items:center;gap:26px;padding:15px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;letter-spacing:-.02em}
+.navlinks{display:flex;gap:24px;margin-left:12px}
+.navlinks a{color:var(--muted);font-weight:600;font-size:14.5px}
+.navlinks a:hover{color:var(--ink)}
+.navr{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn{padding:11px 18px;border-radius:11px;font-weight:700;font-size:14.5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;gap:8px;transition:.15s;cursor:pointer}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--grad2);border-color:transparent;color:#fff;box-shadow:0 8px 20px rgba(128,61,255,.28)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.lg{padding:14px 24px;font-size:15.5px}
+
+/* hero */
+.hero{position:relative;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center;padding:70px 0 60px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);background:rgba(128,61,255,.08);border:1px solid rgba(128,61,255,.16);padding:6px 12px;border-radius:999px}
+.hero h1{font-size:clamp(34px,4.6vw,54px);margin:20px 0 18px;max-width:15ch;text-wrap:balance}
+.hero p.lede{font-size:19px;color:var(--muted);max-width:46ch;margin-bottom:26px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero .assure{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;color:var(--faint);font-size:13.5px;font-weight:600}
+.hero .assure span{display:inline-flex;align-items:center;gap:6px}
+.threadart{position:relative;height:360px}
+.threadart svg{width:100%;height:100%;overflow:visible}
+.glowdot{filter:drop-shadow(0 0 14px rgba(128,61,255,.7))}
+
+.trust{padding:8px 0 44px}
+.trust p{text-align:center;color:var(--faint);font-size:12.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.logos{display:flex;flex-wrap:wrap;justify-content:center;gap:34px;align-items:center;opacity:.72}
+.logos span{font-weight:800;font-size:17px;color:var(--muted);letter-spacing:-.01em}
+
+/* section shells */
+section{padding:64px 0}
+.sec-head{text-align:center;max-width:56ch;margin:0 auto 44px}
+.sec-head .kicker{color:var(--violet);font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.sec-head h2{font-size:clamp(26px,3.6vw,40px);margin:12px 0 12px;text-wrap:balance}
+.sec-head p{color:var(--muted);font-size:17.5px}
+
+/* the shift */
+.shift{background:var(--surface);border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2)}
+.shiftrow{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.shiftcard{border:1px solid var(--line);border-radius:18px;padding:26px;background:var(--surface)}
+.shiftcard.hot{background:var(--slate);color:#fff;border-color:transparent;box-shadow:var(--shadow)}
+.shiftcard .lab{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
+.shiftcard.hot .lab{color:#a5b4fc}
+.shiftcard h3{font-size:19px;margin-bottom:8px}
+.shiftcard p{font-size:14.5px;color:var(--muted)}
+.shiftcard.hot p{color:#cbd5e1}
+
+/* pillars */
+.pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.pillar{display:flex;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow-sm)}
+.pillar .ic{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;background:rgba(128,61,255,.08)}
+.pillar .ic svg{width:24px;height:24px}
+.pillar h3{font-size:18px;margin-bottom:6px}
+.pillar p{color:var(--muted);font-size:14.5px}
+.pillar .say{margin-top:10px;font-size:13.5px;font-weight:700;color:var(--violet)}
+
+/* how it works */
+.how{background:var(--surface);border-top:1px solid var(--line-2)}
+.flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:30px}
+.step{display:flex;align-items:center;gap:10px}
+.chip{padding:8px 15px;border-radius:11px;font-weight:800;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.chip.on{background:var(--grad2);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(128,61,255,.24)}
+.arrow{color:var(--faint);font-weight:800}
+.mock{max-width:920px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.mockbar{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--line-2);background:var(--surface-2)}
+.mockbar i{width:11px;height:11px;border-radius:50%;background:#d6dae6;display:inline-block}
+.mockbody{display:grid;grid-template-columns:220px 1fr 260px;gap:0;min-height:260px}
+.mcol{padding:18px;border-right:1px solid var(--line-2)}
+.mcol:last-child{border-right:none}
+.mcol .h{font-size:12px;font-weight:800;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.mline{background:var(--surface-2);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;margin-bottom:9px;font-size:13px;color:var(--ink);display:flex;gap:8px;align-items:center}
+.mdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mtag{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:6px;color:#fff}
+.mbtn{background:var(--grad2);color:#fff;font-weight:800;font-size:13px;text-align:center;padding:10px;border-radius:10px;margin-top:6px}
+
+/* audience */
+.aud{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.audcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px}
+.audcard .ic{font-size:22px;margin-bottom:12px}
+.audcard h3{font-size:16px;margin-bottom:6px}
+.audcard p{color:var(--muted);font-size:13.5px}
+
+/* quote */
+.quote{background:var(--slate);color:#fff}
+.quote .wrap{text-align:center;padding:20px 24px}
+.quote .qmark{font-size:44px;color:#7c5cff;font-weight:900;line-height:1}
+.quote blockquote{font-family:'Satoshi';font-weight:700;font-size:clamp(22px,3vw,30px);letter-spacing:-.02em;max-width:22ch;margin:10px auto 22px;line-height:1.25;text-wrap:balance}
+.quote .who{display:flex;align-items:center;justify-content:center;gap:12px;color:#cbd5e1;font-size:14px}
+.quote .av{width:40px;height:40px;border-radius:50%;background:var(--grad2)}
+.quote .who b{color:#fff}
+
+/* pricing */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch}
+.tier{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px;display:flex;flex-direction:column;box-shadow:var(--shadow-sm)}
+.tier.pop{border-color:var(--violet);box-shadow:0 20px 46px rgba(128,61,255,.18);position:relative}
+.tier.pop::before{content:'Most popular';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad2);color:#fff;font-size:11.5px;font-weight:800;padding:5px 13px;border-radius:999px}
+.tier .nm{font-family:'Satoshi';font-weight:900;font-size:18px}
+.tier .pr{font-family:'Satoshi';font-weight:900;font-size:40px;margin:10px 0 2px}
+.tier .pr span{font-size:15px;color:var(--faint);font-weight:700}
+.tier .desc{color:var(--muted);font-size:13.5px;margin-bottom:18px;min-height:38px}
+.tier ul{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;flex:1}
+.tier li{display:flex;gap:9px;font-size:14px}
+.tier li b{font-weight:800}
+.tier .ck{color:#20b878;font-weight:900}
+.tier .btn{width:100%;justify-content:center}
+.pricenote{text-align:center;color:var(--faint);font-size:13px;margin-top:24px}
+
+/* final cta */
+.final{padding:76px 24px}
+.finalbox{max-width:1140px;margin:0 auto;border-radius:28px;padding:60px 32px;text-align:center;color:#fff;position:relative;overflow:hidden;background:linear-gradient(120deg,#6d31e6,#3b82f6 60%,#22d3ee)}
+.finalbox h2{font-size:clamp(28px,4vw,42px);margin-bottom:12px;color:#fff}
+.finalbox p{opacity:.94;font-size:18px;max-width:44ch;margin:0 auto 26px}
+.finalbox .btn{background:#fff;color:var(--violet);border:none;font-weight:800}
+.finalbox .btn:hover{background:#f1ecff}
+
+footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint);font-size:13.5px}
+.footin{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.footin .brand{color:var(--ink)}
+.footin .grow{flex:1}
+
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr}.threadart{display:none}
+  .shiftrow,.pillars,.aud,.tiers{grid-template-columns:1fr}
+  .navlinks{display:none}.mockbody{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap navin">
+  <div class="brand"><span class="mark"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tl" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tl)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg></span>Threadline</div>
+  <div class="navlinks"><a href="#">Product</a><a href="#pillars">Solutions</a><a href="#pricing">Pricing</a><a href="#">Resources</a></div>
+  <div class="navr"><a class="btn ghost" href="threadline-app-home.html">Log in</a><a class="btn primary" href="threadline-onboarding.html">Start free</a></div>
+</div></nav>
+
+<header class="hero"><div class="wrap hero-grid">
+  <div>
+    <span class="eyebrow">✦ Your content thought partner</span>
+    <h1>You don't need more pressure to post. You need someone to <span class="grad-text">think with.</span></h1>
+    <p class="lede">Threadline helps you uncover ideas, shape them into a clear direction, and turn them into content that's ready to move.</p>
+    <div class="cta">
+      <a class="btn primary lg" href="threadline-onboarding.html">Start your free trial →</a>
+      <a class="btn lg" href="#how">See how it works</a>
+    </div>
+    <div class="assure"><span>✓ No credit card</span><span>✓ 14-day free trial</span><span>✓ Cancel anytime</span></div>
+  </div>
+  <div class="threadart">
+    <svg viewBox="0 0 460 360" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="l1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#803DFF" stop-opacity="0"/><stop offset="1" stop-color="#803DFF"/></linearGradient>
+        <linearGradient id="l2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3B82F6" stop-opacity="0"/><stop offset="1" stop-color="#3B82F6"/></linearGradient>
+        <linearGradient id="l3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22D3EE" stop-opacity="0"/><stop offset="1" stop-color="#22D3EE"/></linearGradient>
+        <linearGradient id="l4" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FB7185" stop-opacity="0"/><stop offset="1" stop-color="#FB7185"/></linearGradient>
+      </defs>
+      <g fill="none" stroke-width="2.4" stroke-linecap="round">
+        <path d="M0 60 C170 60 210 176 400 178" stroke="url(#l1)"/>
+        <path d="M0 130 C180 130 220 174 400 178" stroke="url(#l2)"/>
+        <path d="M0 200 C160 200 220 182 400 178" stroke="url(#l3)"/>
+        <path d="M0 270 C180 270 230 186 400 178" stroke="url(#l4)"/>
+        <path d="M0 330 C150 330 240 190 400 178" stroke="url(#l1)"/>
+        <path d="M0 20 C200 20 220 172 400 178" stroke="url(#l2)"/>
+      </g>
+      <circle class="glowdot" cx="400" cy="178" r="7" fill="#803DFF"/>
+      <circle cx="400" cy="178" r="13" fill="none" stroke="#803DFF" stroke-opacity=".35" stroke-width="2"/>
+    </svg>
+  </div>
+</div></header>
+
+<div class="trust"><div class="wrap">
+  <p>Trusted by founders, creators, and marketing teams</p>
+  <div class="logos"><span>Kindred</span><span>Tiny Clothing Swap</span><span>SportPharm</span><span>TutorEd</span></div>
+</div></div>
+
+<section class="shift" id="shift"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker">The shift</div>
+    <h2>Not a posting platform. A thought partner.</h2>
+    <p>Threadline begins before the calendar — it helps you explore what you know, shape what matters, and build the content around it.</p>
+  </div>
+  <div class="shiftrow">
+    <div class="shiftcard"><div class="lab">Before Threadline</div><h3>A blank calendar</h3><p>Scattered notes, half-built ideas, and the constant pressure to post something.</p></div>
+    <div class="shiftcard hot"><div class="lab">With Threadline</div><h3>Someone to think with</h3><p>A partner that helps generate ideas with you — then carries them forward into a plan.</p></div>
+    <div class="shiftcard"><div class="lab">After Threadline</div><h3>Content that's yours</h3><p>Connected series and campaigns that feel purposeful, consistent, and genuinely you.</p></div>
+  </div>
+</div></section>
+
+<section id="pillars"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker">How Threadline helps</div>
+    <h2>Four ways it works <span class="grad-text">with you</span>, not over you.</h2>
+    <p>You already know more than you think. Threadline helps you find it, connect it, and move it.</p>
+  </div>
+  <div class="pillars">
+    <div class="pillar"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#803dff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div><div><h3>Think together</h3><p>Better questions surface stronger ideas — and help you hear what's already valuable in your thinking.</p><div class="say">"There's something strong here."</div></div></div>
+    <div class="pillar"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#803dff" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M8 8.5C12 11 12 13 16.2 15.6"/></svg></div><div><h3>Find the thread</h3><p>Connect scattered thoughts, stories, and expertise into one clearer content direction.</p><div class="say">"These ideas may belong together."</div></div></div>
+    <div class="pillar"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#803dff" stroke-width="2" stroke-linecap="round"><path d="M12 3v6M12 9l4 3M12 9l-4 3M8 12v3M16 12v3M12 15v4"/><circle cx="12" cy="3" r="1.4" fill="#803dff"/></svg></div><div><h3>Build the idea out</h3><p>Turn one promising thought into angles, formats, series, and campaigns.</p><div class="say">"Let's map this into a series."</div></div></div>
+    <div class="pillar"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#803dff" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4M8.5 14l2.5 2.5L16 12"/></svg></div><div><h3>Move it into action</h3><p>Organize, draft, plan, and schedule — so strong ideas don't stay stuck in notes.</p><div class="say">"From 'we should talk about this' to ready to publish."</div></div></div>
+  </div>
+</div></section>
+
+<section class="how" id="how"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker">The flow</div>
+    <h2>From a half-formed thought to a full plan.</h2>
+    <p>Start with what you're already thinking. Threadline threads it into a direction, then a series, then a scheduled plan.</p>
+  </div>
+  <div class="flow">
+    <div class="step"><span class="chip on">Spark</span><span class="arrow">→</span></div>
+    <div class="step"><span class="chip">Thread</span><span class="arrow">→</span></div>
+    <div class="step"><span class="chip">Series</span><span class="arrow">→</span></div>
+    <div class="step"><span class="chip">Content</span><span class="arrow">→</span></div>
+    <div class="step"><span class="chip">Calendar</span></div>
+  </div>
+  <div class="mock">
+    <div class="mockbar"><i></i><i></i><i></i></div>
+    <div class="mockbody">
+      <div class="mcol"><div class="h">💡 Spark Bank</div>
+        <div class="mline"><span class="mdot" style="background:#803dff"></span>People buy the "why," not the "what."</div>
+        <div class="mline"><span class="mdot" style="background:#3b82f6"></span>The behind-the-scenes builds trust.</div>
+        <div class="mline"><span class="mdot" style="background:#22d3ee"></span>Repurpose long-form with purpose.</div>
+      </div>
+      <div class="mcol"><div class="h">🧵 Thread — "Why we do what we do"</div>
+        <p style="font-size:13.5px;color:var(--muted);margin-bottom:12px">A series that shares the mission and purpose behind your brand. <b style="color:var(--ink)">4 pillars:</b> Purpose · Values · Impact · Story.</p>
+        <div class="mbtn">Build this series</div>
+      </div>
+      <div class="mcol"><div class="h">📅 This week</div>
+        <div class="mline">Mon <span class="mtag" style="background:#803dff;margin-left:auto">Carousel</span></div>
+        <div class="mline">Wed <span class="mtag" style="background:#3b82f6;margin-left:auto">Reel</span></div>
+        <div class="mline">Fri <span class="mtag" style="background:#22d3ee;margin-left:auto;color:#083344">Story</span></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="aud"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker">Who it's for</div>
+    <h2>For people with real ideas — not endless time.</h2>
+    <p>You're not out of ideas. You're out of structure, momentum, and someone to think with.</p>
+  </div>
+  <div class="aud">
+    <div class="audcard"><div class="ic">🚀</div><h3>Founder-led brands</h3><p>Great instincts, inconsistent content rhythm.</p></div>
+    <div class="audcard"><div class="ic">👥</div><h3>Small marketing teams</h3><p>Strategy exists — but ideas get trapped in meetings.</p></div>
+    <div class="audcard"><div class="ic">🎬</div><h3>Creative studios</h3><p>Need repeatable content systems for multiple clients.</p></div>
+    <div class="audcard"><div class="ic">🎓</div><h3>Experts &amp; educators</h3><p>Deep expertise that needs clearer packaging.</p></div>
+  </div>
+</div></section>
+
+<section class="quote"><div class="wrap">
+  <div class="qmark">"</div>
+  <blockquote>We finally start with strategy, not a blank calendar.</blockquote>
+  <div class="who"><span class="av"></span><span>— <b>Maya Patel</b>, Founder, Studio North</span></div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <div class="sec-head">
+    <div class="kicker">Pricing</div>
+    <h2>Start free. Bring your team when you're ready.</h2>
+    <p>Every plan includes the full thought-partner workflow, all views, and smart reminders. Choose your brands and seats.</p>
+  </div>
+  <div class="tiers">
+    <div class="tier"><div class="nm">Starter</div><div class="pr">$19<span>/mo</span></div><div class="desc">For the solo creator finding their rhythm.</div>
+      <ul><li><span class="ck">✓</span> <b>1</b> brand</li><li><span class="ck">✓</span> <b>2</b> team seats</li><li><span class="ck">✓</span> <b>30</b> AI images / mo</li><li><span class="ck">✓</span> Unlimited ideas &amp; series</li></ul>
+      <a class="btn" href="threadline-onboarding.html">Start free trial</a></div>
+    <div class="tier pop"><div class="nm">Pro</div><div class="pr">$39<span>/mo</span></div><div class="desc">For active brands and small teams.</div>
+      <ul><li><span class="ck">✓</span> <b>3</b> brands</li><li><span class="ck">✓</span> <b>4</b> team seats</li><li><span class="ck">✓</span> <b>120</b> AI images / mo</li><li><span class="ck">✓</span> Series auto-scheduling</li></ul>
+      <a class="btn primary" href="threadline-onboarding.html">Start free trial</a></div>
+    <div class="tier"><div class="nm">Agency</div><div class="pr">$99<span>/mo</span></div><div class="desc">For studios running many clients.</div>
+      <ul><li><span class="ck">✓</span> <b>10</b> brands</li><li><span class="ck">✓</span> <b>10</b> team seats</li><li><span class="ck">✓</span> <b>400</b> AI images / mo</li><li><span class="ck">✓</span> Priority support</li></ul>
+      <a class="btn" href="threadline-onboarding.html">Start free trial</a></div>
+  </div>
+  <div class="pricenote">Need more seats? Add teammates for $9/mo each. More images? 100-image packs for $5.</div>
+</div></section>
+
+<div class="final"><div class="finalbox">
+  <h2>Stop posting. Start building.</h2>
+  <p>Bring an idea, an offer, or an unfinished thought. Threadline will help you take it somewhere.</p>
+  <a class="btn lg" href="threadline-onboarding.html">Start building together →</a>
+</div></div>
+
+<footer><div class="wrap footin">
+  <div class="brand"><span class="mark"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="url(#tl)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg></span>Threadline</div>
+  <span style="color:var(--muted);font-weight:600">Think it through. Build it out.</span>
+  <div class="grow"></div>
+  <span>© 2026 Threadline · <a href="#" style="color:var(--muted);font-weight:600">Privacy</a> · <a href="#" style="color:var(--muted);font-weight:600">Terms</a></span>
+</div></footer>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Prototype</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0f172a;--muted:#54607a;--faint:#8b96ad;--line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#fff;--surface-2:#f2f4f9;
+--violet:#803dff;--blue:#3b82f6;--grad2:linear-gradient(135deg,#803dff,#3b82f6);--shadow-sm:0 4px 16px rgba(20,20,60,.06)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,sans-serif;color:var(--ink);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;
+background:radial-gradient(1100px 700px at 82% -12%,#efeaff 0,transparent 55%),radial-gradient(900px 700px at -12% 12%,#e6f2ff 0,transparent 55%),var(--bg);padding:40px 22px 70px}
+h1,h2,h3{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:860px;margin:0 auto}
+.mark{display:inline-block;width:38px;height:38px;vertical-align:-9px;margin-right:10px}.mark svg{width:100%;height:100%}
+h1{font-size:clamp(26px,4vw,36px)}
+.sub{color:var(--muted);font-size:16px;margin:8px 0 6px;max-width:60ch}
+.grad{background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.note{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:12px}
+.sec{margin-top:30px}
+.sec h3{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);margin-bottom:11px;display:flex;align-items:center;gap:9px}
+.sec h3 .n{width:22px;height:22px;border-radius:7px;background:rgba(128,61,255,.1);display:grid;place-items:center;font-size:11px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+@media(max-width:760px){.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.cards{grid-template-columns:1fr}}
+.card{display:block;background:var(--surface);border:1.5px solid var(--line);border-radius:15px;padding:15px 16px;transition:.14s}
+.card:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.card .ci{font-size:19px}
+.card b{display:block;font-size:14px;margin-top:7px}
+.card span{display:block;font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.4}
+.card.pri{border-color:var(--violet);background:linear-gradient(120deg,rgba(128,61,255,.06),rgba(59,130,246,.04))}
+.foot{margin-top:36px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line-2);padding-top:20px}
+.reset{border:1.5px solid var(--line);border-radius:11px;padding:10px 16px;font-weight:800;font-size:13px;color:var(--muted);background:var(--surface)}
+.reset:hover{border-color:#fb7185;color:#c83a56}
+.foot p{font-size:12px;color:var(--faint);max-width:52ch}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#0f172a;color:#fff;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span class="mark"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tl" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tl)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg></span>Threadline <span class="grad">prototype</span></h1>
+  <p class="sub">The full clickable product — every page runs on the brand you build in onboarding. Start at the top for the complete journey, or jump anywhere.</p>
+  <span class="note">💡 Complete onboarding once and every app page personalizes to your brand. Until then, pages show the sample brand "Groundwork."</span>
+
+  <div class="sec"><h3><span class="n">1</span>The pitch</h3>
+    <div class="cards">
+      <a class="card" href="threadline-home.html"><span class="ci">🌐</span><b>Marketing homepage</b><span>The public site — every CTA leads into onboarding.</span></a>
+    </div></div>
+
+  <div class="sec"><h3><span class="n">2</span>Onboarding — build the brand</h3>
+    <div class="cards">
+      <a class="card pri" href="threadline-onboarding.html"><span class="ci">✦</span><b>Choose your path</b><span>The post-signup first screen. Start the full journey here.</span></a>
+      <a class="card" href="threadline-build.html"><span class="ci">🧠</span><b>Path 2 · Help me build</b><span>Guided thought-partner session, 5 phases.</span></a>
+      <a class="card" href="threadline-import.html"><span class="ci">📥</span><b>Path 1 · I know my brand</b><span>Import → snapshot → brand audit.</span></a>
+    </div></div>
+
+  <div class="sec"><h3><span class="n">3</span>The brand deck</h3>
+    <div class="cards">
+      <a class="card pri" href="threadline-review.html"><span class="ci">🗂</span><b>Brand Review deck</b><span>12 slides · approve, edit, talk it through · Activate.</span></a>
+    </div></div>
+
+  <div class="sec"><h3><span class="n">4</span>The app</h3>
+    <div class="cards">
+      <a class="card pri" href="threadline-app-home.html"><span class="ci">🏠</span><b>Home</b><span>Daily command center.</span></a>
+      <a class="card" href="threadline-build-page.html"><span class="ci">✎</span><b>Build</b><span>Thought-partner sessions + 6 guided modes.</span></a>
+      <a class="card" href="threadline-spark-bank.html"><span class="ci">⚡</span><b>Spark Bank</b><span>Idea library, Picks, Needs a Home.</span></a>
+      <a class="card" href="threadline-series.html"><span class="ci">🧵</span><b>Series</b><span>Generator, active series, templates.</span></a>
+      <a class="card" href="threadline-plan.html"><span class="ci">📅</span><b>Plan</b><span>Planner · Kanban · Calendar + reuse.</span></a>
+      <a class="card" href="threadline-analytics.html"><span class="ci">📊</span><b>Analytics</b><span>The learning loop. Try “Connect Instagram.”</span></a>
+      <a class="card" href="threadline-settings.html"><span class="ci">⚙︎</span><b>Settings</b><span>Team reviews toggle + Brand Development.</span></a>
+    </div></div>
+
+  <div class="foot">
+    <button class="reset" onclick="resetDemo()">↺ Reset demo data</button>
+    <p>Clears your built brand, saved sessions, connections, and preferences so you can run the journey fresh. Nothing here is a real account — it's all in your browser.</p>
+  </div>
+</div>
+<script>
+function resetDemo(){
+  ['threadline.brand','threadline.build','threadline.import','threadline.homeWelcomed','threadline.sparksWelcomed','threadline.planWelcomed','threadline.planView','threadline.connections','threadline.teamRules'].forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} });
+  let t=document.querySelector('.toast'); if(!t){ t=document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+  t.textContent='Demo reset — the journey starts fresh'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400);
+}
+</script>
+</body>
+</html>

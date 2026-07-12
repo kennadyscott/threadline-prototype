@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Build</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --green:#20b878;--amber:#f5a524;
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);--shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em;line-height:1.15}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit}
+.grad-text{background:var(--grad2);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mark{display:inline-block;width:28px;height:28px;flex-shrink:0}.mark svg{width:100%;height:100%;display:block}
+
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+@media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{background:var(--surface);border-right:1px solid var(--line-2);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;padding:2px 10px 18px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nitem{display:flex;flex-direction:column;padding:9px 12px;border-radius:12px;text-align:left;transition:.13s}
+.nitem b{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:9px}
+.nitem span{font-size:11.5px;color:var(--faint);margin-left:25px;margin-top:1px}
+.nitem:hover{background:var(--surface-2)}
+.nitem.on{background:rgba(128,61,255,.08)}
+.nitem.on b{color:var(--violet)}
+.nitem .ic{width:16px;text-align:center}
+.sfoot{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.wsrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer}
+.wsrow:hover{background:var(--surface-2)}
+.avv{width:32px;height:32px;border-radius:9px;background:var(--grad2);color:#fff;font-weight:900;font-size:12.5px;display:grid;place-items:center;flex-shrink:0}
+.avv.round{border-radius:50%}
+.wsrow .wt b{display:block;font-size:13px;font-weight:800}
+.wsrow .wt span{font-size:11.5px;color:var(--faint)}
+.setrow{display:flex;align-items:center;gap:9px;padding:9px 12px;color:var(--muted);font-weight:700;font-size:13.5px;border-radius:10px}
+.setrow:hover{background:var(--surface-2)}
+
+.main{min-width:0;padding-bottom:70px}
+.topbar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(247,248,251,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.search{flex:0 1 340px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:var(--faint);font-size:14px;cursor:text}
+.search .kbd{margin-left:auto;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
+.bell{position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.bell:hover{background:var(--surface-2)}
+.bell i{position:absolute;top:4px;right:4px;background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.newspark{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
+.newspark:hover{filter:brightness(1.06)}
+
+/* ---------- landing ---------- */
+.wrap{display:grid;grid-template-columns:1fr 320px;gap:22px;padding:26px 28px 0;max-width:1400px}
+@media(max-width:1150px){.wrap{grid-template-columns:1fr}}
+.hero{display:flex;gap:20px;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.hero h1{font-size:clamp(24px,3vw,32px)}
+.hero p{color:var(--muted);font-size:15px;margin-top:6px;max-width:52ch}
+.doodle{flex-shrink:0;width:220px}
+@media(max-width:820px){.doodle{display:none}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow-sm);margin-top:18px}
+.ph{display:flex;align-items:center;gap:10px}
+.ph h3{font-size:17px}
+.rec{font-size:10.5px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.1);border-radius:999px;padding:4px 10px}
+.psub{color:var(--muted);font-size:13.5px;margin-top:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 15px;font-weight:700;font-size:13px;color:var(--muted);transition:.13s}
+.chip:hover{border-color:var(--violet);color:var(--violet)}
+.inputbox{border:1.5px solid var(--line);border-radius:16px;background:var(--surface);transition:.13s}
+.inputbox:focus-within{border-color:var(--violet);box-shadow:0 0 0 3px rgba(128,61,255,.1)}
+.inputbox textarea{width:100%;border:none;outline:none;background:none;padding:16px;font-size:15px;min-height:76px;resize:none;color:var(--ink)}
+.inrow{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--line-2)}
+.tool{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;color:var(--muted);padding:7px 11px;border-radius:9px}
+.tool:hover{background:var(--surface-2);color:var(--ink)}
+.tool.sur{border:1px solid var(--line);border-radius:10px}
+.tool.sur:hover{border-color:var(--violet);color:var(--violet)}
+.send{margin-left:auto;width:40px;height:40px;border-radius:50%;background:var(--grad2);color:#fff;font-size:16px;font-weight:900;display:grid;place-items:center;box-shadow:0 6px 16px rgba(128,61,255,.3)}
+.send:hover{filter:brightness(1.08)}
+
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:14px}
+@media(max-width:760px){.modes{grid-template-columns:1fr 1fr}}
+.mode{border:1px solid var(--line);border-radius:15px;padding:18px;background:var(--surface);cursor:pointer;transition:.14s;display:flex;flex-direction:column}
+.mode:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.mode .mi{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:20px;margin-bottom:12px}
+.mode b{font-size:14.5px}
+.mode p{color:var(--muted);font-size:12.5px;margin-top:4px;flex:1}
+.mode .go{margin-top:10px;color:var(--violet);font-weight:900}
+
+.srcstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:14px}
+@media(max-width:900px){.srcstrip{grid-template-columns:1fr 1fr}}
+.src{display:flex;gap:11px;align-items:center;border:1.5px dashed var(--line);border-radius:13px;padding:13px 14px;cursor:pointer;transition:.13s;background:var(--surface)}
+.src:hover{border-color:var(--violet)}
+.src .si{width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.src b{display:block;font-size:13px}
+.src span{font-size:11.5px;color:var(--faint)}
+
+.rail{display:flex;flex-direction:column;gap:18px;padding-top:2px}
+.rpanel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow-sm)}
+.rpanel h3{font-size:15px;display:flex;align-items:baseline}
+.rpanel h3 .va{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--violet)}
+.sess{display:flex;align-items:center;gap:11px;padding:10px 6px;border-radius:11px;cursor:pointer}
+.sess:hover{background:var(--surface-2)}
+.sess .si{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.sess .st b{display:block;font-size:13px;font-weight:800;line-height:1.3}
+.sess .st span{font-size:11.5px;color:var(--faint)}
+.sess .car{margin-left:auto;color:var(--faint)}
+.qp{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line-2);border-radius:11px;padding:10px 13px;font-weight:700;font-size:13px;color:var(--ink);margin-top:8px;transition:.13s;text-align:left}
+.qp:hover{border-color:var(--violet);color:var(--violet)}
+.seriescard{background:linear-gradient(120deg,rgba(128,61,255,.09),rgba(59,130,246,.06));border:1px solid rgba(128,61,255,.18);border-radius:18px;padding:18px}
+.seriescard b{font-size:15px}
+.seriescard p{color:var(--muted);font-size:13px;margin:5px 0 12px}
+.seriescard button{background:var(--grad2);color:#fff;font-weight:800;font-size:13px;padding:9px 15px;border-radius:10px}
+
+/* ---------- session ---------- */
+#sessionView{display:none}
+.shead{display:flex;align-items:center;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.back{font-weight:800;font-size:13.5px;color:var(--muted);padding:8px 12px;border-radius:10px}
+.back:hover{background:var(--surface-2);color:var(--ink)}
+.shead .stt b{display:block;font-size:15.5px;font-weight:900}
+.shead .stt span{font-size:12px;color:var(--faint)}
+.goal{margin-left:auto;display:inline-flex;align-items:center;gap:7px;background:rgba(128,61,255,.08);color:var(--violet);font-weight:800;font-size:12.5px;padding:7px 13px;border-radius:999px}
+.saved{font-size:12px;color:var(--faint);font-weight:700}
+.sgrid{display:grid;grid-template-columns:1fr 300px;gap:22px;padding:22px 28px 0;max-width:1400px}
+@media(max-width:1100px){.sgrid{grid-template-columns:1fr}.ctx{display:none}}
+.convo{display:flex;flex-direction:column;gap:14px;min-width:0}
+.msg{max-width:78%;padding:13px 16px;border-radius:16px;font-size:14.5px;line-height:1.55;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg.u{align-self:flex-end;background:var(--grad2);color:#fff;border-bottom-right-radius:6px}
+.msg.a{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:6px;box-shadow:var(--shadow-sm)}
+.msg.a .who{display:flex;align-items:center;gap:7px;font-weight:800;font-size:12px;color:var(--violet);margin-bottom:7px}
+.msg.a .who .mark{width:16px;height:16px}
+.msg.a b{font-weight:800}
+.mchips{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;animation:fade .3s ease}
+.mchips .chip{background:var(--surface)}
+.mchips.usedrow{opacity:.45;pointer-events:none}
+.thinking{display:flex;align-items:center;gap:9px;color:var(--violet);font-weight:700;font-size:13.5px;align-self:flex-start;padding:4px 2px}
+.dots{display:inline-flex;gap:4px}.dots i{width:6px;height:6px;border-radius:50%;background:var(--violet);animation:bob 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+.sinput{position:sticky;bottom:14px;margin-top:18px}
+.sinput .inputbox{box-shadow:var(--shadow)}
+.sinput textarea{min-height:52px}
+
+/* outputs */
+.outs{margin:22px 0 0}
+.outs h3{font-size:15.5px;margin-bottom:10px}
+.ocard{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);animation:fade .35s ease}
+.olabel{display:inline-flex;font-size:10.5px;font-weight:800;padding:4px 11px;border-radius:999px;margin-bottom:9px}
+.ol-v{background:rgba(128,61,255,.1);color:var(--violet)}
+.ol-b{background:rgba(59,130,246,.1);color:var(--blue)}
+.ol-g{background:rgba(32,184,120,.1);color:#178a5a}
+.ol-a{background:rgba(245,165,36,.14);color:#b57708}
+.ocard .ot{font-size:16px;font-weight:900;line-height:1.3}
+.ocard .os{color:var(--muted);font-size:13.5px;margin-top:5px;line-height:1.5}
+.ometa{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
+.ometa span{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--surface-2);border-radius:8px;padding:4px 10px}
+.owhy{margin-top:10px;font-size:12.5px;color:var(--faint);font-style:italic}
+.oacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.ob{border:1.5px solid var(--line);border-radius:10px;padding:8px 13px;font-weight:800;font-size:12.5px;color:var(--muted);transition:.13s}
+.ob:hover{border-color:var(--violet);color:var(--violet)}
+.ob.pri{background:var(--grad2);color:#fff;border-color:transparent}
+.ob.done{border-color:var(--green);color:#178a5a;background:rgba(32,184,120,.06);pointer-events:none}
+
+/* context panel */
+.ctx{display:flex;flex-direction:column;gap:14px}
+.cpanel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm)}
+.cpanel h4{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.cpanel .t{display:inline-block;background:var(--surface-2);border:1px solid var(--line-2);border-radius:999px;padding:4px 11px;font-weight:700;font-size:12px;margin:0 5px 6px 0}
+.cpanel .row{font-size:13px;font-weight:600;padding:6px 0;border-bottom:1px dashed var(--line-2)}
+.cpanel .row:last-child{border:none}
+.cpanel .row span{color:var(--faint);font-size:11.5px;display:block}
+
+/* plan drawer */
+.scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:70;display:none}
+.scrim.on{display:block}
+.drawer{position:fixed;top:0;right:-420px;bottom:0;width:400px;max-width:92vw;background:var(--surface);z-index:75;box-shadow:-16px 0 50px rgba(20,20,60,.18);transition:right .3s ease;padding:24px;overflow-y:auto}
+.drawer.on{right:0}
+.drawer h3{font-size:17px;margin-bottom:4px}
+.drawer .dsub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.df{margin-bottom:14px}
+.df label{display:block;font-weight:700;font-size:12.5px;margin-bottom:6px}
+.df input,.df select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;outline:none;background:var(--surface);color:var(--ink)}
+.df input:focus,.df select:focus{border-color:var(--violet)}
+.radio{display:flex;flex-direction:column;gap:7px}
+.radio label{display:flex;align-items:center;gap:9px;font-weight:600;font-size:13.5px;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;cursor:pointer;margin:0}
+.radio label:hover{border-color:var(--violet)}
+.radio input{width:auto;accent-color:var(--violet)}
+.togglerow{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13.5px;margin:16px 0}
+.togglerow input{accent-color:var(--violet);width:18px;height:18px}
+.dacts{display:flex;gap:10px;margin-top:20px}
+.dacts .grow{flex:1}
+.dbtn{padding:12px 18px;border-radius:11px;font-weight:800;font-size:14px}
+.dbtn.pri{background:var(--grad2);color:#fff}
+.dbtn.ghost{color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:95}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+svg.defs{position:absolute;width:0;height:0}
+</style>
+</head>
+<body>
+<svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><span class="mark" id="lmark"></span>Threadline</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sfoot">
+      <div class="wsrow" onclick="toast('Workspace switcher — prototype')"><div class="avv" id="wsav">TB</div><div class="wt"><b id="wsname">Workspace</b><span>Workspace</span></div></div>
+      <div class="wsrow" onclick="toast('Profile — prototype')"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="wt"><b>Kennady Scott</b><span>Admin</span></div></div>
+      <button class="setrow" onclick="location.href='threadline-settings.html'">⚙︎ Settings</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search" onclick="toast('Global search — prototype')">🔍 Search anything... <span class="kbd">⌘ K</span></div>
+      <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
+      <button class="newspark" onclick="toast('New Spark — available on every page')">＋ New Spark</button>
+    </div>
+
+    <!-- ================= LANDING ================= -->
+    <div id="landingView">
+      <div class="wrap">
+        <div class="colmain">
+          <div class="hero">
+            <div>
+              <h1>Build with Threadline <span>✦</span></h1>
+              <p>Your thought partner for content that connects.<br>Tell Threadline what you're working on, and we'll help you uncover ideas, shape angles, and build content that fits your strategy.</p>
+            </div>
+            <svg class="doodle" viewBox="0 0 220 130" fill="none">
+              <path d="M18 42 C18 26 32 18 60 16 L150 12 C176 11 190 22 190 40 L188 74 C187 92 174 100 150 101 L62 104 C36 105 20 96 19 78 Z" fill="rgba(128,61,255,.09)"/>
+              <rect x="38" y="30" width="118" height="62" rx="10" fill="#fff" stroke="#e6e9f1" stroke-width="2"/>
+              <line x1="50" y1="46" x2="112" y2="44" stroke="#d9ccff" stroke-width="4" stroke-linecap="round"/>
+              <line x1="50" y1="58" x2="128" y2="56" stroke="#e6e9f1" stroke-width="4" stroke-linecap="round"/>
+              <line x1="50" y1="70" x2="98" y2="69" stroke="#e6e9f1" stroke-width="4" stroke-linecap="round"/>
+              <path d="M138 44 l4.5 10 10 4.5 -10 4.5 -4.5 10 -4.5 -10 -10 -4.5 10 -4.5 Z" fill="url(#tl)"/>
+              <ellipse cx="176" cy="96" rx="24" ry="16" fill="#fff" stroke="#e6e9f1" stroke-width="2"/>
+              <circle cx="168" cy="96" r="2.6" fill="#803dff"/><circle cx="176" cy="96" r="2.6" fill="#803dff"/><circle cx="184" cy="96" r="2.6" fill="#803dff"/>
+              <path d="M196 84 C206 74 200 58 208 52" stroke="#c9b8ff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              <circle cx="210" cy="49" r="4" fill="none" stroke="#c9b8ff" stroke-width="2.5"/>
+            </svg>
+          </div>
+
+          <div class="panel">
+            <div class="ph"><h3>Start a thought partner session</h3><span class="rec">Recommended</span></div>
+            <p class="psub">Tell Threadline what's on your mind, and we'll talk it through together.</p>
+            <div class="chips" id="starters"></div>
+            <div class="inputbox">
+              <textarea id="mainInput" placeholder="Type anything... or ask Threadline a question"></textarea>
+              <div class="inrow">
+                <button class="tool" onclick="toast('Add context: files, links, transcripts, customer feedback')">📎 Add context</button>
+                <button class="tool" onclick="toast('Voice notes with transcription — prototype')">🎙 Voice</button>
+                <button class="tool sur" onclick="surprise()">Surprise me ✦</button>
+                <button class="send" onclick="submitMain()">→</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:26px"><h3 style="font-size:17px">Other ways to build</h3><p class="psub">Different starting points for different needs.</p></div>
+          <div class="modes" id="modes"></div>
+
+          <div style="margin-top:26px"><h3 style="font-size:17px">Build from your content and context</h3><p class="psub">Use what you already have to spark new ideas.</p></div>
+          <div class="srcstrip">
+            <div class="src" onclick="toast('Upload a doc — Threadline extracts themes, quotes & directions')"><div class="si">📄</div><div><b>Upload a doc</b><span>PDF, DOCX, TXT</span></div></div>
+            <div class="src" onclick="toast('Paste or capture — notes, links, or text')"><div class="si">📋</div><div><b>Paste or capture</b><span>Notes, links, or text</span></div></div>
+            <div class="src" onclick="startSession({mode:'story'})"><div class="si">👥</div><div><b>Use a client story</b><span>Turn moments into content</span></div></div>
+            <div class="src" onclick="toast('Import from source — transcripts, calls & more (future integration)')"><div class="si">✨</div><div><b>Import from source</b><span>Transcripts, calls, more</span></div></div>
+          </div>
+        </div>
+
+        <div class="rail">
+          <div class="rpanel"><h3>Your recent sessions <button class="va" onclick="toast('Session history — prototype')">View all</button></h3>
+            <div id="recent"></div>
+          </div>
+          <div class="rpanel"><h3>Quick prompts</h3><p class="psub" style="margin-top:2px">Use a prompt to get started fast.</p><div id="qps"></div></div>
+          <div class="seriescard"><b>Create a recurring series</b><p>Build a signature series your audience will look forward to.</p><button onclick="location.href='threadline-series.html'">Go to Series Generator →</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SESSION ================= -->
+    <div id="sessionView">
+      <div class="shead">
+        <button class="back" onclick="endSession()">← New session</button>
+        <div class="stt"><b id="sTitle">Session</b><span id="sMeta">Just now · autosaved</span></div>
+        <span class="goal" id="sGoal">🎯 Find content ideas</span>
+        <span class="saved">✓ Saved</span>
+      </div>
+      <div class="sgrid">
+        <div class="convo-wrap" style="min-width:0">
+          <div class="convo" id="convo"></div>
+          <div class="outs" id="outs" style="display:none"><h3>Session outputs · <span id="outCount">0</span></h3><div id="outList"></div></div>
+          <div class="sinput"><div class="inputbox">
+            <textarea id="sessInput" placeholder="Reply to Threadline..."></textarea>
+            <div class="inrow">
+              <button class="tool" onclick="toast('Add context to this session')">📎</button>
+              <button class="send" onclick="sessReply()">→</button>
+            </div>
+          </div></div>
+        </div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <h3>Post to Plan</h3>
+  <p class="dsub">Threadline pre-filled this from the idea and your open slots.</p>
+  <div class="df"><label>Title</label><input id="d-title"></div>
+  <div class="df"><label>Series / pillar</label><select id="d-series"></select></div>
+  <div class="df"><label>Placement</label><div class="radio" id="d-place"></div></div>
+  <div class="df"><label>Format</label><select id="d-format"><option>LinkedIn post</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Email</option></select></div>
+  <div class="togglerow"><input type="checkbox" id="d-draft" checked> Create draft now</div>
+  <div class="dacts"><button class="dbtn ghost" onclick="closeDrawer()">Cancel</button><div class="grow"></div><button class="dbtn pri" onclick="confirmPlan()">Post to Plan</button></div>
+</div>
+
+<script src="threadline-brand.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
+$('#lmark').innerHTML=MARK;
+
+const B=(window.loadBrand&&loadBrand())||defaultBrand();
+const lc=s=>{s=(s||'').trim();return s?s.charAt(0).toLowerCase()+s.slice(1):s;};
+const strip=s=>(s||'').replace(/<[^>]+>/g,'');
+$('#wsname').textContent=B.name;
+$('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const POV_PILLAR=(B.pillars.find(p=>/view|talk|pov|perspective/i.test(p[0]))||B.pillars[B.pillars.length-1])[0];
+const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars[Math.min(2,B.pillars.length-1)])[0];
+const SLOT_SERIES=B.series[0]?B.series[0][0]:'your series';
+
+/* ---------- nav ---------- */
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['✎','Build','Think, create, build',1,''],['⚡','Spark Bank','Your idea library',0,'threadline-spark-bank.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+$('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
+
+/* ---------- landing content ---------- */
+const STARTERS=['I want to talk about...','A recent client win',"An idea I'm stuck on",'What my audience is struggling with','A launch or promotion','A belief I want to share'];
+$('#starters').innerHTML=STARTERS.map(s=>`<button class="chip" onclick="document.getElementById('mainInput').value=${JSON.stringify(s==='I want to talk about...'?'I want to talk about ':s+': ')};document.getElementById('mainInput').focus()">${s}</button>`).join('');
+
+const MODES=[
+  {k:'idea',ic:'💡',bg:'rgba(128,61,255,.1)',t:'Idea Generator',d:'Get fresh ideas based on your brand, audience, and goals.'},
+  {k:'angle',ic:'🖼️',bg:'rgba(32,184,120,.1)',t:'Angle Explorer',d:'Explore different angles on a topic to find the strongest one.'},
+  {k:'sharpen',ic:'🎯',bg:'rgba(251,113,133,.12)',t:'Message Sharpening',d:'Clarify your message and make your point of view stronger.'},
+  {k:'repurpose',ic:'📄',bg:'rgba(245,165,36,.14)',t:'Content Repurposer',d:'Turn one piece of content into multiple formats and angles.'},
+  {k:'planner',ic:'📅',bg:'rgba(59,130,246,.1)',t:'Planner Fill',d:'Get ideas specifically for your open slots and upcoming dates.'},
+  {k:'ask',ic:'🧠',bg:'rgba(34,211,238,.12)',t:'Ask Threadline',d:'Ask anything. No prompt needed. Just start the conversation.'},
+];
+$('#modes').innerHTML=MODES.map(m=>`<div class="mode" onclick="startSession({mode:'${m.k}'})"><div class="mi" style="background:${m.bg}">${m.ic}</div><b>${m.t}</b><p>${m.d}</p><span class="go">→</span></div>`).join('');
+
+const RECENT=[
+  {ic:'💬',bg:'rgba(128,61,255,.1)',t:'Overcoming objections in sales conversations',w:'Today at 9:41 AM'},
+  {ic:'💡',bg:'rgba(245,165,36,.14)',t:'Educating without sounding salesy',w:'Yesterday · 3 ideas saved'},
+  {ic:'✏️',bg:'rgba(251,113,133,.12)',t:(function(){const w=strip(B.messaging.primary).split(/\s+/);let o='';for(const x of w){if((o+' '+x).trim().length>40)break;o=(o+' '+x).trim();}return o.replace(/[.,;:]$/,'');})(),w:'2 days ago'},
+  {ic:'🎯',bg:'rgba(59,130,246,.1)',t:'Positioning our offer with confidence',w:'3 days ago'},
+];
+$('#recent').innerHTML=RECENT.map(r=>`<div class="sess" onclick="toast('Reopening session — continue where you left off')"><div class="si" style="background:${r.bg}">${r.ic}</div><div class="st"><b>${r.t}</b><span>${r.w}</span></div><span class="car">›</span></div>`).join('');
+
+const QPS=[['📅','Find ideas for my open slots','planner'],['🚀','Build around an offer or launch','offer'],['🔁','Repurpose existing content','repurpose'],['👥','Find audience pain points','idea'],['☀️','Develop a point of view','sharpen']];
+$('#qps').innerHTML=QPS.map(([ic,t,m])=>`<button class="qp" onclick="startSession({mode:'${m}'})"><span>${ic}</span>${t}</button>`).join('');
+
+/* =========================================================
+   SESSION ENGINE
+========================================================= */
+let outN=0, usedChips=null;
+function show(view){ $('#landingView').style.display=view==='landing'?'block':'none'; $('#sessionView').style.display=view==='session'?'block':'none'; window.scrollTo({top:0}); }
+function endSession(){ show('landing'); $('#convo').innerHTML=''; $('#outList').innerHTML=''; $('#outs').style.display='none'; outN=0; $('#outCount').textContent='0'; }
+
+function think(cb,ms){ const t=el('div','thinking',`<span>Threadline is thinking</span><span class="dots"><i></i><i></i><i></i></span>`); $('#convo').appendChild(t); scrollConvo(); setTimeout(()=>{ t.remove(); cb(); },ms||900); }
+function say(html,chips){ think(()=>{ const m=el('div','msg a',`<div class="who"><span class="mark">${MARK}</span> Threadline</div>${html}`); $('#convo').appendChild(m);
+  if(chips&&chips.length){ const row=el('div','mchips'); chips.forEach(c=>{ const b=el('button','chip',c.t); b.onclick=()=>{ row.classList.add('usedrow'); userSay(c.t); setTimeout(()=>c.go(),350); }; row.appendChild(b); }); $('#convo').appendChild(row); }
+  scrollConvo(); }); }
+function sayNow(html){ const m=el('div','msg a',`<div class="who"><span class="mark">${MARK}</span> Threadline</div>${html}`); $('#convo').appendChild(m); scrollConvo(); }
+function userSay(t){ $('#convo').appendChild(el('div','msg u',esc(t))); scrollConvo(); }
+function scrollConvo(){ window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); }
+
+function addOutput(o){
+  $('#outs').style.display=''; outN++; $('#outCount').textContent=outN;
+  const c=el('div','ocard');
+  c.innerHTML=`<span class="olabel ${o.cls||'ol-v'}">${o.label}</span>
+    <div class="ot">${o.t}</div><div class="os">${o.s}</div>
+    <div class="ometa"><span>↳ ${o.pillar}</span><span>${o.format}</span>${o.slot?`<span>📅 ${o.slot}</span>`:''}</div>
+    <div class="owhy">Why: ${o.why}</div>
+    <div class="oacts">
+      <button class="ob" data-save>Save to Spark Bank</button>
+      <button class="ob pri" data-plan>Post to Plan</button>
+      <button class="ob" data-build>Build into content</button>
+      <button class="ob" data-refine>Refine</button>
+    </div>`;
+  c.querySelector('[data-save]').onclick=e=>{ e.target.classList.add('done'); e.target.textContent='✓ Saved to Spark Bank'; toast('Saved — linked to this session'); };
+  c.querySelector('[data-plan]').onclick=()=>openDrawer(o);
+  c.querySelector('[data-build]').onclick=()=>toast('Creating planned item + opening content workspace…');
+  c.querySelector('[data-refine]').onclick=()=>{ say(`Let's refine <b>${o.t}</b>. What's not landing yet — the hook, the specificity, or the tone?`,[
+    {t:'The hook',go:()=>say(`Try opening with the tension instead of the topic: <b>"${o.hook||'Everyone tells you to do more. Here’s why that’s the problem.'}"</b> — it names the struggle before the lesson.`)},
+    {t:'Make it more specific',go:()=>say(`Anchor it in one real moment — one client, one decision, one number. Specific beats sweeping every time for ${lc(B.audience.primary)}`)},
+    {t:'The tone',go:()=>say(`Your voice is <b>${B.voice.traits.map(lc).join(', ')}</b> — read it out loud and cut anything you wouldn't actually say.`)},
+  ]); };
+  $('#outList').appendChild(c); scrollConvo();
+}
+
+/* ---------- plan drawer ---------- */
+let drawerIdea=null;
+function openDrawer(o){ drawerIdea=o;
+  $('#d-title').value=strip(o.t);
+  $('#d-series').innerHTML=B.series.map(s=>`<option${s[3]===o.pillar||s[0]===o.pillar?' selected':''}>${s[0]}</option>`).join('')+B.pillars.map(p=>`<option${p[0]===o.pillar?' selected':''}>Pillar: ${p[0]}</option>`).join('');
+  $('#d-place').innerHTML=[
+    ['Open slot — Wednesday (recommended)',1],['Next available series slot',0],['Pick a week',0],['Add without a date',0]
+  ].map(([t,ck],i)=>`<label><input type="radio" name="place" ${ck?'checked':''}>${t}</label>`).join('');
+  $('#scrim').classList.add('on'); $('#drawer').classList.add('on');
+}
+function closeDrawer(){ $('#scrim').classList.remove('on'); $('#drawer').classList.remove('on'); }
+function confirmPlan(){ closeDrawer(); toast('Posted to Plan — “'+$('#d-title').value.slice(0,32)+'…”');
+  say(`Done — I placed it in your plan${$('#d-draft').checked?' and started a draft':''}. Your <b>${SLOT_SERIES}</b> cadence and pillar balance are preserved. Want to keep building, or fill another slot?`,[
+    {t:'Keep building',go:()=>say('Great — give me the next rough thought.')},
+    {t:'Fill another slot',go:()=>runPlanner(true)},
+  ]); }
+
+/* ---------- context panel ---------- */
+function renderCtx(extra){
+  $('#ctx').innerHTML=`
+  <div class="cpanel"><h4>Brand voice</h4>${B.voice.traits.map(t=>`<span class="t">${t}</span>`).join('')}<div style="font-size:12px;color:var(--faint);margin-top:6px">${B.voice.tone}</div></div>
+  <div class="cpanel"><h4>Pillars</h4>${B.pillars.map(p=>`<span class="t">${p[0]}</span>`).join('')}</div>
+  <div class="cpanel"><h4>Open Plan slots</h4><div class="row">${SLOT_SERIES} — Wednesday<span>Open · needs an idea</span></div><div class="row">${B.series[2]?B.series[2][0]:'Series'} — Friday<span>Open</span></div></div>
+  <div class="cpanel"><h4>Related Sparks</h4><div class="row">${strip(B.messaging.primary)}</div><div class="row">${strip(B.messaging.pov)}</div></div>
+  ${extra||''}`;
+}
+
+/* ---------- session scripts ---------- */
+const GOALS={idea:'Find content ideas',angle:'Explore angles',sharpen:'Develop a point of view',repurpose:'Repurpose content',planner:'Fill open Plan slots',ask:'Open exploration',offer:'Build around an offer',story:'Capture a client story',free:'Find content ideas'};
+function startSession(opts){
+  opts=opts||{};
+  show('session'); renderCtx();
+  $('#sGoal').textContent='🎯 '+(GOALS[opts.mode]||GOALS.free);
+  $('#sTitle').textContent=opts.title||({idea:'Idea Generator',angle:'Angle Explorer',sharpen:'Message Sharpening',repurpose:'Content Repurposer',planner:'Planner Fill',ask:'Ask Threadline',offer:'Build around an offer',story:'Client story'})[opts.mode]||'Thought partner session';
+  const m=opts.mode||'free';
+  if(m==='free') runFree(opts.seed);
+  else if(m==='planner') runPlanner();
+  else if(m==='idea') runIdeaGen();
+  else if(m==='angle') runAngles();
+  else if(m==='sharpen') runSharpen();
+  else if(m==='repurpose') runRepurpose();
+  else if(m==='offer') runOffer();
+  else if(m==='story') runStory();
+  else if(m==='surprise') runSurprise();
+  else runAsk();
+}
+function submitMain(){ const v=$('#mainInput').value.trim(); if(!v){ $('#mainInput').focus(); return; } $('#mainInput').value=''; startSession({mode:'free',seed:v,title:v.slice(0,44)}); }
+function surprise(){ startSession({mode:'surprise',title:'Surprise me'}); }
+function sessReply(){ const v=$('#sessInput').value.trim(); if(!v) return; $('#sessInput').value=''; userSay(v); reflect(v); }
+
+const KEYWORDS=['simplicity','clarity','consistency','trust','overwhelm','pricing','authenticity','confidence','momentum','burnout'];
+function kw(t){ t=(t||'').toLowerCase(); return KEYWORDS.find(k=>t.includes(k)); }
+function shortSeed(s){ s=(s||'').trim().replace(/[.!?,;:\s]+$/,''); return s.length>90?s.slice(0,90)+'…':s; }
+
+/* free / reflect flow — the core thought-partner loop */
+function runFree(seed){ if(seed){ userSay(seed); reflect(seed); } else { say(`What are you thinking about? Start with a question, a rough idea, a client moment — anything.`); } }
+function reflect(seed){
+  const k=kw(seed);
+  say(`Here's what I'm hearing: <b>${esc(shortSeed(seed))}</b>.${k?` The thread that stands out is <b>${k}</b> — for ${lc(B.audience.primary)} that's rarely a tactics problem, it's a direction problem.`:` There's a real thread in this.`} Is that the argument you want to make?`,[
+    {t:"Yes, that's it",go:()=>directions(seed)},
+    {t:'Not quite — sharper',go:()=>say(`Okay — say it the blunt way, like you're telling one client the truth over coffee. What would you actually say?`)},
+  ]);
+}
+function directions(seed){
+  say(`I see three ways to develop it. Which feels most like you?`,[
+    {t:'A contrarian point of view',go:()=>developPOV(seed)},
+    {t:'A practical framework',go:()=>developFramework(seed)},
+    {t:'A personal story',go:()=>developStory(seed)},
+  ]);
+}
+function developPOV(seed){
+  say(`Strong choice — your voice is built for this. Here's the sharpest version I can see, grounded in your <b>${POV_PILLAR}</b> pillar. It also fits your open <b>Wednesday</b> slot.`);
+  setTimeout(()=>addOutput({label:'Strong point of view',cls:'ol-v',
+    t: seed?cap(shortSeed(seed)):strip(B.messaging.pov),
+    s:`${strip(B.messaging.supporting).split('.')[0]}. Say the thing your audience suspects but nobody in your space will say plainly.`,
+    pillar:POV_PILLAR,format:'LinkedIn post or carousel',slot:'Wednesday',
+    why:`It fits your ${POV_PILLAR} pillar and supports your goal of building authority.`,
+    hook:'Everyone tells you to do more. Here’s why that’s the problem.'}),1400);
+  setTimeout(()=>say(`Want a second option to compare, or shall we move this one forward? You can <b>Save</b> it, <b>Post to Plan</b>, or <b>Build</b> it right from the card.`,[
+    {t:'Give me a second option',go:()=>developFramework(seed)},
+    {t:'This is the one',go:()=>say('Then lock it in — hit <b>Post to Plan</b> on the card and I’ll place it in Wednesday’s slot.')},
+  ]),2600);
+}
+function developFramework(seed){
+  say(`Here's the teaching version — same idea, framed as a framework your audience can use today.`);
+  setTimeout(()=>addOutput({label:'Educational framework',cls:'ol-b',
+    t:'3 questions that cut through the noise',
+    s:`A simple decision filter for ${lc(B.audience.primary).replace(/\.$/,'')} — teach the thinking, not just the tip.`,
+    pillar:B.pillars[0][0],format:'Carousel',slot:'Next '+B.pillars[0][0]+' slot',
+    why:`Your ${B.pillars[0][0]} pillar is due this week, and how-to framing performs with your audience.`}),1400);
+}
+function developStory(seed){
+  say(`The personal route — this is what makes the other two believable. One honest moment beats ten tips.`);
+  setTimeout(()=>addOutput({label:'Founder story',cls:'ol-a',
+    t:'The week I ignored my own advice',
+    s:'Tell the moment you learned this the hard way — the mistake, the shift, and what changed after.',
+    pillar:(B.pillars[1]?B.pillars[1][0]:B.pillars[0][0]),format:'Reel or LinkedIn post',slot:'Friday',
+    why:'Most of this week teaches. A story would balance the plan with proof and personality.'}),1400);
+}
+function cap(s){ s=(s||'').trim(); return s?s.charAt(0).toUpperCase()+s.slice(1):s; }
+
+/* planner fill */
+function runPlanner(cont){
+  renderCtx();
+  say(`You have an open <b>${SLOT_SERIES}</b> slot on <b>Wednesday</b>${B.series[2]?` and a <b>${B.series[2][0]}</b> slot Friday`:''}. Based on your recent notes and your audience's questions, here are ideas that fit — I kept your pillar balance in mind.`);
+  const q=B.audience.questions;
+  setTimeout(()=>addOutput({label:'Fits Wednesday · '+SLOT_SERIES,cls:'ol-b',t:q[0]||'The question they always ask',s:'Answer the exact question your audience keeps asking — direct, no fluff.',pillar:B.pillars[0][0],format:'Carousel',slot:'Wednesday',why:'Your audience literally asks this; it slots straight into '+SLOT_SERIES+'.'}),1200);
+  setTimeout(()=>addOutput({label:'Fits Wednesday · alt',cls:'ol-v',t:strip(B.messaging.pov),s:'The point-of-view version — say what the industry gets wrong and what you do instead.',pillar:POV_PILLAR,format:'LinkedIn post',slot:'Wednesday',why:'You haven’t published a POV piece in 2 weeks — this rebalances the mix.'}),2100);
+  setTimeout(()=>addOutput({label:'Fits Friday',cls:'ol-g',t:'A client’s before → after, in their words',s:'One real transformation, told simply. Screenshot, quote, or 3-line story.',pillar:PROOF_PILLAR,format:'Static post',slot:'Friday',why:'Most of this week teaches — proof balances it.'}),3000);
+  setTimeout(()=>say(`Post one straight into its slot, or tell me what's missing and I'll go again.`,[
+    {t:'Show different ideas',go:()=>say(`Okay — different tack: what happened this week? A client moment, a decision, a frustration. Timely beats evergreen.`)},
+    {t:'Leave slots open',go:()=>say('No pressure — the slots will be waiting on Home and in Plan.')},
+  ]),3900);
+}
+
+/* idea generator */
+function runIdeaGen(){
+  say(`Let's mine your foundation. Which pillar should we start with?`,
+    B.pillars.map(p=>({t:p[0],go:()=>ideasFor(p)})) );
+}
+function ideasFor(p){
+  say(`Four ideas rooted in <b>${p[0]}</b> — each with a reason it earns a place in your plan.`);
+  const q=B.audience.questions;
+  const ideas=[
+    {t:q[0]||'The question they always ask',s:'Answer it plainly — the post that builds trust before the sale.',why:'Your audience asks this before buying.'},
+    {t:strip(B.messaging.beliefs).split('.')[0]+'.',s:'Your core belief, stated without hedging.',why:'It states your position — the thing only you can say.'},
+    {t:'The mistake everyone makes with '+lc(p[0]),s:'Name the trap, then the way out.',why:'Myth-busting fits your voice and performs.'},
+    {t:'What '+lc(p[0])+' looks like in real life',s:'One concrete example beats theory.',why:'Specificity is your differentiator.'},
+  ];
+  ideas.forEach((i,ix)=>setTimeout(()=>addOutput({label:'Idea · '+p[0],cls:['ol-v','ol-b','ol-a','ol-g'][ix%4],t:cap(i.t),s:i.s,pillar:p[0],format:'Post or carousel',why:i.why}),1000+ix*700));
+  setTimeout(()=>say(`Save the keepers, post one to Plan, or say <b>"more like #2"</b> and I'll go deeper.`),1000+ideas.length*700+400);
+}
+
+/* angles */
+function runAngles(){
+  const topic=strip(B.messaging.pov);
+  say(`Give me a topic — or we can use one from your Spark Bank:`,[
+    {t:'Use: “'+topic.slice(0,44)+'”',go:()=>anglesFor(topic)},
+    {t:'I’ll type my own',go:()=>say('Go ahead — one line is plenty.')},
+  ]);
+}
+function anglesFor(topic){
+  say(`<b>${esc(topic)}</b> — here are four meaningfully different ways in. Notice how each serves a different job.`);
+  const A=[
+    {label:'Teach',cls:'ol-b',t:'The framework version',s:'Turn it into 3 steps your audience can apply today.',why:'Educational content builds your '+B.pillars[0][0]+' pillar.'},
+    {label:'Challenge',cls:'ol-v',t:'The contrarian version',s:'Lead with what everyone gets wrong — then your alternative.',why:'POV content is what makes you impossible to ignore.'},
+    {label:'Tell a story',cls:'ol-a',t:'The founder-story version',s:'The moment you learned this yourself.',why:'Stories make the teaching believable.'},
+    {label:'Show proof',cls:'ol-g',t:'The client-example version',s:'One before → after that proves the point.',why:'Proof converts the already-interested.'},
+  ];
+  A.forEach((a,ix)=>setTimeout(()=>addOutput({...a,pillar:ix===1?POV_PILLAR:ix===3?PROOF_PILLAR:B.pillars[0][0],format:'Post or carousel'}),1000+ix*700));
+  setTimeout(()=>say(`Choose one, or I can <b>combine two</b> — the challenge + story pairing is usually the strongest.`,[
+    {t:'Combine challenge + story',go:()=>addOutput({label:'Combined angle',cls:'ol-v',t:'The belief I had to unlearn',s:'Open with the contrarian claim, prove it with your own story, close with the lesson.',pillar:POV_PILLAR,format:'LinkedIn post',slot:'Wednesday',why:'POV + story is your highest-trust format.'})},
+  ]),1000+A.length*700+400);
+}
+
+/* sharpen */
+function runSharpen(){
+  say(`Paste the rough message — a thought, a headline, a caption. Or start from your current primary message:`,[
+    {t:'Use: “'+strip(B.messaging.primary).slice(0,44)+'”',go:()=>sharpenText(strip(B.messaging.primary))},
+    {t:'I’ll paste my own',go:()=>say('Paste it below — messy is fine.')},
+  ]);
+}
+function sharpenText(t){
+  say(`The core point is strong. The wrapper is doing too much. Here's the sharpened version — and what I changed.`);
+  setTimeout(()=>addOutput({label:'Sharpened message',cls:'ol-v',t:cap(t),s:'Cut the setup, led with the claim, and ended on the audience — not on you.',pillar:POV_PILLAR,format:'Headline / caption',why:'Shorter sentences and a concrete subject match your voice rules.'}),1200);
+  setTimeout(()=>say(`Push it further?`,[
+    {t:'Make it bolder',go:()=>say(`Bolder: <b>"Stop optimizing. Start deciding."</b> — declarative, zero hedging.`)},
+    {t:'Make it warmer',go:()=>say(`Warmer: <b>"You're not behind — you're just carrying too many open loops. Let's close one."</b>`)},
+    {t:'Turn it into a content brief',go:()=>addOutput({label:'Content brief',cls:'ol-b',t:'Brief: '+cap(t).slice(0,50),s:'Hook, 3 supporting points, one example, CTA — ready to hand to Build.',pillar:B.pillars[0][0],format:'Brief',why:'Everything needed to draft without re-deciding the point.'})},
+  ]),2400);
+}
+
+/* repurpose */
+function runRepurpose(){
+  say(`What's the source? Paste a link or upload — or use your strongest recent piece:`,[
+    {t:'Use my best post from last month',go:()=>{
+      say(`Found it. The reusable ideas inside aren't the post itself — they're these three threads. Each can stand alone.`);
+      const R=[
+        {label:'Deeper follow-up',cls:'ol-b',t:'The part you skipped over',s:'Expand the one paragraph readers highlighted into its own piece.',format:'LinkedIn post'},
+        {label:'Format shift',cls:'ol-a',t:'Same idea, as a carousel',s:'The 3 core claims become 3 slides + a proof slide.',format:'Carousel'},
+        {label:'Opposite take',cls:'ol-v',t:'When the advice doesn’t apply',s:'The honest exceptions — builds more trust than the original.',format:'Post'},
+      ];
+      R.forEach((r,ix)=>setTimeout(()=>addOutput({...r,pillar:B.pillars[ix%B.pillars.length][0],why:'Reuses proven material without repeating it.'}),900+ix*700));
+    }},
+    {t:'Paste a link',go:()=>say('Drop it below and I’ll pull the threads out.')},
+  ]);
+}
+
+/* offer */
+function runOffer(){
+  say(`Let's build around your offer without turning your feed into an ad. I'll balance education, proof, and promotion. What's the goal?`,[
+    {t:'Fill a launch window',go:()=>offerSet('launch')},
+    {t:'Steady interest, no launch',go:()=>offerSet('steady')},
+  ]);
+}
+function offerSet(kind){
+  say(`Here's a balanced set — only one is directly promotional. That ratio is what keeps trust while you sell.`);
+  const O=[
+    {label:'Problem awareness',cls:'ol-b',t:'The cost of staying stuck',s:'Name the pain your offer solves — no pitch.',why:'Meets the audience before they’re ready to buy.'},
+    {label:'Proof',cls:'ol-g',t:'What changed for one client',s:'A result, in their words.',why:'Proof does the selling for you.'},
+    {label:'Objection handling',cls:'ol-a',t:'“'+ (strip(B.audience.objections).split('"')[1]||'I don’t have time') +'” — answered honestly',s:'Take their biggest hesitation seriously.',why:'Your audience’s top objection, addressed before the ask.'},
+    {label:'Direct promotion',cls:'ol-v',t:'Here’s exactly what you get',s:'The offer, plainly — who it’s for, what changes, how to start.',why:'One clear ask converts better than five soft ones.'},
+  ];
+  O.forEach((o,ix)=>setTimeout(()=>addOutput({...o,pillar:B.pillars[ix%B.pillars.length][0],format:'Post'}),900+ix*700));
+  setTimeout(()=>say(`Threadline can place these across the next ${kind==='launch'?'two':'three'} weeks while preserving your pillar balance and series cadence. Want the planner preview?`,[
+    {t:'Yes, place them',go:()=>toast('Planner preview — 4 items placed across 3 weeks (prototype)')},
+  ]),900+O.length*700+400);
+}
+
+/* client story */
+function runStory(){
+  say(`Let's capture it while it's fresh. Rough is fine — what happened?`);
+  setTimeout(()=>say(`As you tell it, I'm listening for four things: the original challenge, what you did, what changed, and the detail your audience will actually care about. Start anywhere.`),2200);
+}
+
+/* surprise */
+function runSurprise(){
+  say(`Here's a thread worth pulling: <b>What's something ${lc(B.audience.primary).replace(/\.$/,'')} struggle with that looks simple from the outside?</b> Answer honestly — the content is hiding in your answer.`);
+}
+/* ask */
+function runAsk(){
+  say(`Ask me anything — strategy, a stuck idea, whether something fits your brand. I already know your voice (<b>${B.voice.traits.map(lc).join(', ')}</b>), your pillars, and your open slots. No prompt needed.`);
+}
+
+/* ---------- entry via URL (from Home) ---------- */
+(function(){
+  const p=new URLSearchParams(location.search);
+  if(p.get('mode')) startSession({mode:p.get('mode')});
+  else if(p.get('seed')) startSession({mode:'free',seed:p.get('seed'),title:p.get('seed').slice(0,44)});
+})();
+
+function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+</script>
+</body>
+</html>

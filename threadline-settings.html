@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Threadline — Settings</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0f172a;--muted:#54607a;--faint:#8b96ad;
+  --line:#e6e9f1;--line-2:#eef1f7;--bg:#f7f8fb;--surface:#ffffff;--surface-2:#f2f4f9;--slate:#0f172a;
+  --violet:#803dff;--blue:#3b82f6;--cyan:#22d3ee;--coral:#fb7185;
+  --green:#20b878;--amber:#f5a524;
+  --grad2:linear-gradient(135deg,#803dff,#3b82f6);
+  --shadow:0 18px 50px rgba(20,20,60,.10);--shadow-sm:0 4px 16px rgba(20,20,60,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Satoshi',system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3,h4{font-family:'Satoshi';font-weight:900;letter-spacing:-.02em;line-height:1.15}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit}
+.mark{display:inline-block;width:28px;height:28px;flex-shrink:0}.mark svg{width:100%;height:100%;display:block}
+
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+@media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{display:none}}
+.sidebar{background:var(--surface);border-right:1px solid var(--line-2);padding:20px 14px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:18px;padding:2px 10px 18px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nitem{display:flex;flex-direction:column;padding:9px 12px;border-radius:12px;text-align:left;transition:.13s}
+.nitem b{font-size:14.5px;font-weight:800;display:flex;align-items:center;gap:9px}
+.nitem span{font-size:11.5px;color:var(--faint);margin-left:25px;margin-top:1px}
+.nitem:hover{background:var(--surface-2)}
+.nitem .ic{width:16px;text-align:center}
+.sfoot{margin-top:auto;display:flex;flex-direction:column;gap:4px}
+.wsrow{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line-2);border-radius:12px;cursor:pointer}
+.wsrow:hover{background:var(--surface-2)}
+.avv{width:32px;height:32px;border-radius:9px;background:var(--grad2);color:#fff;font-weight:900;font-size:12.5px;display:grid;place-items:center;flex-shrink:0}
+.avv.round{border-radius:50%}
+.wsrow .wt b{display:block;font-size:13px;font-weight:800}
+.wsrow .wt span{font-size:11.5px;color:var(--faint)}
+.setrow{display:flex;align-items:center;gap:9px;padding:9px 12px;color:var(--violet);font-weight:800;font-size:13.5px;border-radius:10px;background:rgba(128,61,255,.08)}
+
+.main{min-width:0;padding-bottom:70px}
+.topbar{position:sticky;top:0;z-index:25;display:flex;align-items:center;gap:14px;padding:14px 28px;background:rgba(247,248,251,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+.search{flex:0 1 340px;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 14px;color:var(--faint);font-size:14px;cursor:text}
+.search .kbd{margin-left:auto;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--faint)}
+.bell{position:relative;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:17px}
+.bell:hover{background:var(--surface-2)}
+.bell i{position:absolute;top:4px;right:4px;background:var(--coral);color:#fff;font-style:normal;font-size:10px;font-weight:900;min-width:16px;height:16px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.newspark{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
+
+.content{padding:26px 28px 0;max-width:980px;margin:0 auto}
+.greet h1{font-size:clamp(24px,3vw,30px)}
+.greet p{color:var(--muted);font-size:14.5px;margin-top:4px}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:20px;margin-top:18px;box-shadow:var(--shadow-sm)}
+.ph{display:flex;align-items:baseline;gap:9px;margin-bottom:12px}
+.ph h3{font-size:16px}
+.ph .sub{color:var(--muted);font-size:12.5px}
+.ph .act{margin-left:auto;font-weight:800;font-size:12.5px;color:var(--violet)}
+
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media(max-width:700px){.frow{grid-template-columns:1fr}}
+.df label{display:block;font-weight:700;font-size:12px;color:var(--muted);margin-bottom:6px}
+.df input,.df select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;outline:none;background:var(--surface);color:var(--ink);font-weight:600}
+.df input:focus,.df select:focus{border-color:var(--violet)}
+
+/* team */
+.member{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px dashed var(--line-2)}
+.member:last-of-type{border-bottom:none}
+.member .mt b{display:block;font-size:13.5px}
+.member .mt span{font-size:11.5px;color:var(--faint)}
+.rolepill{margin-left:auto;font-size:10.5px;font-weight:800;border-radius:7px;padding:3px 10px}
+.r-admin{background:rgba(128,61,255,.1);color:var(--violet)}
+.r-member{background:var(--surface-2);color:var(--muted)}
+.invite{display:inline-flex;align-items:center;gap:7px;border:1.5px dashed var(--line);border-radius:11px;padding:10px 15px;font-weight:800;font-size:13px;color:var(--muted);margin-top:10px}
+.invite:hover{border-color:var(--violet);color:var(--violet)}
+
+.ckrow{display:flex;align-items:flex-start;gap:11px;font-weight:700;font-size:14px;padding:6px 0;cursor:pointer}
+.ckrow input{accent-color:var(--violet);width:18px;height:18px;margin-top:2px;flex-shrink:0}
+.ckrow span{display:block;font-size:12px;color:var(--faint);font-weight:600;margin-top:1px}
+.reviewset{border:1px solid var(--line-2);border-radius:13px;padding:14px 16px;margin-top:10px;background:var(--surface-2)}
+.reviewset.off{opacity:.55;pointer-events:none}
+.savebar{display:flex;gap:10px;margin-top:14px}
+.savebar .grow{flex:1}
+.sbtn{padding:11px 18px;border-radius:11px;font-weight:800;font-size:13.5px}
+.sbtn.pri{background:var(--grad2);color:#fff}
+
+/* brand dev grid */
+.bgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+@media(max-width:900px){.bgrid{grid-template-columns:1fr 1fr}}
+.bcard{border:1px solid var(--line);border-radius:13px;padding:14px;cursor:pointer;transition:.13s;background:var(--surface)}
+.bcard:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.bcard .bi{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:15px;margin-bottom:9px}
+.bcard b{font-size:13px}
+.bcard span{display:block;font-size:11px;color:var(--faint);margin-top:2px}
+.reopen{display:flex;align-items:center;gap:13px;background:linear-gradient(120deg,rgba(128,61,255,.08),rgba(59,130,246,.05));border:1px solid rgba(128,61,255,.2);border-radius:14px;padding:15px 17px;margin-top:13px}
+.reopen b{font-size:14px}
+.reopen p{color:var(--muted);font-size:12.5px}
+.reopen button{margin-left:auto;background:var(--grad2);color:#fff;font-weight:800;font-size:13px;padding:10px 16px;border-radius:11px;white-space:nowrap}
+
+/* connections */
+.conn{display:flex;align-items:center;gap:11px;padding:10px 4px;border-bottom:1px dashed var(--line-2);font-size:13.5px;font-weight:700}
+.conn:last-of-type{border-bottom:none}
+.conn .ci{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0}
+.conn .cs{display:block;font-size:11px;color:var(--faint);font-weight:600}
+.conn button{margin-left:auto;font-weight:800;font-size:12px;color:var(--violet);border:1px solid rgba(128,61,255,.3);border-radius:8px;padding:5px 12px}
+.conn.ok button{color:var(--muted);border-color:var(--line)}
+
+.danger{border-color:rgba(251,113,133,.3)}
+.danger .drow{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:700;padding:8px 0}
+.danger .drow span{color:var(--faint);font-size:12px;font-weight:600;display:block}
+.danger .drow button{margin-left:auto;border:1.5px solid var(--line);border-radius:9px;padding:7px 13px;font-weight:800;font-size:12px;color:var(--muted)}
+.danger .drow button:hover{border-color:var(--coral);color:#c83a56}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:95}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+svg.defs{position:absolute;width:0;height:0}
+</style>
+</head>
+<body>
+<svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo"><span class="mark" id="lmark"></span>Threadline</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sfoot">
+      <div class="wsrow" onclick="toast('Workspace switcher — prototype')"><div class="avv" id="wsav">TB</div><div class="wt"><b id="wsname">Workspace</b><span>Workspace</span></div></div>
+      <div class="wsrow" onclick="toast('Profile — prototype')"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="wt"><b>Kennady Scott</b><span>Admin</span></div></div>
+      <button class="setrow">⚙︎ Settings</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="search" onclick="toast('Global search — prototype')">🔍 Search anything... <span class="kbd">⌘ K</span></div>
+      <button class="bell" onclick="toast('3 notifications')">🔔<i>3</i></button>
+      <button class="newspark" onclick="toast('New Spark — available on every page')">＋ New Spark</button>
+    </div>
+
+    <div class="content">
+      <div class="greet"><h1>Settings <span style="font-size:20px">⚙︎</span></h1><p>Workspace, team, brand system, and connections.</p></div>
+
+      <div class="panel">
+        <div class="ph"><h3>Workspace</h3></div>
+        <div class="frow">
+          <div class="df"><label>Workspace name</label><input id="ws-name-input"></div>
+          <div class="df"><label>Plan</label><select><option>Pro — $39/mo · 3 brands · 4 seats</option><option>Starter — $19/mo</option><option>Agency — $99/mo</option></select></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Team &amp; reviews</h3><span class="sub">Who's here — and how content gets approved.</span></div>
+        <div class="member"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="mt"><b>Kennady Scott</b><span>kennady@cleark12.com · Owner</span></div><span class="rolepill r-admin">Admin · Reviewer</span></div>
+        <div class="member"><div class="avv round" style="background:linear-gradient(135deg,#3b82f6,#22d3ee)">J</div><div class="mt"><b>Jordan Lee</b><span>jordan@groundwork.co · invited</span></div><span class="rolepill r-member">Member · Creator</span></div>
+        <button class="invite" onclick="toast('Invite sent — 2 of 4 seats used on Pro')">＋ Invite teammate</button>
+
+        <label class="ckrow" style="margin-top:16px"><input type="checkbox" id="s-required" onchange="toggleReviewSet()"><b>Require review before posts can be scheduled<span>Uncheck if you're a single person running your own account — you'll mark posts ready yourself, with no reviewer step.</span></b></label>
+        <div class="reviewset" id="reviewset">
+          <div class="frow">
+            <div class="df"><label>Who reviews</label><select id="s-reviewer"><option>Kennady Scott (Admin)</option><option>Any admin</option><option>Assigned per piece</option></select></div>
+            <div class="df"><label>Who submits for review</label><select id="s-submit"><option>All members</option><option>Creators only</option></select></div>
+          </div>
+        </div>
+        <div class="savebar"><span style="font-size:12px;color:var(--faint);align-self:center" id="ruleState"></span><span class="grow"></span><button class="sbtn pri" onclick="saveRules()">Save review rules</button></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Brand Development</h3><span class="sub">Your approved brand system — open any piece, anytime.</span></div>
+        <div class="bgrid" id="bgrid"></div>
+        <div class="reopen"><span style="font-size:20px">✦</span><div><b>Reopen brand review</b><p>Walk the full click-through deck again — for major updates or a rebrand. Approvals are preserved until you change them.</p></div><button onclick="location.href='threadline-review.html'">Reopen review →</button></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Connected accounts</h3><span class="sub">Powers Analytics and (later) publishing.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
+        <div id="conns"></div>
+      </div>
+
+      <div class="panel danger">
+        <div class="ph"><h3>Workspace actions</h3></div>
+        <div class="drow">Restart onboarding<span>Go back through the brand-building flow. Your current brand stays until a new one is activated.</span><button onclick="location.href='threadline-onboarding.html'">Restart</button></div>
+        <div class="drow">Export workspace data<span>Sparks, plan, series, and brand system as JSON.</span><button onclick="toast('Export ready — downloads as threadline-export.json')">Export</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="threadline-brand.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
+$('#lmark').innerHTML=MARK;
+
+const B=(window.loadBrand&&loadBrand())||defaultBrand();
+$('#wsname').textContent=B.name;
+$('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+$('#ws-name-input').value=B.name;
+
+/* nav */
+const NAV=[['🏠','Home','Your content command center','threadline-app-home.html'],['✎','Build','Think, create, build','threadline-build-page.html'],['⚡','Spark Bank','Your idea library','threadline-spark-bank.html'],['🧵','Series','Create recurring impact','threadline-series.html'],['📅','Plan','Plan, create, and publish','threadline-plan.html'],['📊','Analytics','Measure what matters','threadline-analytics.html']];
+$('#nav').innerHTML=NAV.map(([ic,l,d,href])=>`<button class="nitem" onclick="location.href='${href}'"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
+
+/* ---------- team review rules (same key Plan reads) ---------- */
+const RKEY='threadline.teamRules';
+function getRules(){ try{ return Object.assign({required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}, JSON.parse(localStorage.getItem(RKEY)||'{}')); }catch(e){ return {required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}; } }
+function loadRules(){ const r=getRules(); $('#s-required').checked=!!r.required; $('#s-reviewer').value=r.reviewer; $('#s-submit').value=r.submit; toggleReviewSet(); }
+function toggleReviewSet(){ const on=$('#s-required').checked; $('#reviewset').classList.toggle('off',!on);
+  $('#ruleState').textContent=on?'Team mode — reviews gate scheduling. Plan reflects this immediately.':'Solo mode — no reviewer step; you mark posts ready yourself.'; }
+function saveRules(){ const r={required:$('#s-required').checked?1:0,reviewer:$('#s-reviewer').value,submit:$('#s-submit').value};
+  try{ localStorage.setItem(RKEY,JSON.stringify(r)); }catch(e){}
+  toast(r.required?'Saved — '+r.reviewer+' approves before scheduling':'Saved — solo mode, no review step'); }
+
+/* ---------- brand development ---------- */
+const BDEV=[
+  ['📋','rgba(128,61,255,.1)','Brand Overview','Name, mission, promise',0],
+  ['🗣','rgba(251,113,133,.12)','Voice Guide','Traits, words, samples',4],
+  ['💬','rgba(59,130,246,.1)','Messaging','Taglines & pitch',5],
+  ['◫','rgba(32,184,120,.12)','Pillars','What you talk about',6],
+  ['🎨','rgba(245,165,36,.14)','Visual Identity','Colors, type, imagery',8],
+  ['◆','rgba(34,211,238,.14)','Logo System','Primary, stacked, icon',8],
+  ['🪪','rgba(15,23,42,.08)','Brand Card','One-page reference',9],
+  ['🗂','rgba(128,61,255,.1)','Full Brand Deck','All 12 sections',0],
+];
+$('#bgrid').innerHTML=BDEV.map(([ic,bg,t,d,slide])=>`<div class="bcard" onclick="location.href='threadline-review.html?slide=${slide}'"><div class="bi" style="background:${bg}">${ic}</div><b>${t}</b><span>${d}</span></div>`).join('');
+
+/* ---------- connections (same key Analytics uses) ---------- */
+const CKEY='threadline.connections';
+let CONN={ig:0,yt:0,lipage:0};
+try{ CONN=Object.assign(CONN,JSON.parse(localStorage.getItem(CKEY)||'{}')); }catch(e){}
+const PLATFORMS=[
+  {k:'ig',n:'Instagram',ic:'ig',bg:'linear-gradient(135deg,#f58529,#dd2a7b,#8134af)',note:'Business account · full insights'},
+  {k:'yt',n:'YouTube',ic:'yt',bg:'#ff0033',note:'Full analytics · free API'},
+  {k:'lipage',n:'LinkedIn Page',ic:'in',bg:'#0a66c2',note:'Company Page analytics'},
+  {k:'liperson',n:'LinkedIn (personal)',ic:'in',bg:'#54607a',na:1,note:'No API — log outcomes manually'},
+  {k:'x',n:'X / Twitter',ic:'𝕏',bg:'#111',na:1,note:'API cost-prohibitive — log manually'},
+];
+function renderConns(){
+  $('#conns').innerHTML=PLATFORMS.map(p=>`<div class="conn${!p.na&&CONN[p.k]?' ok':''}"><span class="ci" style="background:${p.bg}">${p.ic}</span><span>${p.n}<span class="cs">${p.na?p.note:(CONN[p.k]?'✓ Connected':p.note)}</span></span>
+    ${p.na?`<button onclick="toast('Manual logging lives in Analytics')">Manual</button>`:`<button onclick="CONN['${p.k}']=CONN['${p.k}']?0:1;try{localStorage.setItem('${CKEY}',JSON.stringify(CONN))}catch(e){};renderConns();toast(CONN['${p.k}']?'${p.n} connected':'Disconnected')">${CONN[p.k]?'Disconnect':'Connect'}</button>`}</div>`).join('');
+}
+
+function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+loadRules(); renderConns();
+</script>
+</body>
+</html>
