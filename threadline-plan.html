@@ -803,6 +803,29 @@ function ibSchedule(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return;
   else { ITEMS.push({id:NEXT_ID(),t:i.t,m:8,d:26,w:'Wed, Aug 26',status:'Planned',fmt:i.fmt||'Carousel',ser:S0,ch:['in'],asset:'\u2726',note:'From Idea Bank.'}); i.posted=1; render(); toast('Scheduled for Wed, Aug 26 \u2014 drag it anywhere in Plan'); } }
 function ibSpot(){ const b=document.getElementById('ibank'); b.scrollIntoView({behavior:'smooth',block:'center'}); b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),1400); }
 
+/* ---------- first week (arrival from the brand reveal) ---------- */
+const FWKEY='threadline.firstWeekDone';
+function firstWeekMode(){ try{ return new URLSearchParams(location.search).get('firstweek')==='1' && !localStorage.getItem(FWKEY); }catch(e){ return false; } }
+function renderFirstWeek(){
+  if(!firstWeekMode()) return false;
+  try{ localStorage.setItem('threadline.activated','1'); }catch(e){}
+  $('#welcome').innerHTML=`<div class="welcome" style="border-color:rgba(32,184,120,.35)">
+    <button class="wx" onclick="dismissFirstWeek()" title="Dismiss">×</button>
+    <h3>🎉 ${esc(B.name)} is live — let\u2019s plan your first week</h3>
+    <div class="chips" style="margin:12px 0">
+      <span><b>1</b>&nbsp; Your series are already holding slots below — that\u2019s your rhythm</span>
+      <span><b>2</b>&nbsp; Pick one idea from the Idea Bank and hit <b>Schedule</b></span>
+      <span><b>3</b>&nbsp; Hit <b>Build</b> on your favorite — Threadline writes it with you</span>
+    </div>
+    <div class="wacts">
+      <button class="wbtn" onclick="ibSpot()">Start with an idea ↓</button>
+      <button class="wbtn" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Turn my point of view into my first post: '+(window.stripTags?stripTags(B.messaging.pov):'my point of view'))">Create my first piece →</button>
+    </div>
+  </div>`;
+  return true;
+}
+function dismissFirstWeek(){ try{ localStorage.setItem(FWKEY,'1'); }catch(e){} renderWelcome(); toast('You\u2019re set — the rhythm is yours now'); }
+
 /* ---------- render ---------- */
 function render(){ renderViews(); renderIdeaBank();
   $('#view').innerHTML = view==='planner'?('<div class="twouter">'+plannerHTML()+'<div class="tfade" id="tfade"><span>Scroll for more \u2192</span></div></div>') : view==='kanban'?kanbanHTML() : calendarHTML();
@@ -815,7 +838,7 @@ function toastUndo(msg,undo){ let t=document.getElementById('toast'); if(!t){ t=
   t.innerHTML=esc(msg)+(undo?' <button id="undoB">Undo</button>':''); if(undo) t.querySelector('#undoB').onclick=()=>{ undo(); t.classList.remove('show'); };
   t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),undo?4500:2600); }
 
-renderWelcome(); render();
+if(!renderFirstWeek()) renderWelcome(); render();
 (function(){ if(new URLSearchParams(location.search).get('f')==='review'){ view='kanban'; kfilter='review'; render(); } })();
 </script>
 <script>
