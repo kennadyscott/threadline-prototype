@@ -189,7 +189,7 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 const $=s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'' };
+const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'', logoColors:[], deckColors:[] };
 
 const PHASES=['Idea','Audience','Point of view','Pillars'];
 let step=0; // 0..3 phases, 4 = done
@@ -250,6 +250,41 @@ function thinkThenRevealAI(container, promise, render){
   });
 }
 
+/* ---------- palette extraction from uploaded images ---------- */
+function hex2rgb(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+function colorDist(a,b){ const pa=hex2rgb(a),pb=hex2rgb(b); return Math.abs(pa[0]-pb[0])+Math.abs(pa[1]-pb[1])+Math.abs(pa[2]-pb[2]); }
+function extractColors(dataURL, cb){
+  const img=new Image();
+  img.onload=()=>{
+    try{
+      const c=document.createElement('canvas'); const w=c.width=72, h=c.height=Math.max(1,Math.round(72*img.height/img.width));
+      const x=c.getContext('2d'); x.drawImage(img,0,0,w,h);
+      const data=x.getImageData(0,0,w,h).data;
+      const buckets={};
+      for(let i=0;i<data.length;i+=4){
+        const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+        if(a<200) continue;
+        if(r>238&&g>238&&b>238) continue;             // drop paper white
+        const key=Math.round(r/24)+','+Math.round(g/24)+','+Math.round(b/24);
+        buckets[key]=(buckets[key]||0)+1;
+      }
+      const top=Object.entries(buckets).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k])=>{
+        const [r,g,b]=k.split(',').map(n=>Math.min(255,+n*24));
+        return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+      });
+      const out=[]; for(const c1 of top){ if(!out.some(c2=>colorDist(c1,c2)<60)) out.push(c1); if(out.length>=5) break; }
+      cb(out);
+    }catch(e){ cb([]); }
+  };
+  img.onerror=()=>cb([]);
+  img.src=dataURL;
+}
+function uploadedPalette(){
+  if(state.deckColors&&state.deckColors.length) return state.deckColors;
+  if(state.logoColors&&state.logoColors.length) return state.logoColors;
+  return null;
+}
+
 /* ---------- brand asset uploads (optional, phase 1) ---------- */
 function renderAssetChips(){
   const w=document.getElementById('assetChips'); if(!w) return;
@@ -266,9 +301,12 @@ function initAssets(){
   lb.onclick=()=>lf.click(); db.onclick=()=>df.click();
   lf.onchange=()=>{ const f=lf.files[0]; if(!f) return; state.logoName=f.name;
     const rd=new FileReader();
-    rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); const sc=Math.min(1,96/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); try{ state.logoData=c.toDataURL('image/png'); }catch(e){ state.logoData=''; } persist(); renderAssetChips(); }; img.src=rd.result; };
-    rd.readAsDataURL(f); renderAssetChips(); toast('Logo added — it\u2019ll anchor your brand kit'); };
-  df.onchange=()=>{ const f=df.files[0]; if(!f) return; state.deckName=f.name; persist(); renderAssetChips(); toast('Got it — Threadline will fold your branding into the foundation'); };
+    rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); const sc=Math.min(1,96/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); try{ state.logoData=c.toDataURL('image/png'); }catch(e){ state.logoData=''; } extractColors(rd.result,cols=>{ state.logoColors=cols; persist(); }); persist(); renderAssetChips(); }; img.src=rd.result; };
+    rd.readAsDataURL(f); renderAssetChips(); toast('Logo added — its colors will drive your brand kit'); };
+  df.onchange=()=>{ const f=df.files[0]; if(!f) return; state.deckName=f.name;
+    if(/^image\//.test(f.type)){ const rd=new FileReader(); rd.onload=()=>{ extractColors(rd.result,cols=>{ state.deckColors=cols; persist(); if(cols.length) toast('Palette pulled from your brand card — '+cols.length+' colors captured'); }); }; rd.readAsDataURL(f); }
+    else toast('Got it — Threadline will fold your brand guide into the foundation');
+    persist(); renderAssetChips(); };
   renderAssetChips();
 }
 function showBrandExample(){ document.getElementById('exOverlay').classList.add('on'); }
@@ -556,8 +594,9 @@ let logoTries=0, logoV=null;
 const LOGO_SHAPES=['rounded','circle','split','badge'];
 function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
 function currentPalette(){
-  try{ const b=compileFromBuild(state,PILLARS); return { colors:(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[] }; }
-  catch(e){ return { colors:['#803dff','#3b82f6'], tagline:'', traits:[] }; }
+  const up=uploadedPalette();
+  try{ const b=compileFromBuild(state,PILLARS); return { colors:up||(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[] }; }
+  catch(e){ return { colors:up||['#803dff','#3b82f6'], tagline:'', traits:[] }; }
 }
 function kwColors(fb){ fb=(fb||'').toLowerCase();
   const map=[[/warm|coral|sunset|orange/, ['#fb7185','#f5a524']],[/soft|pastel|light|gentle|calm/,['#b9a7ff','#9ad0f5']],[/bold|strong|black|dark/,['#0f1118','#803dff']],[/green|earth|natur|eco|sustain/,['#20b878','#7cc26f']],[/blue|ocean|trust/,['#3b82f6','#22d3ee']],[/pink|fun/,['#fb7185','#c86bfa']],[/gold|yellow|sunny/,['#f4b400','#ffd35c']]];
@@ -577,16 +616,22 @@ async function logoDirection(feedback){
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
       system:'You are a brand identity designer choosing a logo direction. Given the brand and (optionally) the founder\u2019s feedback on the previous take, pick two hex colors and one mark shape that fit the brand\u2019s personality, plus one short sentence explaining the choice. Shapes: rounded (solid rounded square), circle (outlined ring), split (two-tone horizon), badge (soft circle with accent dot).',
-      messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(feedback?('\n\nFeedback on the previous logo: '+feedback):'\n\nThis is the first draft.')}],
+      messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(uploadedPalette()?('\nTheir brand palette, extracted from the brand card they uploaded — c1 and c2 MUST come from this list: '+uploadedPalette().join(', ')):'')+(feedback?('\n\nFeedback on the previous logo: '+feedback):'\n\nThis is the first draft.')}],
       max_tokens:300,
       output_config:{format:{type:'json_schema',schema:{type:'object',properties:{c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['c1','c2','shape','why'],additionalProperties:false}}}
     })});
     if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
-      if(t){ const j=JSON.parse(t); if(/^#[0-9a-f]{6}$/i.test(j.c1)&&/^#[0-9a-f]{6}$/i.test(j.c2)) return j; } }
+      if(t){ const j=JSON.parse(t);
+        if(/^#[0-9a-f]{6}$/i.test(j.c1)&&/^#[0-9a-f]{6}$/i.test(j.c2)){
+          const up=uploadedPalette();
+          if(up){ if(!up.some(c=>colorDist(c,j.c1)<90)) j.c1=up[0]; if(!up.some(c=>colorDist(c,j.c2)<90)) j.c2=up[1]||up[0]; }
+          return j; } } }
   }catch(e){}
-  const pal=currentPalette(); const kc=kwColors(feedback);
-  return { c1:kc?kc[0]:(pal.colors[0]||'#803dff'), c2:kc?kc[1]:(pal.colors[1]||'#3b82f6'), shape:LOGO_SHAPES[logoTries%4],
-    why: feedback?'Reworked around your notes — new shape and palette.':'Drawn from your brand colors and the voice you picked.' };
+  const up=uploadedPalette(); const pal=currentPalette(); const kc=kwColors(feedback);
+  const c1=kc?kc[0]:(up?up[0]:(pal.colors[0]||'#803dff'));
+  const c2=kc?kc[1]:(up?(up[1]||up[0]):(pal.colors[1]||'#3b82f6'));
+  return { c1:c1, c2:c2, shape:LOGO_SHAPES[logoTries%4],
+    why: feedback?'Reworked around your notes — new shape and palette.':(up?'Palette pulled straight from the brand card you shared.':'Drawn from your brand colors and the voice you picked.') };
 }
 function renderLogoPreview(){
   const pal=currentPalette(); const svg=logoSVG(logoV);
@@ -622,7 +667,7 @@ function logoStage(){
   stage(`
     <div class="kick">✦ One last piece</div>
     <h2 class="q">Let's give ${state.name?`<b>${esc(state.name)}</b>`:'your brand'} <span class="grad-text">a face.</span></h2>
-    <p class="lead">You didn't upload a logo — so Threadline drafted one from everything you've shared, plus a brand card to hold it all.</p>
+    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> — Threadline pulled your palette from it and drafted a mark to match. Already have a logo in there? Skip this and add it anytime in Settings → Brand.`:`You didn't upload a logo — so Threadline drafted one from everything you've shared, plus a brand card to hold it all.`}</p>
     <div class="thinking" id="lgThink"><span>Threadline is sketching your mark</span><span class="dots"><i></i><i></i><i></i></span></div>
     <div id="lgReveal" style="display:none">
       <div class="lgrow">
@@ -653,7 +698,7 @@ function logoStage(){
 }
 
 /* ---------- Completion ---------- */
-function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; const _up=uploadedPalette(); if(_up&&_up.length>=2) _b.visual.colors=_up.slice(0,5); saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
   const built=['Positioning','Audience profile','Brand voice','Content pillars','Visual direction'];
   stage(`<div class="done-wrap">
     <div class="burst">🎉</div>
