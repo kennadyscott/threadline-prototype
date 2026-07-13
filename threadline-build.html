@@ -53,6 +53,10 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .lgmark{width:30px;height:30px;display:inline-block;flex-shrink:0}
 .lgmark svg{width:100%;height:100%;display:block}
 .lgwhy{color:var(--muted);font-size:12.5px;margin-top:10px;font-style:italic}
+.lgcardbox{flex:1;min-width:240px;display:flex}
+.lgcardimg{width:100%;max-width:320px;max-height:420px;object-fit:contain;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:#fff}
+.dlrow{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
+.lgupl{margin-top:10px}
 .lgcap{border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:12.5px;margin-top:14px}
 .assetrow{display:flex;gap:9px;flex-wrap:wrap}
 .assetbtn{border:1.5px dashed var(--line);border-radius:11px;padding:10px 15px;font-weight:800;font-size:13px;color:var(--muted);background:var(--surface);cursor:pointer;font-family:inherit}
@@ -590,7 +594,8 @@ async function adjustPillars(){
 }
 
 /* ---------- logo + brand card step (only if nothing was uploaded) ---------- */
-let logoTries=0, logoV=null;
+let logoTries=0, logoV=null, logoUploaded=false;
+let genImgs={ logo:null, card:null, logoSmall:null };
 const LOGO_SHAPES=['rounded','circle','split','badge'];
 function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
 function currentPalette(){
@@ -633,22 +638,58 @@ async function logoDirection(feedback){
   return { c1:c1, c2:c2, shape:LOGO_SHAPES[logoTries%4],
     why: feedback?'Reworked around your notes — new shape and palette.':(up?'Palette pulled straight from the brand card you shared.':'Drawn from your brand colors and the voice you picked.') };
 }
+
+/* ---- ChatGPT image generation (live app) with local fallback ---- */
+function shrinkImage(dataURL,px,cb){ const img=new Image(); img.onload=()=>{ try{ const c=document.createElement('canvas'); const sc=Math.min(1,px/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); cb(c.toDataURL('image/png')); }catch(e){ cb(null); } }; img.onerror=()=>cb(null); img.src=dataURL; }
+async function aiImage(prompt,size){
+  try{
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),90000);
+    const r=await fetch('/api/image',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({prompt:prompt,size:size||'1024x1024'}),signal:ctrl.signal});
+    clearTimeout(t);
+    if(!r.ok) return null;
+    const d=await r.json();
+    return d&&d.b64?('data:image/png;base64,'+d.b64):null;
+  }catch(e){ return null; }
+}
+function paletteLine(){ const up=uploadedPalette(); return (up||currentPalette().colors).slice(0,5).join(', '); }
+function logoPrompt(feedback){
+  return 'Minimalist, iconic vector-style logo mark for "'+(state.name||'a new brand')+'" — '+state.idea+'. Flat design, clean white background, centered, memorable. Use ONLY these brand colors: '+paletteLine()+'. Personality: '+(state.voicePick||'warm')+'. Crisp edges, professional, no photorealism, no clutter, no lorem ipsum.'+(feedback?' The founder rejected the previous version with this feedback — address it directly: '+feedback:'');
+}
+function cardPrompt(feedback){
+  return 'A single-page brand style card (brand guidelines one-pager) for "'+(state.name||'a new brand')+'" — '+state.idea+'. Clean editorial grid on a white background with clearly labeled sections: PRIMARY LOGO (a minimalist mark cohesive with this identity), TAGLINE, COLOR PALETTE shown as labeled swatches using ONLY these colors: '+paletteLine()+', TYPOGRAPHY sample, BRAND VALUES ('+PILLARS.slice(0,4).map(pp=>pp.n).join(', ')+'), TONE OF VOICE: '+(state.voicePick||'warm')+'. Modern flat vector illustration style, organized, professional, matching the logo. Real readable English labels only.'+(feedback?' Founder feedback to address: '+feedback:'');
+}
+function fallbackCardHTML(){
+  const pal=currentPalette();
+  return `<div class="excard" style="flex:1;min-width:240px">
+    <div class="exlogo"><span class="lgmark" id="lgCardMark"></span><span class="exwm">${esc(state.name||'Your brand')}</span></div>
+    <div class="extag">${esc(pal.tagline||'Your tagline lands in the brand reveal.')}</div>
+    <div class="exrow"><span class="exlbl">Colors</span>${pal.colors.slice(0,5).map(c=>`<span class="exsw" style="background:${c}"></span>`).join('')}</div>
+    <div class="exrow"><span class="exlbl">Voice</span><span style="font-weight:700;font-size:12.5px">${esc(pal.traits.join('. ')||state.voicePick||'')}${pal.traits.length?'.':''}</span></div>
+    <div class="exrow"><span class="exlbl">Pillars</span>${PILLARS.slice(0,4).map(pp=>`<span class="exv">${esc(pp.n)}</span>`).join('')}</div>
+  </div>`;
+}
 function renderLogoPreview(){
-  const pal=currentPalette(); const svg=logoSVG(logoV);
-  const el1=document.getElementById('lgTile'); if(el1) el1.innerHTML=svg;
-  const el2=document.getElementById('lgCardMark'); if(el2) el2.innerHTML=svg;
-  const why=document.getElementById('lgWhy'); if(why) why.textContent=logoV.why||'';
+  const tile=document.getElementById('lgTile');
+  if(tile) tile.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" alt="logo">`:logoSVG(logoV);
+  const box=document.getElementById('lgCardBox');
+  if(box) box.innerHTML=genImgs.card?`<img class="lgcardimg" src="${genImgs.card}" alt="brand card">`:fallbackCardHTML();
+  const mk=document.getElementById('lgCardMark');
+  if(mk) mk.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:7px">`:logoSVG(logoV);
+  const why=document.getElementById('lgWhy');
+  if(why) why.textContent=(logoV&&logoV.why?logoV.why+' ':'')+(genImgs.logo?'· Generated with AI images — download both below.':'· AI image generation runs in the live app; this draft is built locally from your palette.');
 }
 async function genLogo(feedback){
   const rev=document.getElementById('lgReveal'); const th=document.getElementById('lgThink');
   if(th) th.classList.add('on'); if(rev) rev.style.display='none';
-  logoV=await logoDirection(feedback);
+  const results=await Promise.all([ logoDirection(feedback), aiImage(logoPrompt(feedback),'1024x1024'), aiImage(cardPrompt(feedback),'1024x1536') ]);
+  logoV=results[0]; genImgs.logo=results[1]; genImgs.card=results[2]; genImgs.logoSmall=null;
+  if(genImgs.logo) shrinkImage(genImgs.logo,96,d=>{ genImgs.logoSmall=d; });
   if(th) th.classList.remove('on'); if(rev) rev.style.display='block';
   renderLogoPreview();
   const left=3-logoTries;
   const cnt=document.getElementById('lgLeft'); if(cnt) cnt.textContent=left;
   const row=document.getElementById('lgRegen');
-  if(row&&left<=0){ row.innerHTML='<div class="lgcap">That\u2019s three takes — solid direction beats endless spins. You can refine your logo anytime in <b>Settings → Brand</b>.</div>'; }
+  if(row&&left<=0){ row.innerHTML='<div class="lgcap">That\u2019s three takes — solid direction beats endless spins. You can refine your logo anytime in <b>Settings → Brand</b>, or upload your own below.</div>'; }
   const fb=document.getElementById('lgfb'); if(fb) fb.value='';
 }
 function regenLogo(){
@@ -657,36 +698,87 @@ function regenLogo(){
   if(note.length<5){ if(fb){ fb.focus(); } toast('Tell Threadline what\u2019s off first — that\u2019s how the next take gets closer'); return; }
   logoTries++; genLogo(note);
 }
+function dlFile(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+function dlLogo(){
+  const base=(state.name||'brand').toLowerCase().replace(/\s+/g,'-');
+  if(genImgs.logo) dlFile(genImgs.logo,base+'-logo.png');
+  else dlFile('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)),base+'-logo.svg');
+  toast('Logo downloaded');
+}
+function roundRect(x,px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
+function canvasCard(){ return new Promise(res=>{
+  const pal=currentPalette();
+  const c=document.createElement('canvas'); c.width=1200; c.height=800; const x=c.getContext('2d');
+  x.fillStyle='#ffffff'; x.fillRect(0,0,1200,800);
+  const drawRest=()=>{
+    x.fillStyle='#0f172a'; x.font='900 62px Satoshi, system-ui, sans-serif'; x.fillText(state.name||'Your brand',215,140);
+    x.fillStyle='#54607a'; x.font='600 27px Satoshi, system-ui, sans-serif'; x.fillText(pal.tagline||'',215,184);
+    x.fillStyle='#8b96ad'; x.font='800 19px Satoshi, system-ui, sans-serif'; x.fillText('COLORS',80,300);
+    pal.colors.slice(0,5).forEach((col,i)=>{ x.fillStyle=col; roundRect(x,80+i*92,322,72,72,14); x.fill(); });
+    x.fillStyle='#8b96ad'; x.font='800 19px Satoshi, system-ui, sans-serif'; x.fillText('VOICE',80,486);
+    x.fillStyle='#0f172a'; x.font='700 30px Satoshi, system-ui, sans-serif'; x.fillText((pal.traits.join('. ')||state.voicePick||'')+(pal.traits.length?'.':''),80,528);
+    x.fillStyle='#8b96ad'; x.font='800 19px Satoshi, system-ui, sans-serif'; x.fillText('PILLARS',80,616);
+    x.fillStyle='#0f172a'; x.font='700 25px Satoshi, system-ui, sans-serif'; x.fillText(PILLARS.slice(0,4).map(pp=>pp.n).join('  \u00b7  '),80,656);
+    x.fillStyle='#b9c0d0'; x.font='600 17px Satoshi, system-ui, sans-serif'; x.fillText('Made with Threadline',80,758);
+    res(c.toDataURL('image/png'));
+  };
+  const src=genImgs.logo||('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)));
+  const img=new Image(); img.onload=()=>{ try{ x.drawImage(img,80,64,110,110); }catch(e){} drawRest(); }; img.onerror=drawRest; img.src=src;
+});}
+async function dlCard(){
+  const base=(state.name||'brand').toLowerCase().replace(/\s+/g,'-');
+  if(genImgs.card){ dlFile(genImgs.card,base+'-brand-card.png'); toast('Brand card downloaded'); return; }
+  const d=await canvasCard(); if(d){ dlFile(d,base+'-brand-card.png'); toast('Brand card downloaded'); }
+}
+function lgUpload(){ const f=document.getElementById('lgUp'); if(f) f.click(); }
+function initLgUpload(){
+  const f=document.getElementById('lgUp'); if(!f) return;
+  f.onchange=()=>{ const file=f.files[0]; if(!file) return;
+    const rd=new FileReader();
+    rd.onload=()=>{ shrinkImage(rd.result,96,small=>{ if(!small){ toast('Couldn\u2019t read that image — try a PNG or JPG'); return; }
+      state.logoData=small; state.logoName=file.name; logoUploaded=true;
+      extractColors(rd.result,cols=>{ state.logoColors=cols; persist(); });
+      genImgs.logo=rd.result; genImgs.logoSmall=small; genImgs.card=null;
+      renderLogoPreview(); persist();
+      const why=document.getElementById('lgWhy'); if(why) why.textContent='Your own logo — Threadline will build the brand kit around it.';
+      toast('Your logo is in — hit continue when ready'); }); };
+    rd.readAsDataURL(file); };
+}
 function acceptLogo(){
-  try{ state.logoData='data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)); state.logoName=(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-logo.svg'; persist(); }catch(e){}
+  try{
+    if(!logoUploaded){
+      if(genImgs.logoSmall) state.logoData=genImgs.logoSmall;
+      else state.logoData='data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV));
+      state.logoName=(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-logo'+(genImgs.logoSmall?'.png':'.svg');
+    }
+    persist();
+  }catch(e){}
   done();
 }
 function logoStage(){
-  logoTries=0;
-  const pal=currentPalette();
+  logoTries=0; logoUploaded=false; genImgs={logo:null,card:null,logoSmall:null};
   stage(`
     <div class="kick">✦ One last piece</div>
     <h2 class="q">Let's give ${state.name?`<b>${esc(state.name)}</b>`:'your brand'} <span class="grad-text">a face.</span></h2>
-    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> — Threadline pulled your palette from it and drafted a mark to match. Already have a logo in there? Skip this and add it anytime in Settings → Brand.`:`You didn't upload a logo — so Threadline drafted one from everything you've shared, plus a brand card to hold it all.`}</p>
-    <div class="thinking" id="lgThink"><span>Threadline is sketching your mark</span><span class="dots"><i></i><i></i><i></i></span></div>
+    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> — Threadline pulled your palette from it and is designing a logo and brand card to match.`:`You didn't upload a logo — so Threadline is designing one from everything you've shared, plus a brand card to hold it all.`}</p>
+    <div class="thinking" id="lgThink"><span>Threadline is designing your logo and brand card — worth the moment</span><span class="dots"><i></i><i></i><i></i></span></div>
     <div id="lgReveal" style="display:none">
       <div class="lgrow">
         <div class="lgtile" id="lgTile"></div>
-        <div class="excard" style="flex:1;min-width:240px">
-          <div class="exlogo"><span class="lgmark" id="lgCardMark"></span><span class="exwm">${esc(state.name||'Your brand')}</span></div>
-          <div class="extag">${esc(pal.tagline||'Your tagline lands in the brand review.')}</div>
-          <div class="exrow"><span class="exlbl">Colors</span>${pal.colors.slice(0,5).map(c=>`<span class="exsw" style="background:${c}"></span>`).join('')}</div>
-          <div class="exrow"><span class="exlbl">Voice</span><span style="font-weight:700;font-size:12.5px">${esc(pal.traits.join('. ')||state.voicePick||'')}${pal.traits.length?'.':''}</span></div>
-          <div class="exrow"><span class="exlbl">Pillars</span>${PILLARS.slice(0,4).map(pp=>`<span class="exv">${esc(pp.n)}</span>`).join('')}</div>
-        </div>
+        <div class="lgcardbox" id="lgCardBox"></div>
       </div>
       <p class="lgwhy" id="lgWhy"></p>
+      <div class="dlrow">
+        <button class="btn ghost" onclick="dlLogo()">↓ Download logo</button>
+        <button class="btn ghost" onclick="dlCard()">↓ Download brand card</button>
+      </div>
       <div id="lgRegen">
-        <div class="field" style="margin-top:14px"><label>Not feeling it? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate — <span id="lgLeft">3</span> left)</span></label>
+        <div class="field" style="margin-top:16px"><label>Not feeling it? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate — <span id="lgLeft">3</span> left)</span></label>
           <textarea id="lgfb" placeholder="e.g. too corporate — we're playful and earthy, more like a farmers-market stand than a bank"></textarea>
         </div>
-        <button class="btn ghost" onclick="regenLogo()">↻ Regenerate</button>
+        <button class="btn ghost" onclick="regenLogo()">↻ Regenerate both</button>
       </div>
+      <div class="lgupl"><input type="file" id="lgUp" accept="image/*" hidden><button class="btn ghost" style="border-style:dashed" onclick="lgUpload()">📤 Or upload your own logo instead</button></div>
     </div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(3,p4)">← Back</button>
@@ -694,6 +786,7 @@ function logoStage(){
       <button class="btn solid" onclick="acceptLogo()">I love it — continue →</button>
     </div>`);
   renderProg();
+  initLgUpload();
   genLogo('');
 }
 
