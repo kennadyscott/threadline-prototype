@@ -58,7 +58,7 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .pickrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
 .pickrow .btn{flex:1;min-width:110px}
 .lgcardbox{flex:1;min-width:240px;display:flex}
-.lgcardimg{width:100%;max-width:320px;max-height:420px;object-fit:contain;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:#fff}
+.lgcardimg{width:100%;max-width:640px;max-height:520px;object-fit:contain;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:#fff}
 .dlrow{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
 .lgupl{margin-top:10px}
 .lgcap{border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;color:var(--muted);font-size:12.5px;margin-top:14px}
@@ -649,10 +649,24 @@ function optionsPrompt(feedback){
     +(feedback?(' The founder rejected the previous options with this feedback \u2014 address it directly: '+feedback):'');
 }
 function cardPrompt(feedback){
-  return 'Generate a single-page brand identity card for the brand "'+(state.name||'a new brand')+'" \u2014 '+state.idea+' \u2014 designed around the exact logo in the provided reference image. Keep that logo unchanged as the primary mark. '
-    +'Include neatly organized labeled sections: primary logo with the brand name, a short tagline, logo variations, color palette swatches with hex codes drawn from the logo\u2019s colors, a typography sample, brand values ('+PILLARS.slice(0,4).map(pp=>pp.n).join(', ')+'), and tone of voice ('+(state.voicePick||'warm')+'). '
-    +'Clean modern editorial layout on a white background, flat vector style, real readable English text only, no lorem ipsum.'
-    +(feedback?(' Founder feedback to address: '+feedback):'');
+  const pal=currentPalette();
+  const nm=state.name||'the brand';
+  const tagline=pal.tagline||('Built for '+(state.audWho||'the people it serves')+'.');
+  const cols=pal.colors.slice(0,5);
+  const traits=(pal.traits.length?pal.traits.join('. '):state.voicePick||'Warm')+'.';
+  const values=PILLARS.slice(0,4).map(pp=>pp.n.toUpperCase()+' \u2014 '+String(pp.p).replace(/\.$/,'')).join(' \u2022 ');
+  return 'A complete professional brand guidelines sheet for "'+nm+'" ('+state.idea+'), designed around the EXACT logo in the provided reference image \u2014 keep that logo unchanged everywhere it appears. '
+   +'Lay it out as a clean landscape brand board on an off-white background with numbered section labels, like a design agency deliverable, containing: '
+   +'01 PRIMARY LOGO \u2014 the provided logo large, locked up with the brand name "'+nm+'" in a bold modern sans-serif wordmark, with the tagline "'+tagline+'" beneath it. '
+   +'02 LOGO VARIATIONS \u2014 small chips showing the logo horizontal with wordmark, icon only, and both repeated on a dark background. '
+   +'03 TYPOGRAPHY \u2014 primary font labeled "Poppins ExtraBold" with an A-Z alphabet sample, secondary font labeled "Inter Regular". '
+   +'04 COLOR PALETTE \u2014 '+cols.length+' rounded swatches labeled with these EXACT hex codes: '+cols.join(', ')+', plus one short sentence describing the palette. '
+   +'05 BRAND ICONS \u2014 a small set of icon variants derived from the logo mark in outline, solid, and circled styles. '
+   +'06 BRAND VALUES \u2014 these four values, each with a tiny matching icon and its one-line description: '+values+'. '
+   +'07 APPLICATION EXAMPLES \u2014 a phone app screen, a business card, and a website header, all using this logo and palette. '
+   +'08 TONE OF VOICE \u2014 the words "'+traits+'" with one warm supporting sentence. '
+   +'Flat vector illustration style, warm and optimistic, generous whitespace, crisp professional layout. Every word of text must be real, correctly spelled English \u2014 spell "'+nm+'" and all hex codes exactly.'
+   +(feedback?(' Founder feedback to address: '+feedback):'');
 }
 /* crop the chosen third out of the options sheet, trim whitespace, return PNG */
 function cropThird(dataURL, idx, cb){
@@ -757,7 +771,7 @@ async function genCard(feedback){
   if(box) box.innerHTML='<div class="thinking on" style="margin:20px 0"><span>ChatGPT is building your brand card around this logo</span><span class="dots"><i></i><i></i><i></i></span></div>';
   let card=null;
   if(genImgs.logo&&genImgs.options){ // live AI path only
-    card=await aiImage({prompt:cardPrompt(feedback),size:'1024x1536',image_b64:genImgs.logo});
+    card=await aiImage({prompt:cardPrompt(feedback),size:'1536x1024',quality:'high',image_b64:genImgs.logo});
   }
   genImgs.card=card||await buildCard();
   renderLogoUI();
