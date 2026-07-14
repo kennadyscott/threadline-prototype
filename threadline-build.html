@@ -54,6 +54,9 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .lgmark svg{width:100%;height:100%;display:block}
 .lgwhy{color:var(--muted);font-size:12.5px;margin-top:10px;font-style:italic}
 .lgerr{border:1px solid rgba(251,113,133,.35);background:rgba(251,113,133,.07);color:#a8324c;border-radius:12px;padding:12px 14px;font-size:12.5px;margin-top:12px;line-height:1.55}
+.lgoptsimg{width:100%;max-width:640px;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:#fff;display:block}
+.pickrow{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.pickrow .btn{flex:1;min-width:110px}
 .lgcardbox{flex:1;min-width:240px;display:flex}
 .lgcardimg{width:100%;max-width:320px;max-height:420px;object-fit:contain;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:#fff}
 .dlrow{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
@@ -505,7 +508,7 @@ async function personalizePillars(){
       system:'You design content pillar systems for brands. Given a brand, its audience, and its beliefs, name 4 distinct content pillars specific to THIS brand\u2019s domain (never about content marketing unless the brand IS content marketing). They should roughly cover: practical value for the audience, behind-the-scenes, proof/stories, and point of view — but named in the brand\u2019s own world. Each pillar: a 2-4 word name and one sentence under 18 words describing what it covers for this brand.',
       messages:[{role:'user',content:'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nTheir struggle: '+(state.audPain||'?')+'\nWe believe: '+(state.believe||'?')+'\nThe industry gets it wrong when: '+(state.wrong||'?')}],
       max_tokens:600,
-      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{pillars:{type:'array',minItems:4,maxItems:4,items:{type:'object',properties:{n:{type:'string'},p:{type:'string'}},required:['n','p'],additionalProperties:false}}},required:['pillars'],additionalProperties:false}}}
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{pillars:{type:'array',items:{type:'object',properties:{n:{type:'string'},p:{type:'string'}},required:['n','p'],additionalProperties:false}}},required:['pillars'],additionalProperties:false}}}
     })});
     if(!r.ok) return;
     const d=await r.json();
@@ -579,7 +582,7 @@ async function adjustPillars(){
       system:'You design content pillar systems for brands. The founder saw a draft set of pillars and gave feedback. Rework the pillars to honor the feedback while keeping a healthy mix (practical value, behind-the-scenes, proof, point of view — adapted to this brand). Return 3 to 5 pillars, each: 2-4 word name + one sentence under 18 words, specific to the brand\u2019s domain.',
       messages:[{role:'user',content:'Brand: '+(state.name||'(unnamed)')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nWe believe: '+(state.believe||'?')+'\n\nCurrent draft pillars:\n'+PILLARS.map(pp=>'- '+pp.n+': '+pp.p).join('\n')+'\n\nFounder feedback: '+critique}],
       max_tokens:700,
-      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{pillars:{type:'array',minItems:3,maxItems:5,items:{type:'object',properties:{n:{type:'string'},p:{type:'string'}},required:['n','p'],additionalProperties:false}}},required:['pillars'],additionalProperties:false}}}
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{pillars:{type:'array',items:{type:'object',properties:{n:{type:'string'},p:{type:'string'}},required:['n','p'],additionalProperties:false}}},required:['pillars'],additionalProperties:false}}}
     })});
     if(!r.ok) throw new Error('offline');
     const d=await r.json();
@@ -595,56 +598,32 @@ async function adjustPillars(){
 }
 
 /* ---------- logo + brand card step (only if nothing was uploaded) ---------- */
-let logoTries=0, logoV=null, logoUploaded=false;
-let genImgs={ logo:null, card:null, logoSmall:null };
+/* Flow: ChatGPT draws THREE logo options in one image -> user picks one ->
+   the chosen logo is cropped out and passed BACK to ChatGPT (images/edits)
+   as the reference for the brand card. Cohesion by construction. */
+let logoTries=0, logoUploaded=false, logoPhase='options';
+let genImgs={ options:null, optSVGs:[], logo:null, logoSmall:null, card:null };
 let imgErr='';
-const LOGO_SHAPES=['rounded','circle','split','badge'];
 function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
 function currentPalette(){
   const up=uploadedPalette()||(state.genColors&&state.genColors.length>=3?state.genColors:null);
   try{ const b=compileFromBuild(state,PILLARS); return { colors:up||(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[], type:(b.visual&&b.visual.type)||'Satoshi' }; }
   catch(e){ return { colors:up||['#803dff','#3b82f6'], tagline:'', traits:[], type:'Satoshi' }; }
 }
-function kwColors(fb){ fb=(fb||'').toLowerCase();
-  const map=[[/warm|coral|sunset|orange/, ['#fb7185','#f5a524']],[/soft|pastel|light|gentle|calm/,['#b9a7ff','#9ad0f5']],[/bold|strong|black|dark/,['#0f1118','#803dff']],[/green|earth|natur|eco|sustain/,['#20b878','#7cc26f']],[/blue|ocean|trust/,['#3b82f6','#22d3ee']],[/pink|fun/,['#fb7185','#c86bfa']],[/gold|yellow|sunny/,['#f4b400','#ffd35c']]];
-  for(const [re,c] of map){ if(re.test(fb)) return c; } return null;
-}
-function logoSVG(v){
+function logoSVG(shape,c1,c2,seed){
   const L=esc((state.name||'B').trim().charAt(0).toUpperCase());
-  const gid='lg'+logoTries;
-  const g=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${v.c1}"/><stop offset="1" stop-color="${v.c2}"/></linearGradient></defs>`;
+  const gid='lg'+seed;
+  const g=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>`;
   const f=`url(#${gid})`;
-  if(v.shape==='circle') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<circle cx="48" cy="48" r="41" fill="none" stroke="${f}" stroke-width="7"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="${v.c1}">${L}</text></svg>`;
-  if(v.shape==='badge') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="40" fill="${f}"/><circle cx="69" cy="27" r="7" fill="#fff" opacity=".92"/><text x="48" y="62" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="40" fill="#fff">${L}</text></svg>`;
+  if(shape==='circle') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<circle cx="48" cy="48" r="41" fill="none" stroke="${f}" stroke-width="7"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="${c1}">${L}</text></svg>`;
+  if(shape==='badge') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="40" fill="${f}"/><circle cx="69" cy="27" r="7" fill="#fff" opacity=".92"/><text x="48" y="62" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="40" fill="#fff">${L}</text></svg>`;
   return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="22" fill="${f}"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="#fff">${L}</text></svg>`;
 }
-
-/* ---- Claude picks the visual concept; ChatGPT draws it ---- */
-async function logoDirection(feedback){
-  try{
-    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You are a brand identity designer. Choose a logo direction for this brand. "concept" is the single concrete object or symbol the mark should depict — a real, drawable thing that carries the brand\u2019s meaning (like a lightbulb for tutoring, a nesting bird for a swap marketplace). Never abstract swooshes, never a letter, never a generic blob or mascot creature unless the brand is explicitly a character brand. "palette" is 4-5 hex colors that BELONG to this brand\u2019s world — chosen from its domain, audience, and personality (a sports-medicine brand feels athletic and clinical; a kids resale brand feels warm and playful). NEVER default to violet/blue tech-startup colors unless the brand genuinely calls for them. Order: deep anchor color first, then primary, accent, and one light neutral. c1 and c2 are the two palette colors the logo mark itself should use. Add one short sentence on why the concept fits.',
-      messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(uploadedPalette()?('\nBrand palette — c1 and c2 MUST come from this list: '+uploadedPalette().join(', ')):'')+(feedback?('\n\nThe founder rejected the last mark with this feedback — address it directly: '+feedback):'\n\nThis is the first draft.')}],
-      max_tokens:350,
-      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{concept:{type:'string'},palette:{type:'array',minItems:4,maxItems:5,items:{type:'string'}},c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['concept','palette','c1','c2','shape','why'],additionalProperties:false}}}
-    })});
-    if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
-      if(t){ const j=JSON.parse(t);
-        if(/^#[0-9a-f]{6}$/i.test(j.c1)&&/^#[0-9a-f]{6}$/i.test(j.c2)){
-          j.palette=(j.palette||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5);
-          const up=uploadedPalette();
-          if(up){ j.palette=up.slice(0,5); if(!up.some(c=>colorDist(c,j.c1)<90)) j.c1=up[0]; if(!up.some(c=>colorDist(c,j.c2)<90)) j.c2=up[1]||up[0]; }
-          return j; } } }
-  }catch(e){}
-  const up=uploadedPalette(); const pal=currentPalette(); const kc=kwColors(feedback);
-  return { concept:'', c1:kc?kc[0]:(up?up[0]:(pal.colors[0]||'#803dff')), c2:kc?kc[1]:(up?(up[1]||up[0]):(pal.colors[1]||'#3b82f6')), shape:LOGO_SHAPES[logoTries%4],
-    why: feedback?'Reworked around your notes.':(up?'Palette pulled straight from the brand card you shared.':'Drawn from your brand colors and the voice you picked.') };
-}
 function shrinkImage(dataURL,px,cb){ const img=new Image(); img.onload=()=>{ try{ const c=document.createElement('canvas'); const sc=Math.min(1,px/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); cb(c.toDataURL('image/png')); }catch(e){ cb(null); } }; img.onerror=()=>cb(null); img.src=dataURL; }
-async function aiImage(prompt,size){
+async function aiImage(body){
   try{
     const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),180000);
-    const r=await fetch('/api/image',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({prompt:prompt,size:size||'1024x1024'}),signal:ctrl.signal});
+    const r=await fetch('/api/image',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:ctrl.signal});
     clearTimeout(t);
     if(!r.ok){
       let m=''; try{ const e=await r.json(); m=(e&&e.error)||''; }catch(x){}
@@ -661,20 +640,49 @@ async function aiImage(prompt,size){
     return null;
   }
 }
-function paletteLine(){ return currentPalette().colors.slice(0,5).join(', '); }
-function logoPrompt(feedback){
-  const concept=(logoV&&logoV.concept)?logoV.concept:'';
-  return 'A single professional logo icon for a brand called "'+(state.name||'a new brand')+'" ('+state.idea+'). '
-    +(concept?('The mark depicts: '+concept+'. '):'')
-    +'Design it as a clean, modern, geometric vector symbol \u2014 bold simple shapes, thick confident strokes, flat solid fills, in the style of a premium tech company app icon. '
-    +'Use ONLY these colors: '+paletteLine()+', on a plain solid white background. '
-    +'CRITICAL: absolutely no text, no letters, no words, no numbers anywhere in the image. One single centered symbol only, with generous empty margin around it. '
-    +'No mascots, no cartoon characters, no faces, no gradients, no drop shadows, no 3D, no photorealism, no background scenery, no multiple variations, no mockups.'
-    +(feedback?(' The founder rejected the previous mark with this feedback \u2014 address it directly: '+feedback):'');
+function optionsPrompt(feedback){
+  const up=uploadedPalette();
+  return 'Generate exactly three distinct professional logo design options for the company "'+(state.name||'a new brand')+'" \u2014 '+state.idea+'. '
+    +'Arrange the three options in a single horizontal row on a plain solid white background, each logo centered within its own third of the image with generous empty spacing, and a small plain number 1, 2, 3 below each option. '
+    +'Each option must be a genuinely different creative concept. Clean flat vector style, crisp, premium, memorable.'
+    +(up?(' Use ONLY these brand colors: '+up.join(', ')+'.'):'')
+    +(feedback?(' The founder rejected the previous options with this feedback \u2014 address it directly: '+feedback):'');
 }
-
-/* ---- brand card is COMPOSED in code (never an AI image): real fonts, real
-       hex values, real pillars, and the exact same logo. Cohesive by construction. ---- */
+function cardPrompt(feedback){
+  return 'Generate a single-page brand identity card for the brand "'+(state.name||'a new brand')+'" \u2014 '+state.idea+' \u2014 designed around the exact logo in the provided reference image. Keep that logo unchanged as the primary mark. '
+    +'Include neatly organized labeled sections: primary logo with the brand name, a short tagline, logo variations, color palette swatches with hex codes drawn from the logo\u2019s colors, a typography sample, brand values ('+PILLARS.slice(0,4).map(pp=>pp.n).join(', ')+'), and tone of voice ('+(state.voicePick||'warm')+'). '
+    +'Clean modern editorial layout on a white background, flat vector style, real readable English text only, no lorem ipsum.'
+    +(feedback?(' Founder feedback to address: '+feedback):'');
+}
+/* crop the chosen third out of the options sheet, trim whitespace, return PNG */
+function cropThird(dataURL, idx, cb){
+  const img=new Image();
+  img.onload=()=>{ try{
+    const tw=Math.floor(img.width/3);
+    const c=document.createElement('canvas'); c.width=tw; c.height=img.height;
+    const x=c.getContext('2d'); x.drawImage(img, idx*tw,0,tw,img.height, 0,0,tw,img.height);
+    const d=x.getImageData(0,0,tw,img.height).data;
+    let minX=tw,minY=img.height,maxX=0,maxY=0;
+    for(let py=0;py<img.height;py+=2){ for(let px=0;px<tw;px+=2){
+      const i=(py*tw+px)*4;
+      if(d[i+3]>200&&!(d[i]>238&&d[i+1]>238&&d[i+2]>238)){ if(px<minX)minX=px; if(px>maxX)maxX=px; if(py<minY)minY=py; if(py>maxY)maxY=py; } } }
+    if(maxX<=minX||maxY<=minY){ cb(c.toDataURL('image/png')); return; }
+    // drop the number caption row: ignore the bottom 12% band when it is detached
+    const pad=Math.round(Math.max(maxX-minX,maxY-minY)*0.08);
+    minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+    maxX=Math.min(tw,maxX+pad); maxY=Math.min(img.height,maxY+pad);
+    const w=maxX-minX,h=maxY-minY, side=Math.max(w,h);
+    const out=document.createElement('canvas'); out.width=side; out.height=side;
+    const ox=out.getContext('2d'); ox.fillStyle='#ffffff'; ox.fillRect(0,0,side,side);
+    ox.drawImage(c, minX,minY,w,h, (side-w)/2,(side-h)/2,w,h);
+    const fin=document.createElement('canvas'); const sc=Math.min(1,768/side);
+    fin.width=Math.round(side*sc); fin.height=Math.round(side*sc);
+    fin.getContext('2d').drawImage(out,0,0,fin.width,fin.height);
+    cb(fin.toDataURL('image/png'));
+  }catch(e){ cb(null); } };
+  img.onerror=()=>cb(null);
+  img.src=dataURL;
+}
 function roundRect(x,px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
 function loadImg(src){ return new Promise(res=>{ if(!src) return res(null); const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
 async function buildCard(){
@@ -684,198 +692,176 @@ async function buildCard(){
   const tint=(h,a)=>{ try{ const [r,g,b]=hex2rgb(h); return 'rgba('+r+','+g+','+b+','+a+')'; }catch(e){ return 'rgba(15,23,42,'+a+')'; } };
   const dark=cols.slice().sort((a,b)=>lum(a)-lum(b))[0]||'#0f172a';
   const accent=cols.find(c=>c!==dark&&lum(c)>40&&lum(c)<200)||cols[1]||dark;
-  const light=cols.slice().sort((a,b)=>lum(b)-lum(a))[0]||'#f4f2ee';
-  const W=1000,H=1420;
+  const W=1000,H=1100;
   const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
   try{ await document.fonts.ready; }catch(e){}
   const F=(w,sz)=>{ x.font=w+' '+sz+'px Satoshi, system-ui, -apple-system, sans-serif'; };
-  const label=(t,px,py)=>{
-    x.fillStyle=accent; roundRect(x,px,py-14,5,18,2.5); x.fill();
-    x.fillStyle='#8b96ad'; F(800,16); try{x.letterSpacing='1.5px';}catch(e){}
-    x.fillText(t.toUpperCase(),px+15,py); try{x.letterSpacing='0px';}catch(e){}
-  };
-  const rule=py=>{ x.fillStyle='#e9ebf0'; x.fillRect(72,py,W-144,1); };
-
-  // canvas
+  const label=(t,px,py)=>{ x.fillStyle=accent; roundRect(x,px,py-14,5,18,2.5); x.fill(); x.fillStyle='#8b96ad'; F(800,16); x.fillText(t.toUpperCase(),px+15,py); };
   x.fillStyle='#ffffff'; x.fillRect(0,0,W,H);
-  // branded header wash
-  x.fillStyle=tint(accent,.08); x.fillRect(0,0,W,318);
-  x.fillStyle=tint(dark,.05); x.fillRect(0,286,W,32);
+  x.fillStyle=tint(accent,.08); x.fillRect(0,0,W,300);
   x.fillStyle=accent; x.fillRect(0,0,W,8);
-
-  const src=genImgs.logo||('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)));
-  const img=await loadImg(src);
-  const drawMark=(bx,by,box)=>{ if(!img) return; const sc=Math.min(box/img.width,box/img.height); const w=img.width*sc,h=img.height*sc; try{ x.drawImage(img,bx+(box-w)/2,by+(box-h)/2,w,h); }catch(e){} };
-
-  // header: logo chip + name + tagline
-  x.fillStyle='#ffffff'; roundRect(x,72,78,160,160,26); x.fill();
-  x.strokeStyle='#e9ebf0'; x.lineWidth=1.5; x.stroke();
-  drawMark(88,94,128);
-  x.fillStyle='#0f172a';
-  const nm=(state.name||'Your brand'); let nmSize=64;
+  const img=await loadImg(genImgs.logo);
+  x.fillStyle='#ffffff'; roundRect(x,72,70,160,160,26); x.fill(); x.strokeStyle='#e9ebf0'; x.lineWidth=1.5; x.stroke();
+  if(img){ const box=128,sc2=Math.min(box/img.width,box/img.height); try{ x.drawImage(img,88+(box-img.width*sc2)/2,86+(box-img.height*sc2)/2,img.width*sc2,img.height*sc2); }catch(e){} }
+  x.fillStyle='#0f172a'; let nmSize=62; const nm=state.name||'Your brand';
   while(nmSize>26){ F(900,nmSize); if(x.measureText(nm).width<=W-72-270) break; nmSize-=3; }
-  x.fillText(nm,270,168);
-  if(pal.tagline){ x.fillStyle='#54607a'; F(600,25); x.fillText(pal.tagline.slice(0,54),272,212); }
-
-  // logo variations — same mark on three treatments
-  let y=396;
-  label('Logo variations',72,y-28);
-  const chips=[['#ffffff','#e9ebf0'],[tint(accent,.12),tint(accent,.25)],[light,'#e9ebf0']];
-  chips.forEach((ch,i)=>{
-    const px=72+i*192;
-    x.fillStyle=ch[0]; roundRect(x,px,y,168,120,18); x.fill();
-    x.strokeStyle=ch[1]; x.lineWidth=1.5; x.stroke();
-    drawMark(px+42,y+18,84);
-  });
-  y+=176; rule(y); y+=56;
-
-  // palette with hex
-  label('Color palette',72,y-4);
+  x.fillText(nm,270,160);
+  if(pal.tagline){ x.fillStyle='#54607a'; F(600,24); x.fillText(pal.tagline.slice(0,54),272,202); }
+  let y=390; label('Color palette',72,y-24);
   const sw=Math.min(160,Math.floor((W-144-(cols.length-1)*16)/cols.length));
-  cols.forEach((col,i)=>{
-    const px=72+i*(sw+16);
-    x.fillStyle=col; roundRect(x,px,y+18,sw,112,16); x.fill();
-    if(lum(col)>225){ x.strokeStyle='#e9ebf0'; x.lineWidth=1; x.stroke(); }
-    x.fillStyle='#54607a'; F(700,16); x.fillText(String(col).toUpperCase(),px,y+160);
-  });
-  y+=216; rule(y); y+=56;
-
-  // typography
-  label('Typography',72,y-4);
-  x.fillStyle='#0f172a'; F(900,54); x.fillText('Aa Bb Cc Dd',72,y+66);
-  x.fillStyle='#54607a'; F(600,20); x.fillText((pal.type||'Satoshi')+' \u2014 headings bold, body regular',72,y+106);
-  y+=162; rule(y); y+=56;
-
-  // two columns: voice | pillars
-  label('Tone of voice',72,y-4);
-  x.fillStyle='#0f172a'; F(800,30);
-  const traitsLine=(pal.traits.join('. ')||state.voicePick||'Clear')+'.';
-  const words=traitsLine.split(' '); let l1='',l2='';
-  words.forEach(w=>{ if(!l2&&(l1+' '+w).trim().length<=24) l1=(l1+' '+w).trim(); else l2=(l2+' '+w).trim(); });
-  x.fillText(l1,72,y+46);
-  if(l2) x.fillText(l2.slice(0,24),72,y+86);
-  label('Content pillars',540,y-4);
-  PILLARS.slice(0,4).forEach((pp,i)=>{
-    const py=y+30+i*48;
-    x.fillStyle=cols[i%cols.length]||accent; roundRect(x,540,py-14,9,30,4.5); x.fill();
-    x.fillStyle='#0f172a'; F(800,23); x.fillText(String(pp.n).slice(0,30),564,py+8);
-  });
-
-  x.fillStyle='#b9c0d0'; F(600,17); x.fillText('Made with Threadline',72,H-44);
+  cols.forEach((col,i)=>{ const px=72+i*(sw+16); x.fillStyle=col; roundRect(x,px,y,sw,104,16); x.fill(); if(lum(col)>225){ x.strokeStyle='#e9ebf0'; x.stroke(); } x.fillStyle='#54607a'; F(700,16); x.fillText(String(col).toUpperCase(),px,y+134); });
+  y+=200; label('Typography',72,y); x.fillStyle='#0f172a'; F(900,50); x.fillText('Aa Bb Cc Dd',72,y+64);
+  x.fillStyle='#54607a'; F(600,19); x.fillText((pal.type||'Satoshi')+' \u2014 headings bold, body regular',72,y+102);
+  y+=180; label('Tone of voice',72,y); x.fillStyle='#0f172a'; F(800,30);
+  x.fillText(((pal.traits.join('. ')||state.voicePick||'Clear')+'.').slice(0,40),72,y+44);
+  label('Content pillars',540,y);
+  PILLARS.slice(0,4).forEach((pp,i)=>{ const py=y+30+i*46; x.fillStyle=cols[i%cols.length]||accent; roundRect(x,540,py-14,9,28,4.5); x.fill(); x.fillStyle='#0f172a'; F(800,22); x.fillText(String(pp.n).slice(0,30),564,py+6); });
+  x.fillStyle='#b9c0d0'; F(600,17); x.fillText('Made with Threadline',72,H-42);
   x.fillStyle=accent; x.fillRect(0,H-8,W,8);
   try{ return c.toDataURL('image/png'); }catch(e){ return null; }
 }
-function renderLogoPreview(){
-  const tile=document.getElementById('lgTile');
-  if(tile) tile.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" alt="logo">`:logoSVG(logoV);
-  const box=document.getElementById('lgCardBox');
-  if(box) box.innerHTML=genImgs.card?`<img class="lgcardimg" src="${genImgs.card}" alt="brand card">`:'';
-  const eb=document.getElementById('lgErr');
-  if(eb){
-    if(!genImgs.logo){
-      eb.style.display='block';
-      eb.innerHTML='<b>\u26A0 Threadline couldn\u2019t draw your logo.</b> '+esc(imgErr||'The image service didn\u2019t respond.')+'<br>The mark showing is a plain placeholder \u2014 not a real logo. Upload your own below, or continue and add one in Settings \u2192 Brand.';
-    } else eb.style.display='none';
-  }
-  const why=document.getElementById('lgWhy');
-  if(why) why.textContent=genImgs.logo?((logoV&&logoV.why?logoV.why+' ':'')+'\u00b7 Your brand card is built around this exact mark.'):'';
-}
-async function genLogo(feedback){
+
+/* ---- phase A: three options ---- */
+async function genOptions(feedback){
   imgErr='';
-  const rev=document.getElementById('lgReveal'); const th=document.getElementById('lgThink');
-  if(th) th.classList.add('on'); if(rev) rev.style.display='none';
-  logoV=await logoDirection(feedback);              // concept first
-  if(logoV&&logoV.palette&&logoV.palette.length>=3&&!uploadedPalette()){ state.genColors=logoV.palette.slice(0,5); persist(); }
-  genImgs.logo=await aiImage(logoPrompt(feedback),'1024x1024');   // then draw it
-  genImgs.logoSmall=null;
-  if(genImgs.logo) shrinkImage(genImgs.logo,128,d=>{ genImgs.logoSmall=d; });
-  genImgs.card=await buildCard();                   // compose card around that mark
+  const th=document.getElementById('lgThink'), rev=document.getElementById('lgReveal');
+  if(th){ th.classList.add('on'); th.querySelector('span').textContent='ChatGPT is sketching three logo directions \u2014 worth the moment'; }
+  if(rev) rev.style.display='none';
+  genImgs.options=await aiImage({prompt:optionsPrompt(feedback),size:'1536x1024'});
+  if(!genImgs.options){
+    const pal=currentPalette();
+    genImgs.optSVGs=[logoSVG('rounded',pal.colors[0]||'#803dff',pal.colors[1]||'#3b82f6','a'),
+                     logoSVG('circle',pal.colors[1]||'#3b82f6',pal.colors[0]||'#803dff','b'),
+                     logoSVG('badge',pal.colors[0]||'#803dff',pal.colors[2]||pal.colors[1]||'#22d3ee','c')];
+  }
+  logoPhase='options'; genImgs.logo=null; genImgs.card=null; genImgs.logoSmall=null;
   if(th) th.classList.remove('on'); if(rev) rev.style.display='block';
-  renderLogoPreview();
-  const left=3-logoTries;
-  const cnt=document.getElementById('lgLeft'); if(cnt) cnt.textContent=left;
-  const row=document.getElementById('lgRegen');
-  if(row&&left<=0){ row.innerHTML='<div class="lgcap">That\u2019s three takes \u2014 solid direction beats endless spins. You can refine your logo anytime in <b>Settings \u2192 Brand</b>, or upload your own below.</div>'; }
+  renderLogoUI();
   const fb=document.getElementById('lgfb'); if(fb) fb.value='';
+}
+/* ---- phase B: pick -> card from the chosen logo ---- */
+function pickOption(i){
+  const after=(logoDataURL)=>{
+    if(!logoDataURL){ toast('Couldn\u2019t cut that option out \u2014 try another'); return; }
+    genImgs.logo=logoDataURL; logoUploaded=false;
+    shrinkImage(logoDataURL,128,d=>{ genImgs.logoSmall=d; });
+    if(!uploadedPalette()) extractColors(logoDataURL,cols=>{ if(cols&&cols.length>=3){ state.genColors=cols; persist(); } genCard(''); });
+    else genCard('');
+    logoPhase='chosen'; renderLogoUI();
+  };
+  if(genImgs.options) cropThird(genImgs.options,i,after);
+  else after('data:image/svg+xml;utf8,'+encodeURIComponent(genImgs.optSVGs[i]||genImgs.optSVGs[0]));
+}
+async function genCard(feedback){
+  const box=document.getElementById('lgCardBox');
+  if(box) box.innerHTML='<div class="thinking on" style="margin:20px 0"><span>ChatGPT is building your brand card around this logo</span><span class="dots"><i></i><i></i><i></i></span></div>';
+  let card=null;
+  if(genImgs.logo&&genImgs.options){ // live AI path only
+    card=await aiImage({prompt:cardPrompt(feedback),size:'1024x1536',image_b64:genImgs.logo});
+  }
+  genImgs.card=card||await buildCard();
+  renderLogoUI();
+}
+function renderLogoUI(){
+  const wrap=document.getElementById('lgBody'); if(!wrap) return;
+  if(logoPhase==='options'){
+    wrap.innerHTML=`
+      <p class="lgwhy">${genImgs.options?'Three directions, drawn by AI \u2014 which one is yours?':''}</p>
+      <div class="lgerr" id="lgErr" style="display:${genImgs.options?'none':'block'}"></div>
+      ${genImgs.options?`<img class="lgoptsimg" src="${genImgs.options}" alt="three logo options">`:
+        `<div class="lgrow">${genImgs.optSVGs.map((sv,i)=>`<div class="lgtile" style="cursor:pointer" onclick="pickOption(${i})">${sv}</div>`).join('')}</div>`}
+      <div class="pickrow">
+        <button class="btn solid" onclick="pickOption(0)">Option 1</button>
+        <button class="btn solid" onclick="pickOption(1)">Option 2</button>
+        <button class="btn solid" onclick="pickOption(2)">Option 3</button>
+      </div>
+      <div id="lgRegen">${logoTries>=3?'<div class="lgcap">That\u2019s three takes \u2014 pick the closest, or upload your own below. You can refine anytime in <b>Settings \u2192 Brand</b>.</div>':`
+        <div class="field" style="margin-top:16px"><label>None of these? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate \u2014 <span id="lgLeft">${3-logoTries}</span> left)</span></label>
+          <textarea id="lgfb" placeholder="e.g. too corporate \u2014 we're playful and earthy, more like a farmers-market stand than a bank"></textarea>
+        </div>
+        <button class="btn ghost" onclick="regenLogo()">\u21BB Three new options</button>`}</div>
+      <div class="lgupl"><input type="file" id="lgUp" accept="image/*" hidden><button class="btn ghost" style="border-style:dashed" onclick="lgUpload()">\u{1F4E4} Or upload your own logo instead</button></div>`;
+  } else {
+    wrap.innerHTML=`
+      <div class="lgrow">
+        <div class="lgtile" id="lgTile">${genImgs.logo?`<img src="${genImgs.logo}" alt="logo">`:''}</div>
+        <div class="lgcardbox" id="lgCardBox">${genImgs.card?`<img class="lgcardimg" src="${genImgs.card}" alt="brand card">`:''}</div>
+      </div>
+      <p class="lgwhy">${logoUploaded?'Your own logo \u2014 the brand card is built around it.':'Your pick \u2014 and a brand card built around that exact logo.'}</p>
+      <div class="dlrow">
+        <button class="btn ghost" onclick="dlLogo()">\u2193 Download logo</button>
+        <button class="btn ghost" onclick="dlCard()">\u2193 Download brand card</button>
+        <button class="btn ghost" onclick="logoPhase='options';renderLogoUI()">\u21A9 Back to the three options</button>
+      </div>
+      <div id="lgRegen">${logoTries>=3?'<div class="lgcap">That\u2019s three takes \u2014 you can refine your brand card anytime in <b>Settings \u2192 Brand</b>.</div>':`
+        <div class="field" style="margin-top:16px"><label>Card not quite right? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate \u2014 <span id="lgLeft">${3-logoTries}</span> left)</span></label>
+          <textarea id="lgfb" placeholder="e.g. warmer, more playful \u2014 and make the tagline bigger"></textarea>
+        </div>
+        <button class="btn ghost" onclick="regenLogo()">\u21BB Regenerate the card</button>`}</div>
+      <div class="lgupl"><input type="file" id="lgUp" accept="image/*" hidden><button class="btn ghost" style="border-style:dashed" onclick="lgUpload()">\u{1F4E4} Or upload your own logo instead</button></div>`;
+  }
+  const eb=document.getElementById('lgErr');
+  if(eb&&!genImgs.options&&logoPhase==='options'){
+    eb.innerHTML='<b>\u26A0 ChatGPT couldn\u2019t draw your options.</b> '+esc(imgErr||'The image service didn\u2019t respond.')+'<br>The tiles below are plain placeholders \u2014 pick one to keep moving, or upload your own.';
+  }
+  initLgUpload();
 }
 function regenLogo(){
   const fb=document.getElementById('lgfb');
   const note=(fb?fb.value.trim():'');
   if(note.length<5){ if(fb){ fb.focus(); } toast('Tell Threadline what\u2019s off first \u2014 that\u2019s how the next take gets closer'); return; }
-  logoTries++; genLogo(note);
+  logoTries++;
+  if(logoPhase==='options') genOptions(note); else genCard(note);
 }
 function dlFile(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
 function dlLogo(){
-  const base=(state.name||'brand').toLowerCase().replace(/\s+/g,'-');
-  if(genImgs.logo) dlFile(genImgs.logo,base+'-logo.png');
-  else dlFile('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)),base+'-logo.svg');
-  toast('Logo downloaded');
+  if(!genImgs.logo){ toast('Pick an option first'); return; }
+  dlFile(genImgs.logo,(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-logo.png'); toast('Logo downloaded');
 }
 async function dlCard(){
-  const base=(state.name||'brand').toLowerCase().replace(/\s+/g,'-');
   const d=genImgs.card||await buildCard();
-  if(d){ dlFile(d,base+'-brand-card.png'); toast('Brand card downloaded'); }
+  if(d){ dlFile(d,(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-brand-card.png'); toast('Brand card downloaded'); }
 }
 function lgUpload(){ const f=document.getElementById('lgUp'); if(f) f.click(); }
 function initLgUpload(){
-  const f=document.getElementById('lgUp'); if(!f) return;
+  const f=document.getElementById('lgUp'); if(!f||f._wired) return; f._wired=1;
   f.onchange=()=>{ const file=f.files[0]; if(!file) return;
     const rd=new FileReader();
-    rd.onload=()=>{ shrinkImage(rd.result,128,async small=>{ if(!small){ toast('Couldn\u2019t read that image \u2014 try a PNG or JPG'); return; }
-      state.logoData=small; state.logoName=file.name; logoUploaded=true;
-      extractColors(rd.result,cols=>{ state.logoColors=cols; persist(); });
-      genImgs.logo=rd.result; genImgs.logoSmall=small; imgErr='';
-      genImgs.card=await buildCard();
-      renderLogoPreview(); persist();
-      const why=document.getElementById('lgWhy'); if(why) why.textContent='Your own logo \u2014 your brand card is built around it.';
-      toast('Your logo is in \u2014 hit continue when ready'); }); };
+    rd.onload=()=>{ shrinkImage(rd.result,768,png=>{ if(!png){ toast('Couldn\u2019t read that image \u2014 try a PNG or JPG'); return; }
+      genImgs.logo=png; logoUploaded=true;
+      shrinkImage(png,128,small=>{ genImgs.logoSmall=small; state.logoData=small; state.logoName=file.name; persist(); });
+      extractColors(rd.result,cols=>{ state.logoColors=cols; persist(); genCard(''); });
+      logoPhase='chosen'; renderLogoUI();
+      toast('Your logo is in \u2014 the brand card is being built around it'); }); };
     rd.readAsDataURL(file); };
 }
 function acceptLogo(){
+  if(logoPhase!=='chosen'||!genImgs.logo){ toast('Pick one of the three options first \u2014 or upload your own'); return; }
   try{
     if(!logoUploaded){
-      if(genImgs.logoSmall) state.logoData=genImgs.logoSmall;
-      else state.logoData='data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV));
-      state.logoName=(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-logo'+(genImgs.logoSmall?'.png':'.svg');
+      state.logoData=genImgs.logoSmall||genImgs.logo;
+      state.logoName=(state.name||'brand').toLowerCase().replace(/\s+/g,'-')+'-logo.png';
     }
     persist();
   }catch(e){}
   done();
 }
 function logoStage(){
-  logoTries=0; logoUploaded=false; genImgs={logo:null,card:null,logoSmall:null};
+  logoTries=0; logoUploaded=false; logoPhase='options';
+  genImgs={options:null,optSVGs:[],logo:null,logoSmall:null,card:null};
   stage(`
     <div class="kick">\u2726 One last piece</div>
     <h2 class="q">Let's give ${state.name?`<b>${esc(state.name)}</b>`:'your brand'} <span class="grad-text">a face.</span></h2>
-    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> \u2014 Threadline pulled your palette from it and is designing a mark to match.`:`You didn't upload a logo \u2014 so Threadline is designing one from everything you've shared, plus a brand card to hold it all.`}</p>
-    <div class="thinking" id="lgThink"><span>Threadline is designing your logo \u2014 worth the moment</span><span class="dots"><i></i><i></i><i></i></span></div>
-    <div id="lgReveal" style="display:none">
-      <div class="lgrow">
-        <div class="lgtile" id="lgTile"></div>
-        <div class="lgcardbox" id="lgCardBox"></div>
-      </div>
-      <div class="lgerr" id="lgErr" style="display:none"></div>
-      <p class="lgwhy" id="lgWhy"></p>
-      <div class="dlrow">
-        <button class="btn ghost" onclick="dlLogo()">\u2193 Download logo</button>
-        <button class="btn ghost" onclick="dlCard()">\u2193 Download brand card</button>
-      </div>
-      <div id="lgRegen">
-        <div class="field" style="margin-top:16px"><label>Not feeling it? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate \u2014 <span id="lgLeft">3</span> left)</span></label>
-          <textarea id="lgfb" placeholder="e.g. too corporate \u2014 we're playful and earthy, more like a farmers-market stand than a bank"></textarea>
-        </div>
-        <button class="btn ghost" onclick="regenLogo()">\u21BB Regenerate</button>
-      </div>
-      <div class="lgupl"><input type="file" id="lgUp" accept="image/*" hidden><button class="btn ghost" style="border-style:dashed" onclick="lgUpload()">\u{1F4E4} Or upload your own logo instead</button></div>
-    </div>
+    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> \u2014 Threadline pulled your palette from it and is sketching three logo directions to match.`:`You didn't upload a logo \u2014 so Threadline is sketching <b>three directions</b>. Pick the one that feels like you, and we'll build your brand card around it.`}</p>
+    <div class="thinking" id="lgThink"><span>ChatGPT is sketching three logo directions</span><span class="dots"><i></i><i></i><i></i></span></div>
+    <div id="lgReveal" style="display:none"><div id="lgBody"></div></div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(3,p4)">\u2190 Back</button>
       <div class="grow"></div>
       <button class="btn solid" onclick="acceptLogo()">I love it \u2014 continue \u2192</button>
     </div>`);
   renderProg();
-  initLgUpload();
-  genLogo('');
+  genOptions('');
 }
 
 /* ---------- Completion ---------- */
