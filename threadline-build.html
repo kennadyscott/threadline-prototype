@@ -53,6 +53,7 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .lgmark{width:30px;height:30px;display:inline-block;flex-shrink:0}
 .lgmark svg{width:100%;height:100%;display:block}
 .lgwhy{color:var(--muted);font-size:12.5px;margin-top:10px;font-style:italic}
+.lgerr{border:1px solid rgba(251,113,133,.35);background:rgba(251,113,133,.07);color:#a8324c;border-radius:12px;padding:12px 14px;font-size:12.5px;margin-top:12px;line-height:1.55}
 .lgcardbox{flex:1;min-width:240px;display:flex}
 .lgcardimg{width:100%;max-width:320px;max-height:420px;object-fit:contain;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow-sm);background:#fff}
 .dlrow{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}
@@ -596,6 +597,7 @@ async function adjustPillars(){
 /* ---------- logo + brand card step (only if nothing was uploaded) ---------- */
 let logoTries=0, logoV=null, logoUploaded=false;
 let genImgs={ logo:null, card:null, logoSmall:null };
+let imgErr='';
 const LOGO_SHAPES=['rounded','circle','split','badge'];
 function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
 function currentPalette(){
@@ -643,13 +645,23 @@ async function logoDirection(feedback){
 function shrinkImage(dataURL,px,cb){ const img=new Image(); img.onload=()=>{ try{ const c=document.createElement('canvas'); const sc=Math.min(1,px/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); cb(c.toDataURL('image/png')); }catch(e){ cb(null); } }; img.onerror=()=>cb(null); img.src=dataURL; }
 async function aiImage(prompt,size){
   try{
-    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),90000);
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),180000);
     const r=await fetch('/api/image',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({prompt:prompt,size:size||'1024x1024'}),signal:ctrl.signal});
     clearTimeout(t);
-    if(!r.ok) return null;
+    if(!r.ok){
+      let m=''; try{ const e=await r.json(); m=(e&&e.error)||''; }catch(x){}
+      if(r.status===401) imgErr='You need to be signed in to the live app for image generation.';
+      else if(r.status===404) imgErr='Image generation isn\u2019t available on this static demo — run it on the live app.';
+      else imgErr=m||('The image service returned '+r.status+'.');
+      return null;
+    }
     const d=await r.json();
-    return d&&d.b64?('data:image/png;base64,'+d.b64):null;
-  }catch(e){ return null; }
+    if(!(d&&d.b64)){ imgErr='The image service replied without an image.'; return null; }
+    return 'data:image/png;base64,'+d.b64;
+  }catch(e){
+    imgErr=(e&&e.name==='AbortError')?'The drawing took too long and timed out.':'Couldn\u2019t reach the image service.';
+    return null;
+  }
 }
 function paletteLine(){ const up=uploadedPalette(); return (up||currentPalette().colors).slice(0,5).join(', '); }
 function logoPrompt(feedback){
@@ -675,10 +687,18 @@ function renderLogoPreview(){
   if(box) box.innerHTML=genImgs.card?`<img class="lgcardimg" src="${genImgs.card}" alt="brand card">`:fallbackCardHTML();
   const mk=document.getElementById('lgCardMark');
   if(mk) mk.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:7px">`:logoSVG(logoV);
+  const eb=document.getElementById('lgErr');
+  if(eb){
+    if(!genImgs.logo){
+      eb.style.display='block';
+      eb.innerHTML='<b>\u26A0 Threadline couldn\u2019t draw your logo.</b> '+esc(imgErr||'The image service didn\u2019t respond.')+'<br>What\u2019s showing is a plain placeholder \u2014 not a real logo. Upload your own below, or continue and add one in Settings \u2192 Brand.';
+    } else eb.style.display='none';
+  }
   const why=document.getElementById('lgWhy');
-  if(why) why.textContent=(logoV&&logoV.why?logoV.why+' ':'')+(genImgs.logo?'· Generated with AI images — download both below.':'· AI image generation runs in the live app; this draft is built locally from your palette.');
+  if(why) why.textContent=genImgs.logo?((logoV&&logoV.why?logoV.why+' ':'')+'\u00b7 Generated with AI \u2014 download both below.'):'';
 }
 async function genLogo(feedback){
+  imgErr='';
   const rev=document.getElementById('lgReveal'); const th=document.getElementById('lgThink');
   if(th) th.classList.add('on'); if(rev) rev.style.display='none';
   const results=await Promise.all([ logoDirection(feedback), aiImage(logoPrompt(feedback),'1024x1024'), aiImage(cardPrompt(feedback),'1024x1536') ]);
@@ -767,6 +787,7 @@ function logoStage(){
         <div class="lgtile" id="lgTile"></div>
         <div class="lgcardbox" id="lgCardBox"></div>
       </div>
+      <div class="lgerr" id="lgErr" style="display:none"></div>
       <p class="lgwhy" id="lgWhy"></p>
       <div class="dlrow">
         <button class="btn ghost" onclick="dlLogo()">↓ Download logo</button>
