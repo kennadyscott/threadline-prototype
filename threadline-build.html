@@ -49,7 +49,7 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 .lead{color:var(--muted);font-size:16.5px;margin-bottom:24px}
 .lgrow{display:flex;gap:16px;flex-wrap:wrap;align-items:stretch;margin-top:6px}
 .lgtile{width:150px;height:150px;border-radius:20px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:22px;box-shadow:0 8px 26px rgba(20,20,60,.07);flex-shrink:0}
-.lgtile svg{width:100%;height:100%}
+.lgtile svg,.lgtile img{width:100%;height:100%;object-fit:contain;display:block}
 .lgmark{width:30px;height:30px;display:inline-block;flex-shrink:0}
 .lgmark svg{width:100%;height:100%;display:block}
 .lgwhy{color:var(--muted);font-size:12.5px;margin-top:10px;font-style:italic}
@@ -602,8 +602,8 @@ const LOGO_SHAPES=['rounded','circle','split','badge'];
 function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
 function currentPalette(){
   const up=uploadedPalette();
-  try{ const b=compileFromBuild(state,PILLARS); return { colors:up||(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[] }; }
-  catch(e){ return { colors:up||['#803dff','#3b82f6'], tagline:'', traits:[] }; }
+  try{ const b=compileFromBuild(state,PILLARS); return { colors:up||(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[], type:(b.visual&&b.visual.type)||'Satoshi' }; }
+  catch(e){ return { colors:up||['#803dff','#3b82f6'], tagline:'', traits:[], type:'Satoshi' }; }
 }
 function kwColors(fb){ fb=(fb||'').toLowerCase();
   const map=[[/warm|coral|sunset|orange/, ['#fb7185','#f5a524']],[/soft|pastel|light|gentle|calm/,['#b9a7ff','#9ad0f5']],[/bold|strong|black|dark/,['#0f1118','#803dff']],[/green|earth|natur|eco|sustain/,['#20b878','#7cc26f']],[/blue|ocean|trust/,['#3b82f6','#22d3ee']],[/pink|fun/,['#fb7185','#c86bfa']],[/gold|yellow|sunny/,['#f4b400','#ffd35c']]];
@@ -615,17 +615,18 @@ function logoSVG(v){
   const g=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${v.c1}"/><stop offset="1" stop-color="${v.c2}"/></linearGradient></defs>`;
   const f=`url(#${gid})`;
   if(v.shape==='circle') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<circle cx="48" cy="48" r="41" fill="none" stroke="${f}" stroke-width="7"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="${v.c1}">${L}</text></svg>`;
-  if(v.shape==='split') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="6" y="6" width="84" height="84" rx="20" fill="${v.c1}"/><path d="M6 62 Q48 42 90 62 L90 70 Q90 90 70 90 L26 90 Q6 90 6 70 Z" fill="${v.c2}" opacity=".85"/><text x="48" y="60" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="42" fill="#fff">${L}</text></svg>`;
   if(v.shape==='badge') return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="40" fill="${f}"/><circle cx="69" cy="27" r="7" fill="#fff" opacity=".92"/><text x="48" y="62" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="40" fill="#fff">${L}</text></svg>`;
   return `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">${g}<rect x="8" y="8" width="80" height="80" rx="22" fill="${f}"/><text x="48" y="63" text-anchor="middle" font-family="Satoshi,system-ui,sans-serif" font-weight="900" font-size="44" fill="#fff">${L}</text></svg>`;
 }
+
+/* ---- Claude picks the visual concept; ChatGPT draws it ---- */
 async function logoDirection(feedback){
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You are a brand identity designer choosing a logo direction. Given the brand and (optionally) the founder\u2019s feedback on the previous take, pick two hex colors and one mark shape that fit the brand\u2019s personality, plus one short sentence explaining the choice. Shapes: rounded (solid rounded square), circle (outlined ring), split (two-tone horizon), badge (soft circle with accent dot).',
-      messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(uploadedPalette()?('\nTheir brand palette, extracted from the brand card they uploaded — c1 and c2 MUST come from this list: '+uploadedPalette().join(', ')):'')+(feedback?('\n\nFeedback on the previous logo: '+feedback):'\n\nThis is the first draft.')}],
-      max_tokens:300,
-      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['c1','c2','shape','why'],additionalProperties:false}}}
+      system:'You are a brand identity designer. Choose a logo direction for this brand. "concept" is the single concrete object or symbol the mark should depict — a real, drawable thing that carries the brand\u2019s meaning (like a lightbulb for tutoring, a nesting bird for a swap marketplace). Never abstract swooshes, never a letter, never a generic blob or mascot creature unless the brand is explicitly a character brand. Pick two hex colors from the brand palette and one short sentence on why the concept fits.',
+      messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(uploadedPalette()?('\nBrand palette — c1 and c2 MUST come from this list: '+uploadedPalette().join(', ')):'')+(feedback?('\n\nThe founder rejected the last mark with this feedback — address it directly: '+feedback):'\n\nThis is the first draft.')}],
+      max_tokens:350,
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{concept:{type:'string'},c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['concept','c1','c2','shape','why'],additionalProperties:false}}}
     })});
     if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
       if(t){ const j=JSON.parse(t);
@@ -635,13 +636,9 @@ async function logoDirection(feedback){
           return j; } } }
   }catch(e){}
   const up=uploadedPalette(); const pal=currentPalette(); const kc=kwColors(feedback);
-  const c1=kc?kc[0]:(up?up[0]:(pal.colors[0]||'#803dff'));
-  const c2=kc?kc[1]:(up?(up[1]||up[0]):(pal.colors[1]||'#3b82f6'));
-  return { c1:c1, c2:c2, shape:LOGO_SHAPES[logoTries%4],
-    why: feedback?'Reworked around your notes — new shape and palette.':(up?'Palette pulled straight from the brand card you shared.':'Drawn from your brand colors and the voice you picked.') };
+  return { concept:'', c1:kc?kc[0]:(up?up[0]:(pal.colors[0]||'#803dff')), c2:kc?kc[1]:(up?(up[1]||up[0]):(pal.colors[1]||'#3b82f6')), shape:LOGO_SHAPES[logoTries%4],
+    why: feedback?'Reworked around your notes.':(up?'Palette pulled straight from the brand card you shared.':'Drawn from your brand colors and the voice you picked.') };
 }
-
-/* ---- ChatGPT image generation (live app) with local fallback ---- */
 function shrinkImage(dataURL,px,cb){ const img=new Image(); img.onload=()=>{ try{ const c=document.createElement('canvas'); const sc=Math.min(1,px/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); cb(c.toDataURL('image/png')); }catch(e){ cb(null); } }; img.onerror=()=>cb(null); img.src=dataURL; }
 async function aiImage(prompt,size){
   try{
@@ -651,7 +648,7 @@ async function aiImage(prompt,size){
     if(!r.ok){
       let m=''; try{ const e=await r.json(); m=(e&&e.error)||''; }catch(x){}
       if(r.status===401) imgErr='You need to be signed in to the live app for image generation.';
-      else if(r.status===404) imgErr='Image generation isn\u2019t available on this static demo — run it on the live app.';
+      else if(r.status===404) imgErr='Image generation isn\u2019t available on this static demo \u2014 run it on the live app.';
       else imgErr=m||('The image service returned '+r.status+'.');
       return null;
     }
@@ -665,57 +662,117 @@ async function aiImage(prompt,size){
 }
 function paletteLine(){ const up=uploadedPalette(); return (up||currentPalette().colors).slice(0,5).join(', '); }
 function logoPrompt(feedback){
-  return 'Minimalist, iconic vector-style logo mark for "'+(state.name||'a new brand')+'" — '+state.idea+'. Flat design, clean white background, centered, memorable. Use ONLY these brand colors: '+paletteLine()+'. Personality: '+(state.voicePick||'warm')+'. Crisp edges, professional, no photorealism, no clutter, no lorem ipsum.'+(feedback?' The founder rejected the previous version with this feedback — address it directly: '+feedback:'');
+  const concept=(logoV&&logoV.concept)?logoV.concept:'';
+  return 'A single professional logo icon for a brand called "'+(state.name||'a new brand')+'" ('+state.idea+'). '
+    +(concept?('The mark depicts: '+concept+'. '):'')
+    +'Design it as a clean, modern, geometric vector symbol \u2014 bold simple shapes, thick confident strokes, flat solid fills, in the style of a premium tech company app icon. '
+    +'Use ONLY these colors: '+paletteLine()+', on a plain solid white background. '
+    +'CRITICAL: absolutely no text, no letters, no words, no numbers anywhere in the image. One single centered symbol only, with generous empty margin around it. '
+    +'No mascots, no cartoon characters, no faces, no gradients, no drop shadows, no 3D, no photorealism, no background scenery, no multiple variations, no mockups.'
+    +(feedback?(' The founder rejected the previous mark with this feedback \u2014 address it directly: '+feedback):'');
 }
-function cardPrompt(feedback){
-  return 'A single-page brand style card (brand guidelines one-pager) for "'+(state.name||'a new brand')+'" — '+state.idea+'. Clean editorial grid on a white background with clearly labeled sections: PRIMARY LOGO (a minimalist mark cohesive with this identity), TAGLINE, COLOR PALETTE shown as labeled swatches using ONLY these colors: '+paletteLine()+', TYPOGRAPHY sample, BRAND VALUES ('+PILLARS.slice(0,4).map(pp=>pp.n).join(', ')+'), TONE OF VOICE: '+(state.voicePick||'warm')+'. Modern flat vector illustration style, organized, professional, matching the logo. Real readable English labels only.'+(feedback?' Founder feedback to address: '+feedback:'');
-}
-function fallbackCardHTML(){
+
+/* ---- brand card is COMPOSED in code (never an AI image): real fonts, real
+       hex values, real pillars, and the exact same logo. Cohesive by construction. ---- */
+function roundRect(x,px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
+function loadImg(src){ return new Promise(res=>{ if(!src) return res(null); const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
+async function buildCard(){
   const pal=currentPalette();
-  return `<div class="excard" style="flex:1;min-width:240px">
-    <div class="exlogo"><span class="lgmark" id="lgCardMark"></span><span class="exwm">${esc(state.name||'Your brand')}</span></div>
-    <div class="extag">${esc(pal.tagline||'Your tagline lands in the brand reveal.')}</div>
-    <div class="exrow"><span class="exlbl">Colors</span>${pal.colors.slice(0,5).map(c=>`<span class="exsw" style="background:${c}"></span>`).join('')}</div>
-    <div class="exrow"><span class="exlbl">Voice</span><span style="font-weight:700;font-size:12.5px">${esc(pal.traits.join('. ')||state.voicePick||'')}${pal.traits.length?'.':''}</span></div>
-    <div class="exrow"><span class="exlbl">Pillars</span>${PILLARS.slice(0,4).map(pp=>`<span class="exv">${esc(pp.n)}</span>`).join('')}</div>
-  </div>`;
+  const W=1000,H=1320;
+  const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  try{ await document.fonts.ready; }catch(e){}
+  const F=(w,sz)=>{ x.font=w+' '+sz+'px Satoshi, system-ui, -apple-system, sans-serif'; };
+  const label=(t,px,py)=>{ x.fillStyle='#8b96ad'; F(800,17); x.letterSpacing='1.5px'; x.fillText(t.toUpperCase(),px,py); x.letterSpacing='0px'; };
+  const rule=(py)=>{ x.fillStyle='#e6e9f1'; x.fillRect(72,py,W-144,1); };
+
+  x.fillStyle='#ffffff'; x.fillRect(0,0,W,H);
+  x.fillStyle='#fdfcfa'; x.fillRect(0,0,W,300);
+
+  // header: logo + name + tagline
+  const src=genImgs.logo||('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)));
+  const img=await loadImg(src);
+  label('Primary logo',72,72);
+  if(img){ const box=132; const sc=Math.min(box/img.width,box/img.height); const w=img.width*sc,h=img.height*sc;
+    try{ x.drawImage(img,72+(box-w)/2,102+(box-h)/2,w,h); }catch(e){} }
+  x.fillStyle='#0f172a'; F(900,60);
+  const nm=(state.name||'Your brand'); let nmSize=60;
+  while(nmSize>28){ F(900,nmSize); if(x.measureText(nm).width<=W-72-232) break; nmSize-=3; }
+  x.fillText(nm,232,190);
+  if(pal.tagline){ x.fillStyle='#54607a'; F(600,25); x.fillText(pal.tagline.slice(0,52),232,232); }
+
+  // palette
+  let y=380;
+  label('Color palette',72,y-28);
+  const cols=pal.colors.slice(0,5);
+  cols.forEach((col,i)=>{
+    const sw=150, gap=16, px=72+i*(sw+gap);
+    x.fillStyle=col; roundRect(x,px,y,sw,110,16); x.fill();
+    if(/^#f|^#e/i.test(col)){ x.strokeStyle='#e6e9f1'; x.lineWidth=1; x.stroke(); }
+    x.fillStyle='#54607a'; F(700,16); x.fillText(String(col).toUpperCase(),px,y+140);
+  });
+  y+=200; rule(y); y+=52;
+
+  // typography
+  label('Typography',72,y);
+  x.fillStyle='#0f172a'; F(900,52); x.fillText('Aa Bb Cc Dd',72,y+72);
+  x.fillStyle='#54607a'; F(600,20); x.fillText((pal.type||'Satoshi')+' \u2014 headings bold, body regular',72,y+112);
+  y+=170; rule(y); y+=52;
+
+  // voice
+  label('Tone of voice',72,y);
+  x.fillStyle='#0f172a'; F(800,34);
+  x.fillText((pal.traits.join('. ')||state.voicePick||'Clear')+'.',72,y+56);
+  y+=110; rule(y); y+=52;
+
+  // pillars
+  label('Content pillars',72,y);
+  y+=44;
+  PILLARS.slice(0,4).forEach((pp,i)=>{
+    const py=y+i*54;
+    x.fillStyle=cols[i%cols.length]||'#803dff'; roundRect(x,72,py-16,10,34,5); x.fill();
+    x.fillStyle='#0f172a'; F(800,25); x.fillText(String(pp.n).slice(0,46),100,py+8);
+  });
+
+  x.fillStyle='#b9c0d0'; F(600,17); x.fillText('Made with Threadline',72,H-48);
+  try{ return c.toDataURL('image/png'); }catch(e){ return null; }
 }
+
 function renderLogoPreview(){
   const tile=document.getElementById('lgTile');
   if(tile) tile.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" alt="logo">`:logoSVG(logoV);
   const box=document.getElementById('lgCardBox');
-  if(box) box.innerHTML=genImgs.card?`<img class="lgcardimg" src="${genImgs.card}" alt="brand card">`:fallbackCardHTML();
-  const mk=document.getElementById('lgCardMark');
-  if(mk) mk.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:7px">`:logoSVG(logoV);
+  if(box) box.innerHTML=genImgs.card?`<img class="lgcardimg" src="${genImgs.card}" alt="brand card">`:'';
   const eb=document.getElementById('lgErr');
   if(eb){
     if(!genImgs.logo){
       eb.style.display='block';
-      eb.innerHTML='<b>\u26A0 Threadline couldn\u2019t draw your logo.</b> '+esc(imgErr||'The image service didn\u2019t respond.')+'<br>What\u2019s showing is a plain placeholder \u2014 not a real logo. Upload your own below, or continue and add one in Settings \u2192 Brand.';
+      eb.innerHTML='<b>\u26A0 Threadline couldn\u2019t draw your logo.</b> '+esc(imgErr||'The image service didn\u2019t respond.')+'<br>The mark showing is a plain placeholder \u2014 not a real logo. Upload your own below, or continue and add one in Settings \u2192 Brand.';
     } else eb.style.display='none';
   }
   const why=document.getElementById('lgWhy');
-  if(why) why.textContent=genImgs.logo?((logoV&&logoV.why?logoV.why+' ':'')+'\u00b7 Generated with AI \u2014 download both below.'):'';
+  if(why) why.textContent=genImgs.logo?((logoV&&logoV.why?logoV.why+' ':'')+'\u00b7 Your brand card is built around this exact mark.'):'';
 }
 async function genLogo(feedback){
   imgErr='';
   const rev=document.getElementById('lgReveal'); const th=document.getElementById('lgThink');
   if(th) th.classList.add('on'); if(rev) rev.style.display='none';
-  const results=await Promise.all([ logoDirection(feedback), aiImage(logoPrompt(feedback),'1024x1024'), aiImage(cardPrompt(feedback),'1024x1536') ]);
-  logoV=results[0]; genImgs.logo=results[1]; genImgs.card=results[2]; genImgs.logoSmall=null;
-  if(genImgs.logo) shrinkImage(genImgs.logo,96,d=>{ genImgs.logoSmall=d; });
+  logoV=await logoDirection(feedback);              // concept first
+  genImgs.logo=await aiImage(logoPrompt(feedback),'1024x1024');   // then draw it
+  genImgs.logoSmall=null;
+  if(genImgs.logo) shrinkImage(genImgs.logo,128,d=>{ genImgs.logoSmall=d; });
+  genImgs.card=await buildCard();                   // compose card around that mark
   if(th) th.classList.remove('on'); if(rev) rev.style.display='block';
   renderLogoPreview();
   const left=3-logoTries;
   const cnt=document.getElementById('lgLeft'); if(cnt) cnt.textContent=left;
   const row=document.getElementById('lgRegen');
-  if(row&&left<=0){ row.innerHTML='<div class="lgcap">That\u2019s three takes — solid direction beats endless spins. You can refine your logo anytime in <b>Settings → Brand</b>, or upload your own below.</div>'; }
+  if(row&&left<=0){ row.innerHTML='<div class="lgcap">That\u2019s three takes \u2014 solid direction beats endless spins. You can refine your logo anytime in <b>Settings \u2192 Brand</b>, or upload your own below.</div>'; }
   const fb=document.getElementById('lgfb'); if(fb) fb.value='';
 }
 function regenLogo(){
   const fb=document.getElementById('lgfb');
   const note=(fb?fb.value.trim():'');
-  if(note.length<5){ if(fb){ fb.focus(); } toast('Tell Threadline what\u2019s off first — that\u2019s how the next take gets closer'); return; }
+  if(note.length<5){ if(fb){ fb.focus(); } toast('Tell Threadline what\u2019s off first \u2014 that\u2019s how the next take gets closer'); return; }
   logoTries++; genLogo(note);
 }
 function dlFile(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
@@ -725,43 +782,24 @@ function dlLogo(){
   else dlFile('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)),base+'-logo.svg');
   toast('Logo downloaded');
 }
-function roundRect(x,px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
-function canvasCard(){ return new Promise(res=>{
-  const pal=currentPalette();
-  const c=document.createElement('canvas'); c.width=1200; c.height=800; const x=c.getContext('2d');
-  x.fillStyle='#ffffff'; x.fillRect(0,0,1200,800);
-  const drawRest=()=>{
-    x.fillStyle='#0f172a'; x.font='900 62px Satoshi, system-ui, sans-serif'; x.fillText(state.name||'Your brand',215,140);
-    x.fillStyle='#54607a'; x.font='600 27px Satoshi, system-ui, sans-serif'; x.fillText(pal.tagline||'',215,184);
-    x.fillStyle='#8b96ad'; x.font='800 19px Satoshi, system-ui, sans-serif'; x.fillText('COLORS',80,300);
-    pal.colors.slice(0,5).forEach((col,i)=>{ x.fillStyle=col; roundRect(x,80+i*92,322,72,72,14); x.fill(); });
-    x.fillStyle='#8b96ad'; x.font='800 19px Satoshi, system-ui, sans-serif'; x.fillText('VOICE',80,486);
-    x.fillStyle='#0f172a'; x.font='700 30px Satoshi, system-ui, sans-serif'; x.fillText((pal.traits.join('. ')||state.voicePick||'')+(pal.traits.length?'.':''),80,528);
-    x.fillStyle='#8b96ad'; x.font='800 19px Satoshi, system-ui, sans-serif'; x.fillText('PILLARS',80,616);
-    x.fillStyle='#0f172a'; x.font='700 25px Satoshi, system-ui, sans-serif'; x.fillText(PILLARS.slice(0,4).map(pp=>pp.n).join('  \u00b7  '),80,656);
-    x.fillStyle='#b9c0d0'; x.font='600 17px Satoshi, system-ui, sans-serif'; x.fillText('Made with Threadline',80,758);
-    res(c.toDataURL('image/png'));
-  };
-  const src=genImgs.logo||('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)));
-  const img=new Image(); img.onload=()=>{ try{ x.drawImage(img,80,64,110,110); }catch(e){} drawRest(); }; img.onerror=drawRest; img.src=src;
-});}
 async function dlCard(){
   const base=(state.name||'brand').toLowerCase().replace(/\s+/g,'-');
-  if(genImgs.card){ dlFile(genImgs.card,base+'-brand-card.png'); toast('Brand card downloaded'); return; }
-  const d=await canvasCard(); if(d){ dlFile(d,base+'-brand-card.png'); toast('Brand card downloaded'); }
+  const d=genImgs.card||await buildCard();
+  if(d){ dlFile(d,base+'-brand-card.png'); toast('Brand card downloaded'); }
 }
 function lgUpload(){ const f=document.getElementById('lgUp'); if(f) f.click(); }
 function initLgUpload(){
   const f=document.getElementById('lgUp'); if(!f) return;
   f.onchange=()=>{ const file=f.files[0]; if(!file) return;
     const rd=new FileReader();
-    rd.onload=()=>{ shrinkImage(rd.result,96,small=>{ if(!small){ toast('Couldn\u2019t read that image — try a PNG or JPG'); return; }
+    rd.onload=()=>{ shrinkImage(rd.result,128,async small=>{ if(!small){ toast('Couldn\u2019t read that image \u2014 try a PNG or JPG'); return; }
       state.logoData=small; state.logoName=file.name; logoUploaded=true;
       extractColors(rd.result,cols=>{ state.logoColors=cols; persist(); });
-      genImgs.logo=rd.result; genImgs.logoSmall=small; genImgs.card=null;
+      genImgs.logo=rd.result; genImgs.logoSmall=small; imgErr='';
+      genImgs.card=await buildCard();
       renderLogoPreview(); persist();
-      const why=document.getElementById('lgWhy'); if(why) why.textContent='Your own logo — Threadline will build the brand kit around it.';
-      toast('Your logo is in — hit continue when ready'); }); };
+      const why=document.getElementById('lgWhy'); if(why) why.textContent='Your own logo \u2014 your brand card is built around it.';
+      toast('Your logo is in \u2014 hit continue when ready'); }); };
     rd.readAsDataURL(file); };
 }
 function acceptLogo(){
@@ -778,10 +816,10 @@ function acceptLogo(){
 function logoStage(){
   logoTries=0; logoUploaded=false; genImgs={logo:null,card:null,logoSmall:null};
   stage(`
-    <div class="kick">✦ One last piece</div>
+    <div class="kick">\u2726 One last piece</div>
     <h2 class="q">Let's give ${state.name?`<b>${esc(state.name)}</b>`:'your brand'} <span class="grad-text">a face.</span></h2>
-    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> — Threadline pulled your palette from it and is designing a logo and brand card to match.`:`You didn't upload a logo — so Threadline is designing one from everything you've shared, plus a brand card to hold it all.`}</p>
-    <div class="thinking" id="lgThink"><span>Threadline is designing your logo and brand card — worth the moment</span><span class="dots"><i></i><i></i><i></i></span></div>
+    <p class="lead">${state.deckName?`You shared <b>${esc(state.deckName)}</b> \u2014 Threadline pulled your palette from it and is designing a mark to match.`:`You didn't upload a logo \u2014 so Threadline is designing one from everything you've shared, plus a brand card to hold it all.`}</p>
+    <div class="thinking" id="lgThink"><span>Threadline is designing your logo \u2014 worth the moment</span><span class="dots"><i></i><i></i><i></i></span></div>
     <div id="lgReveal" style="display:none">
       <div class="lgrow">
         <div class="lgtile" id="lgTile"></div>
@@ -790,21 +828,21 @@ function logoStage(){
       <div class="lgerr" id="lgErr" style="display:none"></div>
       <p class="lgwhy" id="lgWhy"></p>
       <div class="dlrow">
-        <button class="btn ghost" onclick="dlLogo()">↓ Download logo</button>
-        <button class="btn ghost" onclick="dlCard()">↓ Download brand card</button>
+        <button class="btn ghost" onclick="dlLogo()">\u2193 Download logo</button>
+        <button class="btn ghost" onclick="dlCard()">\u2193 Download brand card</button>
       </div>
       <div id="lgRegen">
-        <div class="field" style="margin-top:16px"><label>Not feeling it? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate — <span id="lgLeft">3</span> left)</span></label>
-          <textarea id="lgfb" placeholder="e.g. too corporate — we're playful and earthy, more like a farmers-market stand than a bank"></textarea>
+        <div class="field" style="margin-top:16px"><label>Not feeling it? Tell Threadline what's off <span style="color:var(--faint);font-weight:500">(required to regenerate \u2014 <span id="lgLeft">3</span> left)</span></label>
+          <textarea id="lgfb" placeholder="e.g. too corporate \u2014 we're playful and earthy, more like a farmers-market stand than a bank"></textarea>
         </div>
-        <button class="btn ghost" onclick="regenLogo()">↻ Regenerate both</button>
+        <button class="btn ghost" onclick="regenLogo()">\u21BB Regenerate</button>
       </div>
-      <div class="lgupl"><input type="file" id="lgUp" accept="image/*" hidden><button class="btn ghost" style="border-style:dashed" onclick="lgUpload()">📤 Or upload your own logo instead</button></div>
+      <div class="lgupl"><input type="file" id="lgUp" accept="image/*" hidden><button class="btn ghost" style="border-style:dashed" onclick="lgUpload()">\u{1F4E4} Or upload your own logo instead</button></div>
     </div>
     <div class="nav">
-      <button class="btn ghost" data-back onclick="adv(3,p4)">← Back</button>
+      <button class="btn ghost" data-back onclick="adv(3,p4)">\u2190 Back</button>
       <div class="grow"></div>
-      <button class="btn solid" onclick="acceptLogo()">I love it — continue →</button>
+      <button class="btn solid" onclick="acceptLogo()">I love it \u2014 continue \u2192</button>
     </div>`);
   renderProg();
   initLgUpload();
