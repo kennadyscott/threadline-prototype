@@ -644,8 +644,13 @@ function optionsPrompt(feedback){
   const up=uploadedPalette();
   return 'Generate exactly three distinct professional logo design options for the company "'+(state.name||'a new brand')+'" \u2014 '+state.idea+'. '
     +'Arrange the three options in a single horizontal row on a plain solid white background, each logo centered within its own third of the image with generous empty spacing, and a small plain number 1, 2, 3 below each option. '
-    +'Each option must be a genuinely different creative concept. Clean flat vector style, crisp, premium, memorable.'
-    +(up?(' Use ONLY these brand colors: '+up.join(', ')+'.'):'')
+    +'The three options must have genuinely different concepts AND different visual energies: '
+    +'OPTION 1 \u2014 a bold, filled, characterful illustrated mark with warmth and personality (a symbol with life in it, like a hand-drawn icon a beloved brand would rally around); '
+    +'OPTION 2 \u2014 a strong geometric mark with vibrant, saturated color-blocking and high contrast; '
+    +'OPTION 3 \u2014 a sleek modern mark energized by one electric accent color. '
+    +'Rich saturated colors chosen to OWN this category and match a '+(state.voicePick||'confident').toLowerCase()+' personality. '
+    +'NEVER muted corporate grey, never thin timid line-art, never washed-out palettes, never generic minimalism. Confident, memorable, full of life.'
+    +(up?(' Build every option from these brand colors, used boldly at full saturation: '+up.join(', ')+'.'):'')
     +(feedback?(' The founder rejected the previous options with this feedback \u2014 address it directly: '+feedback):'');
 }
 function cardPrompt(feedback){
@@ -665,7 +670,7 @@ function cardPrompt(feedback){
    +'06 BRAND VALUES \u2014 these four values, each with a tiny matching icon and its one-line description: '+values+'. '
    +'07 APPLICATION EXAMPLES \u2014 a phone app screen, a business card, and a website header, all using this logo and palette. '
    +'08 TONE OF VOICE \u2014 the words "'+traits+'" with one warm supporting sentence. '
-   +'Flat vector illustration style, warm and optimistic, generous whitespace, crisp professional layout. Every word of text must be real, correctly spelled English \u2014 spell "'+nm+'" and all hex codes exactly.'
+   +'Vibrant, energetic editorial design \u2014 bold color blocking, the brand\u2019s accent color used generously across section backgrounds, icons, illustrations, and the application mockups; warm, optimistic, and full of life, like a brand board from a top-tier design agency. NEVER flat grey, never washed out, never timid. Every word of text must be real, correctly spelled English \u2014 spell "'+nm+'" and all hex codes exactly.'
    +(feedback?(' Founder feedback to address: '+feedback):'');
 }
 /* crop the chosen third out of the options sheet, trim whitespace, return PNG */
