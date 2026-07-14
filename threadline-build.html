@@ -194,7 +194,7 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 const $=s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'', logoColors:[], deckColors:[] };
+const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'', logoColors:[], deckColors:[], genColors:[] };
 
 const PHASES=['Idea','Audience','Point of view','Pillars'];
 let step=0; // 0..3 phases, 4 = done
@@ -601,7 +601,7 @@ let imgErr='';
 const LOGO_SHAPES=['rounded','circle','split','badge'];
 function logoOrDone(){ if(state.logoData){ done(); } else { step=4; renderProg(); logoStage(); } }
 function currentPalette(){
-  const up=uploadedPalette();
+  const up=uploadedPalette()||(state.genColors&&state.genColors.length>=3?state.genColors:null);
   try{ const b=compileFromBuild(state,PILLARS); return { colors:up||(b.visual&&b.visual.colors)||['#803dff','#3b82f6'], tagline:b.tagline||'', traits:(b.voice&&b.voice.traits)||[], type:(b.visual&&b.visual.type)||'Satoshi' }; }
   catch(e){ return { colors:up||['#803dff','#3b82f6'], tagline:'', traits:[], type:'Satoshi' }; }
 }
@@ -623,16 +623,17 @@ function logoSVG(v){
 async function logoDirection(feedback){
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You are a brand identity designer. Choose a logo direction for this brand. "concept" is the single concrete object or symbol the mark should depict — a real, drawable thing that carries the brand\u2019s meaning (like a lightbulb for tutoring, a nesting bird for a swap marketplace). Never abstract swooshes, never a letter, never a generic blob or mascot creature unless the brand is explicitly a character brand. Pick two hex colors from the brand palette and one short sentence on why the concept fits.',
+      system:'You are a brand identity designer. Choose a logo direction for this brand. "concept" is the single concrete object or symbol the mark should depict — a real, drawable thing that carries the brand\u2019s meaning (like a lightbulb for tutoring, a nesting bird for a swap marketplace). Never abstract swooshes, never a letter, never a generic blob or mascot creature unless the brand is explicitly a character brand. "palette" is 4-5 hex colors that BELONG to this brand\u2019s world — chosen from its domain, audience, and personality (a sports-medicine brand feels athletic and clinical; a kids resale brand feels warm and playful). NEVER default to violet/blue tech-startup colors unless the brand genuinely calls for them. Order: deep anchor color first, then primary, accent, and one light neutral. c1 and c2 are the two palette colors the logo mark itself should use. Add one short sentence on why the concept fits.',
       messages:[{role:'user',content:'Brand: '+(state.name||'?')+'\nWhat it is: '+state.idea+'\nAudience: '+(state.audWho||'?')+'\nVoice: '+(state.voicePick||'?')+'\nWe believe: '+(state.believe||'?')+(uploadedPalette()?('\nBrand palette — c1 and c2 MUST come from this list: '+uploadedPalette().join(', ')):'')+(feedback?('\n\nThe founder rejected the last mark with this feedback — address it directly: '+feedback):'\n\nThis is the first draft.')}],
       max_tokens:350,
-      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{concept:{type:'string'},c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['concept','c1','c2','shape','why'],additionalProperties:false}}}
+      output_config:{format:{type:'json_schema',schema:{type:'object',properties:{concept:{type:'string'},palette:{type:'array',minItems:4,maxItems:5,items:{type:'string'}},c1:{type:'string'},c2:{type:'string'},shape:{type:'string',enum:['rounded','circle','split','badge']},why:{type:'string'}},required:['concept','palette','c1','c2','shape','why'],additionalProperties:false}}}
     })});
     if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
       if(t){ const j=JSON.parse(t);
         if(/^#[0-9a-f]{6}$/i.test(j.c1)&&/^#[0-9a-f]{6}$/i.test(j.c2)){
+          j.palette=(j.palette||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5);
           const up=uploadedPalette();
-          if(up){ if(!up.some(c=>colorDist(c,j.c1)<90)) j.c1=up[0]; if(!up.some(c=>colorDist(c,j.c2)<90)) j.c2=up[1]||up[0]; }
+          if(up){ j.palette=up.slice(0,5); if(!up.some(c=>colorDist(c,j.c1)<90)) j.c1=up[0]; if(!up.some(c=>colorDist(c,j.c2)<90)) j.c2=up[1]||up[0]; }
           return j; } } }
   }catch(e){}
   const up=uploadedPalette(); const pal=currentPalette(); const kc=kwColors(feedback);
@@ -660,7 +661,7 @@ async function aiImage(prompt,size){
     return null;
   }
 }
-function paletteLine(){ const up=uploadedPalette(); return (up||currentPalette().colors).slice(0,5).join(', '); }
+function paletteLine(){ return currentPalette().colors.slice(0,5).join(', '); }
 function logoPrompt(feedback){
   const concept=(logoV&&logoV.concept)?logoV.concept:'';
   return 'A single professional logo icon for a brand called "'+(state.name||'a new brand')+'" ('+state.idea+'). '
@@ -678,65 +679,92 @@ function roundRect(x,px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+
 function loadImg(src){ return new Promise(res=>{ if(!src) return res(null); const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
 async function buildCard(){
   const pal=currentPalette();
-  const W=1000,H=1320;
+  const cols=pal.colors.slice(0,5);
+  const lum=h=>{ try{ const [r,g,b]=hex2rgb(h); return .299*r+.587*g+.114*b; }catch(e){ return 255; } };
+  const tint=(h,a)=>{ try{ const [r,g,b]=hex2rgb(h); return 'rgba('+r+','+g+','+b+','+a+')'; }catch(e){ return 'rgba(15,23,42,'+a+')'; } };
+  const dark=cols.slice().sort((a,b)=>lum(a)-lum(b))[0]||'#0f172a';
+  const accent=cols.find(c=>c!==dark&&lum(c)>40&&lum(c)<200)||cols[1]||dark;
+  const light=cols.slice().sort((a,b)=>lum(b)-lum(a))[0]||'#f4f2ee';
+  const W=1000,H=1420;
   const c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
   try{ await document.fonts.ready; }catch(e){}
   const F=(w,sz)=>{ x.font=w+' '+sz+'px Satoshi, system-ui, -apple-system, sans-serif'; };
-  const label=(t,px,py)=>{ x.fillStyle='#8b96ad'; F(800,17); x.letterSpacing='1.5px'; x.fillText(t.toUpperCase(),px,py); x.letterSpacing='0px'; };
-  const rule=(py)=>{ x.fillStyle='#e6e9f1'; x.fillRect(72,py,W-144,1); };
+  const label=(t,px,py)=>{
+    x.fillStyle=accent; roundRect(x,px,py-14,5,18,2.5); x.fill();
+    x.fillStyle='#8b96ad'; F(800,16); try{x.letterSpacing='1.5px';}catch(e){}
+    x.fillText(t.toUpperCase(),px+15,py); try{x.letterSpacing='0px';}catch(e){}
+  };
+  const rule=py=>{ x.fillStyle='#e9ebf0'; x.fillRect(72,py,W-144,1); };
 
+  // canvas
   x.fillStyle='#ffffff'; x.fillRect(0,0,W,H);
-  x.fillStyle='#fdfcfa'; x.fillRect(0,0,W,300);
+  // branded header wash
+  x.fillStyle=tint(accent,.08); x.fillRect(0,0,W,318);
+  x.fillStyle=tint(dark,.05); x.fillRect(0,286,W,32);
+  x.fillStyle=accent; x.fillRect(0,0,W,8);
 
-  // header: logo + name + tagline
   const src=genImgs.logo||('data:image/svg+xml;utf8,'+encodeURIComponent(logoSVG(logoV)));
   const img=await loadImg(src);
-  label('Primary logo',72,72);
-  if(img){ const box=132; const sc=Math.min(box/img.width,box/img.height); const w=img.width*sc,h=img.height*sc;
-    try{ x.drawImage(img,72+(box-w)/2,102+(box-h)/2,w,h); }catch(e){} }
-  x.fillStyle='#0f172a'; F(900,60);
-  const nm=(state.name||'Your brand'); let nmSize=60;
-  while(nmSize>28){ F(900,nmSize); if(x.measureText(nm).width<=W-72-232) break; nmSize-=3; }
-  x.fillText(nm,232,190);
-  if(pal.tagline){ x.fillStyle='#54607a'; F(600,25); x.fillText(pal.tagline.slice(0,52),232,232); }
+  const drawMark=(bx,by,box)=>{ if(!img) return; const sc=Math.min(box/img.width,box/img.height); const w=img.width*sc,h=img.height*sc; try{ x.drawImage(img,bx+(box-w)/2,by+(box-h)/2,w,h); }catch(e){} };
 
-  // palette
-  let y=380;
-  label('Color palette',72,y-28);
-  const cols=pal.colors.slice(0,5);
-  cols.forEach((col,i)=>{
-    const sw=150, gap=16, px=72+i*(sw+gap);
-    x.fillStyle=col; roundRect(x,px,y,sw,110,16); x.fill();
-    if(/^#f|^#e/i.test(col)){ x.strokeStyle='#e6e9f1'; x.lineWidth=1; x.stroke(); }
-    x.fillStyle='#54607a'; F(700,16); x.fillText(String(col).toUpperCase(),px,y+140);
+  // header: logo chip + name + tagline
+  x.fillStyle='#ffffff'; roundRect(x,72,78,160,160,26); x.fill();
+  x.strokeStyle='#e9ebf0'; x.lineWidth=1.5; x.stroke();
+  drawMark(88,94,128);
+  x.fillStyle='#0f172a';
+  const nm=(state.name||'Your brand'); let nmSize=64;
+  while(nmSize>26){ F(900,nmSize); if(x.measureText(nm).width<=W-72-270) break; nmSize-=3; }
+  x.fillText(nm,270,168);
+  if(pal.tagline){ x.fillStyle='#54607a'; F(600,25); x.fillText(pal.tagline.slice(0,54),272,212); }
+
+  // logo variations — same mark on three treatments
+  let y=396;
+  label('Logo variations',72,y-28);
+  const chips=[['#ffffff','#e9ebf0'],[tint(accent,.12),tint(accent,.25)],[light,'#e9ebf0']];
+  chips.forEach((ch,i)=>{
+    const px=72+i*192;
+    x.fillStyle=ch[0]; roundRect(x,px,y,168,120,18); x.fill();
+    x.strokeStyle=ch[1]; x.lineWidth=1.5; x.stroke();
+    drawMark(px+42,y+18,84);
   });
-  y+=200; rule(y); y+=52;
+  y+=176; rule(y); y+=56;
+
+  // palette with hex
+  label('Color palette',72,y-4);
+  const sw=Math.min(160,Math.floor((W-144-(cols.length-1)*16)/cols.length));
+  cols.forEach((col,i)=>{
+    const px=72+i*(sw+16);
+    x.fillStyle=col; roundRect(x,px,y+18,sw,112,16); x.fill();
+    if(lum(col)>225){ x.strokeStyle='#e9ebf0'; x.lineWidth=1; x.stroke(); }
+    x.fillStyle='#54607a'; F(700,16); x.fillText(String(col).toUpperCase(),px,y+160);
+  });
+  y+=216; rule(y); y+=56;
 
   // typography
-  label('Typography',72,y);
-  x.fillStyle='#0f172a'; F(900,52); x.fillText('Aa Bb Cc Dd',72,y+72);
-  x.fillStyle='#54607a'; F(600,20); x.fillText((pal.type||'Satoshi')+' \u2014 headings bold, body regular',72,y+112);
-  y+=170; rule(y); y+=52;
+  label('Typography',72,y-4);
+  x.fillStyle='#0f172a'; F(900,54); x.fillText('Aa Bb Cc Dd',72,y+66);
+  x.fillStyle='#54607a'; F(600,20); x.fillText((pal.type||'Satoshi')+' \u2014 headings bold, body regular',72,y+106);
+  y+=162; rule(y); y+=56;
 
-  // voice
-  label('Tone of voice',72,y);
-  x.fillStyle='#0f172a'; F(800,34);
-  x.fillText((pal.traits.join('. ')||state.voicePick||'Clear')+'.',72,y+56);
-  y+=110; rule(y); y+=52;
-
-  // pillars
-  label('Content pillars',72,y);
-  y+=44;
+  // two columns: voice | pillars
+  label('Tone of voice',72,y-4);
+  x.fillStyle='#0f172a'; F(800,30);
+  const traitsLine=(pal.traits.join('. ')||state.voicePick||'Clear')+'.';
+  const words=traitsLine.split(' '); let l1='',l2='';
+  words.forEach(w=>{ if(!l2&&(l1+' '+w).trim().length<=24) l1=(l1+' '+w).trim(); else l2=(l2+' '+w).trim(); });
+  x.fillText(l1,72,y+46);
+  if(l2) x.fillText(l2.slice(0,24),72,y+86);
+  label('Content pillars',540,y-4);
   PILLARS.slice(0,4).forEach((pp,i)=>{
-    const py=y+i*54;
-    x.fillStyle=cols[i%cols.length]||'#803dff'; roundRect(x,72,py-16,10,34,5); x.fill();
-    x.fillStyle='#0f172a'; F(800,25); x.fillText(String(pp.n).slice(0,46),100,py+8);
+    const py=y+30+i*48;
+    x.fillStyle=cols[i%cols.length]||accent; roundRect(x,540,py-14,9,30,4.5); x.fill();
+    x.fillStyle='#0f172a'; F(800,23); x.fillText(String(pp.n).slice(0,30),564,py+8);
   });
 
-  x.fillStyle='#b9c0d0'; F(600,17); x.fillText('Made with Threadline',72,H-48);
+  x.fillStyle='#b9c0d0'; F(600,17); x.fillText('Made with Threadline',72,H-44);
+  x.fillStyle=accent; x.fillRect(0,H-8,W,8);
   try{ return c.toDataURL('image/png'); }catch(e){ return null; }
 }
-
 function renderLogoPreview(){
   const tile=document.getElementById('lgTile');
   if(tile) tile.innerHTML=genImgs.logo?`<img src="${genImgs.logo}" alt="logo">`:logoSVG(logoV);
@@ -757,6 +785,7 @@ async function genLogo(feedback){
   const rev=document.getElementById('lgReveal'); const th=document.getElementById('lgThink');
   if(th) th.classList.add('on'); if(rev) rev.style.display='none';
   logoV=await logoDirection(feedback);              // concept first
+  if(logoV&&logoV.palette&&logoV.palette.length>=3&&!uploadedPalette()){ state.genColors=logoV.palette.slice(0,5); persist(); }
   genImgs.logo=await aiImage(logoPrompt(feedback),'1024x1024');   // then draw it
   genImgs.logoSmall=null;
   if(genImgs.logo) shrinkImage(genImgs.logo,128,d=>{ genImgs.logoSmall=d; });
@@ -850,7 +879,7 @@ function logoStage(){
 }
 
 /* ---------- Completion ---------- */
-function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; const _up=uploadedPalette(); if(_up&&_up.length>=2) _b.visual.colors=_up.slice(0,5); saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; const _up=uploadedPalette()||(state.genColors&&state.genColors.length>=3?state.genColors:null); if(_up&&_up.length>=2) _b.visual.colors=_up.slice(0,5); saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
   const built=['Positioning','Audience profile','Brand voice','Content pillars','Visual direction'];
   stage(`<div class="done-wrap">
     <div class="burst">🎉</div>
