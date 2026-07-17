@@ -210,7 +210,7 @@ h2.q{font-size:clamp(24px,4vw,32px);margin:12px 0 8px;text-wrap:balance}
 const $=s=>document.querySelector(s);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'', logoColors:[], deckColors:[], genColors:[] };
+const state={ name:'', idea:'', why:'', audWho:'', audPain:'', audTired:'', believe:'', wrong:'', feel:'', positioning:'', voicePick:'', words:'', neverWords:'', persona:'', logoName:'', logoData:'', deckName:'', logoColors:[], deckColors:[], genColors:[], cardData:'' };
 
 const PHASES=['Idea','Audience','Point of view','Pillars'];
 let step=0; // 0..3 phases, 4 = done
@@ -325,7 +325,7 @@ function initAssets(){
     rd.onload=()=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); const sc=Math.min(1,96/Math.max(img.width,img.height)); c.width=Math.max(1,Math.round(img.width*sc)); c.height=Math.max(1,Math.round(img.height*sc)); c.getContext('2d').drawImage(img,0,0,c.width,c.height); try{ state.logoData=c.toDataURL('image/png'); }catch(e){ state.logoData=''; } extractColors(rd.result,cols=>{ state.logoColors=cols; persist(); }); persist(); renderAssetChips(); }; img.src=rd.result; };
     rd.readAsDataURL(f); renderAssetChips(); toast('Logo added — its colors will drive your brand kit'); };
   df.onchange=()=>{ const f=df.files[0]; if(!f) return; state.deckName=f.name;
-    if(/^image\//.test(f.type)){ const rd=new FileReader(); rd.onload=()=>{ extractColors(rd.result,cols=>{ state.deckColors=cols; persist(); if(cols.length) toast('Palette pulled from your brand card — '+cols.length+' colors captured'); }); }; rd.readAsDataURL(f); }
+    if(/^image\//.test(f.type)){ const rd=new FileReader(); rd.onload=()=>{ extractColors(rd.result,cols=>{ state.deckColors=cols; persist(); if(cols.length) toast('Palette pulled from your brand card \u2014 '+cols.length+' colors captured'); }); const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); const sc=Math.min(1,640/Math.max(im.width,im.height)); c.width=Math.round(im.width*sc); c.height=Math.round(im.height*sc); c.getContext('2d').drawImage(im,0,0,c.width,c.height); try{ state.cardData=c.toDataURL('image/png'); persist(); }catch(e){} }; im.src=rd.result; }; rd.readAsDataURL(f); }
     else toast('Got it — Threadline will fold your brand guide into the foundation');
     persist(); renderAssetChips(); };
   renderAssetChips();
@@ -642,6 +642,7 @@ function wireLogoUploads(){
     if(/^image\//.test(f.type)){ const rd=new FileReader();
       rd.onload=()=>{ cardImg=rd.result;
         extractColors(rd.result,cols=>{ state.deckColors=cols; persist(); });
+        shrinkImage(rd.result,640,d=>{ if(d){ state.cardData=d; persist(); } });
         persist(); renderUploadState(); toast('Brand card in \u2014 palette captured'); };
       rd.readAsDataURL(f); }
     else{ persist(); renderUploadState(); toast('Got it \u2014 we\u2019ll fold your brand guide in'); } }; }
@@ -707,7 +708,7 @@ function logoStage(){
 }
 
 /* ---------- Completion ---------- */
-function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; const _up=uploadedPalette()||(state.genColors&&state.genColors.length>=3?state.genColors:null); if(_up&&_up.length>=2) _b.visual.colors=_up.slice(0,5); saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+function done(){ step=4; renderProg(); if(!state.positioning) state.positioning='The strategic partner'; try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromBuild(state, PILLARS); if(state.logoData) _b.visual.logo=state.logoData; if(state.logoName) _b.visual.logoName=state.logoName; if(state.deckName) _b.visual.deckName=state.deckName; if(state.cardData) _b.visual.card=state.cardData; const _up=uploadedPalette()||(state.genColors&&state.genColors.length>=3?state.genColors:null); if(_up&&_up.length>=2) _b.visual.colors=_up.slice(0,5); saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
   const built=['Positioning','Audience profile','Brand voice','Content pillars','Visual direction'];
   stage(`<div class="done-wrap">
     <div class="burst">🎉</div>
