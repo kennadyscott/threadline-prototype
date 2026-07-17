@@ -122,6 +122,8 @@ input,textarea,select{font-family:inherit}
 .hb{border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:800;font-size:12.5px;color:var(--muted);background:var(--surface);cursor:pointer}
 .hb:hover{border-color:var(--violet);color:var(--violet)}
 .hb.pri{background:var(--grad2);color:#fff;border-color:transparent}
+.spoke{margin-top:12px;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;color:var(--slate);background:color-mix(in srgb, var(--violet) 6%, var(--surface));border:1px solid color-mix(in srgb, var(--violet) 18%, var(--line))}
+.secnote{font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--faint);opacity:.85}
 .hubsec{margin-top:20px}
 .hubsec h3{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .hubsec h3::after{content:'';flex:1;height:1px;background:var(--line-2)}
@@ -345,6 +347,13 @@ svg.defs{position:absolute;width:0;height:0}
   </div>
 </div>
 
+<div class="overlay" id="miniOverlay"><div class="modal">
+  <h3>📱 New mini-series</h3>
+  <p class="msub">A mini-series is a light, repeatable format for socials — one recognizable angle, episode after episode. Threadline drafts the first batch of episodes.</p>
+  <div class="mf"><label>Series name (or leave blank — AI will name it)</label><input id="mn-name" placeholder="e.g. Myth vs. Reality"></div>
+  <div class="mf"><label>What's the recurring idea?</label><input id="mn-idea" placeholder="e.g. bust one myth about our industry every week"></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeMini()">Cancel</button><div class="grow"></div><button class="mbtn pri" id="mn-go" onclick="createMini()">✦ Spin the series</button></div>
+</div></div>
 <div class="overlay" id="campOverlay"><div class="modal">
   <h3>🎯 New campaign</h3>
   <p class="msub">A campaign is a coordinated push — one platform idea, rolled out across channels. Threadline drafts the whole thing; you shape it.</p>
@@ -404,6 +413,16 @@ function hubSeed(){
       {id:'i3',t:'The moment a client saw the biggest shift',sum:'A transformation story — proof beats promises.',pillar:(B.pillars[2]||B.pillars[0])[0],status:'progress'},
       {id:'i4',t:'AI fatigue is real',sum:'People crave human perspective more than ever.',pillar:(B.pillars[B.pillars.length-1])[0],status:'ready'}
     ],
+    minis:[{
+      id:'m1', name:'Myth vs. Reality', premise:'Every week, one thing everyone believes about '+((B.pillars[0][0]||'your world').toLowerCase())+' — and what\u2019s actually true.',
+      cadence:'Weekly', channels:['Instagram','TikTok'], status:'idea',
+      episodes:[
+        {t:'Myth: You need to be everywhere',hook:'One channel done well beats five done badly.'},
+        {t:'Myth: More content = more growth',hook:'Consistency compounds; volume burns out.'},
+        {t:'Myth: '+(B.audience.pains||'It has to be complicated').split(/[,;]/)[0],hook:'The simple version works better.'},
+        {t:'Myth: You can\u2019t start small',hook:'Every brand you admire started with post #1.'}
+      ]
+    }],
     campaigns:[{
       id:'c1', name:(B.name||'Brand')+' Point-of-View Campaign', prio:'Lead campaign',
       channels:['LinkedIn','Instagram','Email'], status:'progress',
@@ -426,11 +445,11 @@ function hubSeed(){
     }]
   };
 }
-let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r) return JSON.parse(r); }catch(e){} return hubSeed(); })();
+let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r){ const h=JSON.parse(r); h.minis=h.minis||[]; return h; } }catch(e){} return hubSeed(); })();
 function hubSave(){ try{ localStorage.setItem(HUBKEY,JSON.stringify(HUB)); }catch(e){} }
 let hubTab='ideas', openCamp=null;
 const HUBTABS=[['ideas','💡','Ideas'],['progress','🛠','In progress'],['ready','🚀','Ready to publish']];
-function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
+function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.minis.filter(m=>m.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
 async function hubAI(system,user,schema,maxTok){
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:user}],max_tokens:maxTok||700,output_config:{format:{type:'json_schema',schema:schema}}})});
@@ -471,6 +490,64 @@ async function hubGenerate(){
     {t:'One belief we\u2019ll never compromise',sum:'From your brand foundation.'}]};
   out.ideas.slice(0,4).forEach(i=>HUB.ideas.unshift({id:uid(),t:i.t,sum:i.sum,pillar:B.pillars[0][0],status:'idea'}));
   hubSave(); if(btn){btn.disabled=false;btn.textContent='✦ Generate ideas';} renderHub(); toast('4 fresh ideas added');
+}
+
+/* ---- mini-series (the middle spoke) ---- */
+let openMini=null;
+const MINI_SCHEMA={type:'object',properties:{name:{type:'string'},premise:{type:'string'},cadence:{type:'string'},channels:{type:'array',items:{type:'string'}},episodes:{type:'array',items:{type:'object',properties:{t:{type:'string'},hook:{type:'string'}},required:['t','hook'],additionalProperties:false}}},required:['name','premise','cadence','channels','episodes'],additionalProperties:false};
+function openMiniModal(){ $('#miniOverlay').classList.add('on'); setTimeout(()=>$('#mn-name').focus(),60); }
+function closeMini(){ $('#miniOverlay').classList.remove('on'); }
+async function createMini(seedName,seedIdea){
+  const name=seedName||$('#mn-name').value.trim(); const idea=seedIdea||$('#mn-idea').value.trim();
+  if(!name&&!idea){ $('#mn-name').focus(); return; }
+  const go=$('#mn-go'); if(go){go.disabled=true;go.textContent='✦ Spinning…';}
+  let m=await hubAI('Design a social-media MINI-SERIES for this brand: a light, repeatable format built from one idea. Return: name (catchy, 2-4 words), premise (one sentence — the repeatable format), cadence (e.g. Weekly), channels (1-2 social channels that fit), episodes = 4-5 {t: episode title under 12 words, hook: one-line opening hook in the brand voice}.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nVoice: '+B.voice.traits.join(', ')+'\nAudience: '+B.audience.primary+'\n\nSeries idea: '+(name?name+' — ':'')+(idea||'spin something from the brand POV'), MINI_SCHEMA, 900);
+  if(!m) m={ name:name||'The Weekly Thread', premise:(idea||'One recurring angle, every week — light to make, easy to recognize.'),
+    cadence:'Weekly', channels:['Instagram'],
+    episodes:[{t:'Episode 1 — the premise, stated plainly',hook:(window.stripTags?stripTags(B.messaging.primary):'')},
+      {t:'Episode 2 — the myth to bust',hook:(window.stripTags?stripTags(B.messaging.pov):'')},
+      {t:'Episode 3 — a real example',hook:'Show, don\u2019t tell.'},
+      {t:'Episode 4 — your audience\u2019s question',hook:B.audience.questions[0]||'Answer the one they always ask.'}] };
+  const mini={id:uid(),name:m.name||name,premise:m.premise,cadence:m.cadence||'Weekly',channels:(m.channels||['Instagram']).slice(0,3),
+    episodes:(m.episodes||[]).slice(0,6),status:'idea'};
+  HUB.minis.unshift(mini); hubSave(); closeMini();
+  if($('#mn-name'))$('#mn-name').value=''; if($('#mn-idea'))$('#mn-idea').value='';
+  if(go){go.disabled=false;go.textContent='✦ Spin the series';}
+  openMini=mini.id; renderHub(); toast('Mini-series drafted — '+mini.episodes.length+' episodes ready');
+}
+function ideaToMini(id){
+  const i=HUB.ideas.find(x=>x.id===id); if(!i) return;
+  HUB.ideas=HUB.ideas.filter(x=>x.id!==id); hubSave();
+  createMini(i.t.slice(0,50), i.sum||i.t);
+}
+function miniStatus(id,st){ const m=HUB.minis.find(x=>x.id===id); if(!m) return; m.status=st; hubSave(); hubTab=st==='idea'?'ideas':st; renderHub(); toast(st==='ready'?'Mini-series ready to publish 🚀':st==='progress'?'Mini-series in progress':'Moved back to ideas'); }
+function dropMini(id){ HUB.minis=HUB.minis.filter(x=>x.id!==id); hubSave(); renderHub(); toast('Mini-series archived'); }
+function miniCard(m){
+  const open=openMini===m.id;
+  const acts=m.status==='idea'
+    ?`<button class="hb pri" onclick="miniStatus('${m.id}','progress')">Start building →</button>`
+    :m.status==='progress'
+    ?`<button class="hb pri" onclick="miniStatus('${m.id}','ready')">Mark ready ✓</button><button class="hb" onclick="location.href='threadline-series.html'">Open in Series →</button><button class="hb" onclick="miniStatus('${m.id}','idea')">←</button>`
+    :`<button class="hb pri" onclick="location.href='threadline-plan.html'">Schedule in Plan →</button><button class="hb" onclick="dropMini('${m.id}')">✓ Published — archive</button>`;
+  return `<div class="camp">
+    <div class="chead" onclick="openMini=openMini==='${m.id}'?null:'${m.id}';renderHub()">
+      <div class="cico" style="background:rgba(34,211,238,.14)">📱</div>
+      <div class="ct2"><b>${esc(m.name)} <span class="prio" style="color:#0e7f95;background:rgba(34,211,238,.12)">Mini-series · ${esc(m.cadence)}</span></b>
+        <div class="csnip">${esc(m.premise)}</div>
+        <div class="cmeta">${m.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}
+          <span class="cdots"><em>${m.episodes.length} episodes</em></span></div>
+      </div>
+    </div>
+    <div class="cacts">${acts}<button class="hb" onclick="openMini=openMini==='${m.id}'?null:'${m.id}';renderHub()">${open?'Close ▴':'Open ▾'}</button></div>
+    ${open?`<div class="cdetail">
+      <div class="csec"><h5>The format</h5><p>${esc(m.premise)}</p></div>
+      <div class="csec"><h5>Episodes</h5>
+        ${m.episodes.map((e,i)=>`<div class="asset"><div class="ahead"><span class="chch">Ep ${i+1}</span><b>${esc(e.t)}</b></div>
+          <div class="cap">${esc(e.hook)}</div>
+          <div class="arow"><button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Write episode ${i+1} of my ${esc(m.name).replace(/'/g,'’')} mini-series: ${esc(e.t).replace(/'/g,'’')}')">Build this episode →</button></div></div>`).join('')}
+      </div>
+    </div>`:''}
+  </div>`;
 }
 
 /* ---- campaigns ---- */
@@ -548,6 +625,7 @@ function campCard(c){
 function ideaRow(i){
   const acts=i.status==='idea'
     ?`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(i.t).replace(/'/g,'’')}')">Build →</button>
+      <button class="hb" onclick="ideaToMini('${i.id}')">📱 Series</button>
       <button class="hb" onclick="ideaToCampaign('${i.id}')">🎯 Campaign</button>
       <button class="hb" onclick="ideaStatus('${i.id}','progress')">Start</button>
       <button class="hb" onclick="dropIdea('${i.id}')">✕</button>`
@@ -574,11 +652,15 @@ function renderHub(){
         <button class="hb pri" onclick="hubAddIdea()">＋ Add idea</button>
         <button class="hb" id="hubSplitBtn" onclick="hubSplit()">✂️ Split into ideas</button>
         <button class="hb" id="hubGenBtn" onclick="hubGenerate()">✦ Generate ideas</button>
+        <button class="hb" onclick="openMiniModal()">📱 New mini-series</button>
         <button class="hb" onclick="openCampModal()">🎯 New campaign</button>
       </div></div>`;
+    html+=`<div class="spoke">🪄 <b>The spoke model:</b> capture an idea once, then spin it out — a quick <b>post</b>, a repeatable <b>📱 mini-series</b>, or a full <b>🎯 campaign</b>. One thought, many threads.</div>`;
   }
-  html+=`<div class="hubsec"><h3>🎯 Campaigns</h3>${camps.length?camps.map(campCard).join(''):`<div class="hubempty">${hubTab==='ideas'?'No campaigns yet — hit <b>🎯 New campaign</b> or promote an idea.':'Nothing here yet.'}</div>`}</div>`;
-  html+=`<div class="hubsec"><h3>💡 General ideas &amp; posts</h3>${ideas.length?ideas.map(ideaRow).join(''):`<div class="hubempty">${hubTab==='ideas'?'Nothing captured yet — dump your first idea above.':'Nothing here yet.'}</div>`}</div>`;
+  const minis=HUB.minis.filter(m=>m.status===st);
+  html+=`<div class="hubsec"><h3>💡 Idea base</h3>${ideas.length?ideas.map(ideaRow).join(''):`<div class="hubempty">${hubTab==='ideas'?'Nothing captured yet — dump your first idea above.':'Nothing here yet.'}</div>`}</div>`;
+  html+=`<div class="hubsec"><h3>📱 Mini-series <span class="secnote">for socials</span></h3>${minis.length?minis.map(miniCard).join(''):`<div class="hubempty">${hubTab==='ideas'?'No series yet — hit <b>📱 Series</b> on any idea to spin one up.':'Nothing here yet.'}</div>`}</div>`;
+  html+=`<div class="hubsec"><h3>🎯 Full campaigns</h3>${camps.length?camps.map(campCard).join(''):`<div class="hubempty">${hubTab==='ideas'?'No campaigns yet — hit <b>🎯 Campaign</b> on an idea, or <b>🎯 New campaign</b> above.':'Nothing here yet.'}</div>`}</div>`;
   $('#hubbody').innerHTML=html;
 }
 renderHub();
