@@ -109,6 +109,67 @@ input,textarea,select{font-family:inherit}
 .cpa{display:flex;gap:8px;align-items:center}
 .cplater{color:var(--faint);font-weight:800;font-size:12.5px;padding:8px 10px;cursor:pointer;background:none;border:none;font-family:inherit}
 .cplater:hover{color:var(--ink)}
+/* ===== content hub ===== */
+.hubtabs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.hubtab{border:1.5px solid var(--line);border-radius:12px;padding:10px 18px;font-weight:800;font-size:13.5px;color:var(--muted);background:var(--surface);cursor:pointer;display:flex;align-items:center;gap:8px}
+.hubtab i{font-style:normal;background:var(--surface-2);border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:800}
+.hubtab.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
+.hubtab.on i{background:rgba(128,61,255,.12)}
+.hubcap{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px;box-shadow:var(--shadow-sm)}
+.hubcap textarea{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;min-height:64px;resize:vertical;outline:none;background:var(--surface);color:var(--ink);font-family:inherit}
+.hubcap textarea:focus{border-color:var(--violet)}
+.hubcap .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.hb{border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:800;font-size:12.5px;color:var(--muted);background:var(--surface);cursor:pointer}
+.hb:hover{border-color:var(--violet);color:var(--violet)}
+.hb.pri{background:var(--grad2);color:#fff;border-color:transparent}
+.hubsec{margin-top:20px}
+.hubsec h3{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.hubsec h3::after{content:'';flex:1;height:1px;background:var(--line-2)}
+.hubempty{border:1.5px dashed var(--line);border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:13px}
+/* campaign cards */
+.camp{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);margin-bottom:12px;overflow:hidden}
+.camp .chead{padding:15px 18px;display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+.camp .cico{width:38px;height:38px;border-radius:11px;background:rgba(128,61,255,.1);display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.camp .ct2{flex:1;min-width:0}
+.camp .ct2 b{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.camp .prio{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--violet);background:rgba(128,61,255,.09);border-radius:999px;padding:3px 9px}
+.camp .csnip{color:var(--muted);font-size:12.5px;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.camp .cmeta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.camp .chch{font-size:10.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.camp .cdots{display:flex;gap:3px;align-items:center;margin-left:auto}
+.camp .cdots em{font-style:normal;font-size:10.5px;color:var(--faint);font-weight:800;margin-right:4px}
+.camp .cdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.camp .cdots i.approved{background:var(--green)}
+.camp .cdots i.revise{background:var(--amber)}
+.camp .cacts{display:flex;gap:7px;padding:0 18px 14px;flex-wrap:wrap}
+.camp .cdetail{border-top:1px solid var(--line-2);background:var(--surface-2);padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.csec h5{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
+.csec p{font-size:13px;color:var(--ink);line-height:1.55}
+.csec ul{margin-left:17px;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.msgrow{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line-2);font-size:12.5px}
+.msgrow:last-child{border-bottom:none}
+.msgrow b{color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+.phrow{display:flex;gap:10px;font-size:12.5px;padding:5px 0}
+.phrow b{color:var(--ink);white-space:nowrap}
+.phrow span{color:var(--muted)}
+.asset{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:8px}
+.asset .ahead{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.asset .ahead b{font-size:13px;flex:1;min-width:0}
+.asset .cap{font-size:12px;color:var(--muted);margin-top:6px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.asset .arow{display:flex;gap:7px;margin-top:9px;align-items:center;flex-wrap:wrap}
+.ab{border:1.5px solid var(--line);border-radius:8px;padding:5px 11px;font-weight:800;font-size:11.5px;color:var(--muted);background:var(--surface);cursor:pointer}
+.ab.ok{border-color:rgba(32,184,120,.5);color:#178a5a}
+.ab.ok.on{background:rgba(32,184,120,.12)}
+.ab.rv{border-color:rgba(245,165,36,.55);color:#b57708}
+.ab.rv.on{background:rgba(245,165,36,.14)}
+.asset .anote{flex:1;min-width:140px;border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:11.5px;background:var(--surface);color:var(--ink);outline:none;font-family:inherit}
+/* idea rows */
+.hrow{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:13px;margin-bottom:8px}
+.hrow .hic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:var(--surface-2);flex-shrink:0}
+.hrow .ht3{flex:1;min-width:0}
+.hrow .ht3 b{font-size:13.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .ht3 span{font-size:11.5px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .hacts{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap}
 /* stat cards */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
 @media(max-width:860px){.stats{grid-template-columns:1fr 1fr}}
@@ -270,22 +331,9 @@ svg.defs{position:absolute;width:0;height:0}
         <div class="greet"><h1 id="greeting">Good morning, Kennady ☀️</h1><p id="greetsub">Let's create content that connects, builds trust, and moves your brand forward.</p></div>
         <div id="welcome"></div>
         <div id="connectPrompt"></div>
-        <div class="stats" id="stats"></div>
-
-        <div class="panel">
-          <div class="phead"><h3>Your content rhythm</h3><span class="sub">A snapshot of your upcoming content.</span><button class="act" onclick="location.href='threadline-plan.html'">View Plan →</button></div>
-          <div class="rhythm" id="rhythm"></div>
-        </div>
-
-        <div class="panel">
-          <div class="phead"><h3>Ideas worth building</h3><span class="sub">Fresh ideas Threadline thinks you'll love.</span><button class="act" onclick="toast('Opening Idea Bank → Threadline Picks')">View all ideas →</button></div>
-          <div class="ideas" id="ideas"></div>
-        </div>
-
-        <div class="callout">
-          <div class="ci">✦</div>
-          <div><b>Need ideas for an open slot?</b><p>Tell Threadline what you want to talk about and we'll help you find the perfect fit.</p></div>
-          <button class="cbtn" onclick="location.href='threadline-build-page.html?mode=planner'">✦ Build with Threadline</button>
+        <div class="hub">
+          <div class="hubtabs" id="hubtabs"></div>
+          <div id="hubbody"></div>
         </div>
       </div>
 
@@ -296,6 +344,14 @@ svg.defs{position:absolute;width:0;height:0}
     </div>
   </div>
 </div>
+
+<div class="overlay" id="campOverlay"><div class="modal">
+  <h3>🎯 New campaign</h3>
+  <p class="msub">A campaign is a coordinated push — one platform idea, rolled out across channels. Threadline drafts the whole thing; you shape it.</p>
+  <div class="mf"><label>Campaign name</label><input id="cp-name" placeholder="e.g. The Clean Start Campaign"></div>
+  <div class="mf"><label>What's the big idea or goal?</label><textarea id="cp-goal" placeholder="What should this campaign prove, own, or sell?"></textarea></div>
+  <div class="macts"><button class="mbtn ghost" onclick="closeCamp()">Cancel</button><div class="grow"></div><button class="mbtn pri" id="cp-go" onclick="createCampaign()">✦ Build campaign</button></div>
+</div></div>
 
 <div class="overlay" id="sparkOverlay"><div class="modal">
   <h3>✦ New Spark</h3>
@@ -336,59 +392,198 @@ $('#wsav').textContent=B.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUp
 const NAV=[['🏠','Home','Your content command center',1,''],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
-/* ---------- stats ---------- */
-const STATS=[
-  {cls:'v',ic:'✦',n:12,l:'Ideas to explore',d:'From Create & your Idea Bank',go:'View ideas →',href:'threadline-plan.html'},
-  {cls:'c',ic:'✏️',n:5,l:'Drafts in progress',d:'Keep the momentum',go:'Open drafts →',href:'threadline-plan.html?view=kanban'},
-  {cls:'g',ic:'🗓️',n:8,l:'Planned this week',d:'On track',go:'View Plan →',href:'threadline-plan.html'},
-  {cls:'b',ic:'🕒',n:3,l:'Open slots',d:'In your series',go:'Fill them now →',href:'threadline-build-page.html?mode=planner'},
-];
-$('#stats').innerHTML=STATS.map(s=>`<div class="stat ${s.cls}" onclick="${s.href?`location.href='${s.href}'`:`toast('${s.msg}')`}"><div class="si">${s.ic}</div><div class="n">${s.n}</div><div class="l">${s.l}</div><div class="d">${s.d}</div><div class="go">${s.go}</div></div>`).join('');
+/* ================= CONTENT HUB ================= */
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const HUBKEY='threadline.hub';
+function hubSeed(){
+  const P0=B.pillars[0][0], povT=(window.stripTags?stripTags(B.messaging.pov):B.messaging.pov);
+  return {
+    ideas:[
+      {id:'i1',t:(window.stripTags?stripTags(B.messaging.primary):B.messaging.primary),sum:'A simple but powerful reminder your audience needs.',pillar:P0,status:'idea'},
+      {id:'i2',t:B.audience.questions[0]||'What do people ask before buying?',sum:'Turn the question you always get into helpful content.',pillar:P0,status:'idea'},
+      {id:'i3',t:'The moment a client saw the biggest shift',sum:'A transformation story — proof beats promises.',pillar:(B.pillars[2]||B.pillars[0])[0],status:'progress'},
+      {id:'i4',t:'AI fatigue is real',sum:'People crave human perspective more than ever.',pillar:(B.pillars[B.pillars.length-1])[0],status:'ready'}
+    ],
+    campaigns:[{
+      id:'c1', name:(B.name||'Brand')+' Point-of-View Campaign', prio:'Lead campaign',
+      channels:['LinkedIn','Instagram','Email'], status:'progress',
+      platform: povT+' This campaign stakes out that position publicly — one coordinated push that makes '+(B.name||'the brand')+' the voice people associate with it.',
+      strategy:{ primary:'Own “'+(window.stripTags?stripTags(B.positioning.knownFor):'the point of view').replace(/\.$/,'')+'” as '+(B.name||'the brand')+' territory — and convert that authority into conversations.',
+        supporting:['Educate the audience on what most advice gets wrong','Create a saveable, shareable framework that carries the message','Turn engagement into replies and booked calls'] },
+      messages:{ emotional:(window.stripTags?stripTags(B.messaging.primary):B.messaging.primary),
+        educational:povT,
+        product:B.overview.promise,
+        brand:(B.name||'The brand')+' — '+(B.tagline||'') },
+      structure:[ {phase:'Launch (Week 1)',what:'LinkedIn launch post + IG post drop the same week; email anchors the argument.'},
+        {phase:'Build (Weeks 2–3)',what:'Framework carousel + story proof; replies feed the next posts.'},
+        {phase:'Convert (Week 4)',what:'Direct CTA post + email with one clear next step.'} ],
+      assets:[
+        {id:'a1',ch:'LinkedIn',title:'LinkedIn launch post',caption:(B.preview&&B.preview.post)||'Launch post in your voice.',status:'approved',notes:''},
+        {id:'a2',ch:'Instagram',title:'Instagram feed post',caption:(B.voice&&B.voice.caption)||'IG caption in your voice.',status:'pending',notes:''},
+        {id:'a3',ch:'Reel',title:'Reel — the hook, on camera',caption:(B.voice&&B.voice.headline)||'Say the headline to camera; text overlay carries it.',status:'pending',notes:''},
+        {id:'a4',ch:'Email',title:'Email anchor',caption:(B.preview&&B.preview.email)||'The full argument, in 150 words.',status:'revise',notes:'Tighten the middle — two sentences too many.'}
+      ]
+    }]
+  };
+}
+let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r) return JSON.parse(r); }catch(e){} return hubSeed(); })();
+function hubSave(){ try{ localStorage.setItem(HUBKEY,JSON.stringify(HUB)); }catch(e){} }
+let hubTab='ideas', openCamp=null;
+const HUBTABS=[['ideas','💡','Ideas'],['progress','🛠','In progress'],['ready','🚀','Ready to publish']];
+function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
+async function hubAI(system,user,schema,maxTok){
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:user}],max_tokens:maxTok||700,output_config:{format:{type:'json_schema',schema:schema}}})});
+    if(!r.ok) return null;
+    const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
+    return t?JSON.parse(t):null;
+  }catch(e){ return null; }
+}
+const IDEAS_SCHEMA={type:'object',properties:{ideas:{type:'array',items:{type:'object',properties:{t:{type:'string'},sum:{type:'string'}},required:['t','sum'],additionalProperties:false}}},required:['ideas'],additionalProperties:false};
+function uid(){ return 'h'+Math.random().toString(36).slice(2,9); }
 
-/* ---------- rhythm (next days from B.series) ---------- */
-const EMO=['✦','❤️','🎓','📣','💡'];
-const STATUSES=[['planned','Planned'],['planned','Planned'],['drafting','Drafting'],['planned','Planned'],['idea','Idea']];
-const DAYS=['SUN','MON','TUE','WED','THU','FRI','SAT'];
-const MONS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-(function(){
-  const wrap=$('#rhythm'); const today=new Date(); let html='';
-  const n=Math.min(5,B.series.length);
-  for(let i=0;i<n;i++){
-    const d=new Date(today); d.setDate(d.getDate()+i+1);
-    const s=B.series[i]; const fmt=(s[1]||'').split('·')[1]||'Post'; const [sc,sl]=STATUSES[i%STATUSES.length];
-    html+=`<div class="rcard" onclick="toast('Opening “${s[0]}” in Plan…')">
-      <div class="day">${DAYS[d.getDay()]}</div><div class="date">${MONS[d.getMonth()]} ${d.getDate()}</div>
-      <div class="em">${EMO[i%EMO.length]}</div><div class="sn">${s[0]}</div><div class="fm">${fmt.trim()}</div>
-      <span class="rst ${sc}">${sc==='planned'?'✓ ':''}${sl}</span></div>`;
+/* ---- capture actions ---- */
+function hubAddIdea(){
+  const ta=$('#hubdump'); const v=(ta?ta.value.trim():''); if(!v){ ta&&ta.focus(); return; }
+  const lines=v.split('\n'); const t=lines[0].slice(0,90); const sum=lines.slice(1).join(' ').slice(0,160);
+  HUB.ideas.unshift({id:uid(),t:t,sum:sum||'Added from a quick capture.',pillar:B.pillars[0][0],status:'idea'});
+  ta.value=''; hubSave(); renderHub(); toast('Idea captured');
+}
+async function hubSplit(){
+  const ta=$('#hubdump'); const v=(ta?ta.value.trim():''); if(v.length<40){ toast('Paste a bigger chunk — a braindump, notes, a transcript'); ta&&ta.focus(); return; }
+  const btn=$('#hubSplitBtn'); if(btn){btn.disabled=true;btn.textContent='✂️ Splitting…';}
+  let out=await hubAI('Split the founder\u2019s braindump into distinct, self-contained content ideas. Each: t = a sharp working title under 12 words, sum = one sentence on the angle. Only ideas actually present in the text.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\n\nBraindump:\n'+v, IDEAS_SCHEMA, 800);
+  if(!(out&&out.ideas&&out.ideas.length)){
+    const parts=v.split(/\n\s*\n|(?<=[.!?])\s+(?=[A-Z])/).map(x=>x.trim()).filter(x=>x.length>25).slice(0,6);
+    out={ideas:parts.map(x=>({t:x.slice(0,70)+(x.length>70?'…':''),sum:x.slice(0,150)}))};
   }
-  const od=new Date(today); od.setDate(od.getDate()+n+1);
-  html+=`<div class="rcard open" onclick="toast('Add content: choose from Idea Bank, ask Threadline, or add a Spark')">
-    <div class="day">Open slot</div><div class="date">${MONS[od.getMonth()]} ${od.getDate()}</div>
-    <div class="plus">＋</div><div class="fm">Add content</div></div>`;
-  wrap.innerHTML=html;
-})();
+  out.ideas.slice(0,8).forEach(i=>HUB.ideas.unshift({id:uid(),t:i.t,sum:i.sum,pillar:B.pillars[0][0],status:'idea'}));
+  ta.value=''; hubSave(); if(btn){btn.disabled=false;btn.textContent='✂️ Split into ideas';} renderHub();
+  toast('Split into '+Math.min(8,out.ideas.length)+' ideas');
+}
+async function hubGenerate(){
+  const btn=$('#hubGenBtn'); if(btn){btn.disabled=true;btn.textContent='✦ Generating…';}
+  let out=await hubAI('Generate 4 fresh, specific content ideas for this brand — ideas only this brand would post, drawn from its audience and point of view. Each: t = working title under 12 words, sum = one sentence on the angle.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nAudience: '+B.audience.primary+'\nPOV: '+(window.stripTags?stripTags(B.messaging.pov):'')+'\nPillars: '+B.pillars.map(p=>p[0]).join(', '), IDEAS_SCHEMA, 600);
+  if(!(out&&out.ideas&&out.ideas.length)) out={ideas:[
+    {t:'What everyone gets wrong about '+((B.pillars[0][0]||'this').toLowerCase()),sum:'Your contrarian take, stated plainly.'},
+    {t:B.audience.questions[1]||'The question behind the question',sum:'Answer what they\u2019re really asking.'},
+    {t:'Behind the decision we almost got wrong',sum:'Process story — builds trust fast.'},
+    {t:'One belief we\u2019ll never compromise',sum:'From your brand foundation.'}]};
+  out.ideas.slice(0,4).forEach(i=>HUB.ideas.unshift({id:uid(),t:i.t,sum:i.sum,pillar:B.pillars[0][0],status:'idea'}));
+  hubSave(); if(btn){btn.disabled=false;btn.textContent='✦ Generate ideas';} renderHub(); toast('4 fresh ideas added');
+}
 
-/* ---------- ideas worth building (from the brand model) ---------- */
-const IDEAS=[
-  {cls:'il-v',label:'Strong thread', t:(window.stripTags?stripTags(B.messaging.primary):B.messaging.primary),
-   d:'A simple but powerful reminder your audience needs.', home:B.pillars[0][0],
-   why:'It states your core belief plainly—the post your positioning is built to own.'},
-  {cls:'il-g',label:'Client insight', t:'The moment a client saw the biggest shift',
-   d:'A great story about transformation.', home:(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars[Math.min(2,B.pillars.length-1)])[0],
-   why:'Most of this week teaches. A story would balance the plan with proof.'},
-  {cls:'il-b',label:'Timely', t:'AI fatigue is real', d:'People are craving human perspective more than ever.',
-   home:(B.pillars.find(p=>/view|talk|pov|perspective/i.test(p[0]))||B.pillars[B.pillars.length-1])[0],
-   why:'A timely angle that fits your point-of-view pillar.'},
-  {cls:'il-a',label:'Great for Q&A', t:B.audience.questions[0]||'What do people ask before buying?',
-   d:'Turn the question you always get into helpful content.', home:B.pillars[0][0],
-   why:'Your audience literally asks this—answering it builds trust fast.'},
-];
-$('#ideas').innerHTML=IDEAS.map(i=>`<div class="icard"><span class="ilabel ${i.cls}">${i.label}</span>
-  <div class="it">${i.t}</div><div class="idsc">${i.d}</div>
-  <div class="home">Suggested home: <b>${i.home}</b></div>
-  <button class="bld" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent(this.closest('.icard').querySelector('.it').textContent)" title="${i.why}">Build this idea →</button></div>`).join('');
+/* ---- campaigns ---- */
+const CAMP_SCHEMA={type:'object',properties:{platform:{type:'string'},strategy:{type:'object',properties:{primary:{type:'string'},supporting:{type:'array',items:{type:'string'}}},required:['primary','supporting'],additionalProperties:false},messages:{type:'object',properties:{emotional:{type:'string'},educational:{type:'string'},product:{type:'string'},brand:{type:'string'}},required:['emotional','educational','product','brand'],additionalProperties:false},structure:{type:'array',items:{type:'object',properties:{phase:{type:'string'},what:{type:'string'}},required:['phase','what'],additionalProperties:false}},assets:{type:'array',items:{type:'object',properties:{ch:{type:'string'},title:{type:'string'},caption:{type:'string'}},required:['ch','title','caption'],additionalProperties:false}}},required:['platform','strategy','messages','structure','assets'],additionalProperties:false};
+function openCampModal(){ $('#campOverlay').classList.add('on'); setTimeout(()=>$('#cp-name').focus(),60); }
+function closeCamp(){ $('#campOverlay').classList.remove('on'); }
+async function createCampaign(seedName,seedGoal){
+  const name=seedName||$('#cp-name').value.trim(); const goal=seedGoal||$('#cp-goal').value.trim();
+  if(!name){ $('#cp-name').focus(); return; }
+  const go=$('#cp-go'); if(go){go.disabled=true;go.textContent='✦ Building…';}
+  let c=await hubAI('You are a campaign strategist. Build a complete content campaign for this brand: platform = a 3-4 sentence campaign thesis in the brand voice; strategy.primary = the one-sentence objective; strategy.supporting = 3 supporting moves; messages = the hierarchy (emotional, educational, product, brand — one sentence each); structure = 3 rollout phases {phase (with weeks), what}; assets = 4 drafted assets {ch (LinkedIn/Instagram/Reel/Email), title, caption written in the brand voice, 40-120 words}.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nVoice: '+B.voice.traits.join(', ')+'\nAudience: '+B.audience.primary+'\n\nCampaign name: '+name+'\nGoal / big idea: '+(goal||'own our point of view'), CAMP_SCHEMA, 1600);
+  if(!c) c={ platform:(goal||'One coordinated push that makes '+(B.name||'the brand')+' impossible to ignore.')+' Built in your voice: '+B.voice.traits.join(', ').toLowerCase()+'.',
+    strategy:{primary:'Make “'+name+'” the thing people remember this month.',supporting:['Educate on the core idea','Show proof from real moments','Convert attention into one clear next step']},
+    messages:{emotional:(window.stripTags?stripTags(B.messaging.primary):''),educational:(window.stripTags?stripTags(B.messaging.pov):''),product:B.overview.promise,brand:(B.name||'')+' — '+(B.tagline||'')},
+    structure:[{phase:'Launch (Week 1)',what:'Anchor post + supporting posts across channels.'},{phase:'Build (Weeks 2–3)',what:'Framework + proof content; engage every reply.'},{phase:'Convert (Week 4)',what:'Direct CTA across channels.'}],
+    assets:[{ch:'LinkedIn',title:'Launch post',caption:(B.preview&&B.preview.post)||''},{ch:'Instagram',title:'Feed post',caption:(B.voice&&B.voice.caption)||''},{ch:'Reel',title:'Reel script',caption:(B.voice&&B.voice.headline)||''},{ch:'Email',title:'Email anchor',caption:(B.preview&&B.preview.email)||''}] };
+  const camp={id:uid(),name:name,prio:'Campaign',channels:[...new Set((c.assets||[]).map(a=>a.ch))].slice(0,4),status:'idea',
+    platform:c.platform,strategy:c.strategy,messages:c.messages,structure:(c.structure||[]).slice(0,4),
+    assets:(c.assets||[]).slice(0,6).map(a=>({id:uid(),ch:a.ch,title:a.title,caption:a.caption,status:'pending',notes:''}))};
+  HUB.campaigns.unshift(camp); hubSave(); closeCamp();
+  if($('#cp-name'))$('#cp-name').value=''; if($('#cp-goal'))$('#cp-goal').value='';
+  if(go){go.disabled=false;go.textContent='✦ Build campaign';}
+  openCamp=camp.id; renderHub(); toast('Campaign drafted — review every piece below');
+}
+function ideaToCampaign(id){
+  const i=HUB.ideas.find(x=>x.id===id); if(!i) return;
+  HUB.ideas=HUB.ideas.filter(x=>x.id!==id); hubSave();
+  createCampaign(i.t.slice(0,60), i.sum||i.t);
+}
+function setAsset(cid,aid,st){ const c=HUB.campaigns.find(x=>x.id===cid); const a=c&&c.assets.find(x=>x.id===aid); if(!a) return; a.status=a.status===st?'pending':st; hubSave(); renderHub(); }
+function noteAsset(cid,aid,el){ const c=HUB.campaigns.find(x=>x.id===cid); const a=c&&c.assets.find(x=>x.id===aid); if(a){ a.notes=el.value; hubSave(); } }
+function campStatus(cid,st){ const c=HUB.campaigns.find(x=>x.id===cid); if(!c) return; c.status=st; hubSave(); hubTab=st==='idea'?'ideas':st; renderHub(); toast(st==='ready'?'Campaign is ready to publish 🚀':st==='progress'?'Campaign moved to In progress':'Moved back to Ideas'); }
+function ideaStatus(id,st){ const i=HUB.ideas.find(x=>x.id===id); if(!i) return; i.status=st; hubSave(); renderHub(); }
+function dropIdea(id){ HUB.ideas=HUB.ideas.filter(x=>x.id!==id); hubSave(); renderHub(); toast('Idea removed'); }
+function dropCamp(id){ HUB.campaigns=HUB.campaigns.filter(x=>x.id!==id); hubSave(); renderHub(); toast('Campaign archived'); }
 
-/* ---------- attention ---------- */
+/* ---- renderers ---- */
+function campCard(c){
+  const done=c.assets.filter(a=>a.status==='approved').length;
+  const open=openCamp===c.id;
+  const acts=c.status==='idea'
+    ?`<button class="hb pri" onclick="campStatus('${c.id}','progress')">Start building →</button>`
+    :c.status==='progress'
+    ?`<button class="hb pri" onclick="campStatus('${c.id}','ready')">Mark ready ✓</button><button class="hb" onclick="campStatus('${c.id}','idea')">← Back to ideas</button>`
+    :`<button class="hb pri" onclick="location.href='threadline-plan.html'">Schedule in Plan →</button><button class="hb" onclick="dropCamp('${c.id}')">✓ Published — archive</button>`;
+  return `<div class="camp">
+    <div class="chead" onclick="openCamp=openCamp==='${c.id}'?null:'${c.id}';renderHub()">
+      <div class="cico">🎯</div>
+      <div class="ct2"><b>${esc(c.name)} <span class="prio">${esc(c.prio)}</span></b>
+        <div class="csnip">${esc(c.platform)}</div>
+        <div class="cmeta">${c.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}
+          <span class="cdots"><em>${done}/${c.assets.length} approved</em>${c.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div>
+      </div>
+    </div>
+    <div class="cacts">${acts}<button class="hb" onclick="openCamp=openCamp==='${c.id}'?null:'${c.id}';renderHub()">${open?'Close':'Open'} ${open?'▴':'▾'}</button></div>
+    ${open?`<div class="cdetail">
+      <div class="csec"><h5>Campaign platform</h5><p>${esc(c.platform)}</p></div>
+      <div class="csec"><h5>Strategy</h5><p><b>${esc(c.strategy.primary)}</b></p><ul>${c.strategy.supporting.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="csec"><h5>Message hierarchy</h5>
+        ${['emotional','educational','product','brand'].map(k=>`<div class="msgrow"><b>${k}</b><span>${esc(c.messages[k]||'')}</span></div>`).join('')}</div>
+      <div class="csec"><h5>Rollout</h5>${c.structure.map(pp=>`<div class="phrow"><b>${esc(pp.phase)}</b><span>${esc(pp.what)}</span></div>`).join('')}</div>
+      <div class="csec"><h5>Assets — review each one</h5>
+        ${c.assets.map(a=>`<div class="asset"><div class="ahead"><span class="chch">${esc(a.ch)}</span><b>${esc(a.title)}</b></div>
+          <div class="cap">${esc(a.caption)}</div>
+          <div class="arow">
+            <button class="ab ok${a.status==='approved'?' on':''}" onclick="setAsset('${c.id}','${a.id}','approved')">✓ Approve</button>
+            <button class="ab rv${a.status==='revise'?' on':''}" onclick="setAsset('${c.id}','${a.id}','revise')">↻ Revise</button>
+            <input class="anote" placeholder="Notes for the revision…" value="${esc(a.notes||'')}" onchange="noteAsset('${c.id}','${a.id}',this)">
+            <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Revise this ${esc(a.ch)} asset for the ${esc(c.name).replace(/'/g,'’')} campaign: ${esc(a.title).replace(/'/g,'’')}')">Open in Create →</button>
+          </div></div>`).join('')}
+      </div>
+    </div>`:''}
+  </div>`;
+}
+function ideaRow(i){
+  const acts=i.status==='idea'
+    ?`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(i.t).replace(/'/g,'’')}')">Build →</button>
+      <button class="hb" onclick="ideaToCampaign('${i.id}')">🎯 Campaign</button>
+      <button class="hb" onclick="ideaStatus('${i.id}','progress')">Start</button>
+      <button class="hb" onclick="dropIdea('${i.id}')">✕</button>`
+    :i.status==='progress'
+    ?`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(i.t).replace(/'/g,'’')}')">Open in Create →</button>
+      <button class="hb" onclick="ideaStatus('${i.id}','ready')">Mark ready ✓</button>
+      <button class="hb" onclick="ideaStatus('${i.id}','idea')">←</button>`
+    :`<button class="hb pri" onclick="location.href='threadline-plan.html'">Schedule in Plan →</button>
+      <button class="hb" onclick="dropIdea('${i.id}')">✓ Published</button>
+      <button class="hb" onclick="ideaStatus('${i.id}','progress')">←</button>`;
+  return `<div class="hrow"><div class="hic">${i.status==='ready'?'🚀':i.status==='progress'?'✏️':'💡'}</div>
+    <div class="ht3"><b>${esc(i.t)}</b><span>${esc(i.sum||'')} · ${esc(i.pillar||'')}</span></div>
+    <div class="hacts">${acts}</div></div>`;
+}
+function renderHub(){
+  $('#hubtabs').innerHTML=HUBTABS.map(([k,ic,l])=>`<button class="hubtab${hubTab===k?' on':''}" onclick="hubTab='${k}';renderHub()">${ic} ${l} <i>${hubCount(k==='ideas'?'idea':k)}</i></button>`).join('');
+  const st=hubTab==='ideas'?'idea':hubTab;
+  const camps=HUB.campaigns.filter(c=>c.status===st);
+  const ideas=HUB.ideas.filter(i=>i.status===st);
+  let html='';
+  if(hubTab==='ideas'){
+    html+=`<div class="hubcap"><textarea id="hubdump" placeholder="Dump an idea — or paste a whole braindump and split it…"></textarea>
+      <div class="row">
+        <button class="hb pri" onclick="hubAddIdea()">＋ Add idea</button>
+        <button class="hb" id="hubSplitBtn" onclick="hubSplit()">✂️ Split into ideas</button>
+        <button class="hb" id="hubGenBtn" onclick="hubGenerate()">✦ Generate ideas</button>
+        <button class="hb" onclick="openCampModal()">🎯 New campaign</button>
+      </div></div>`;
+  }
+  html+=`<div class="hubsec"><h3>🎯 Campaigns</h3>${camps.length?camps.map(campCard).join(''):`<div class="hubempty">${hubTab==='ideas'?'No campaigns yet — hit <b>🎯 New campaign</b> or promote an idea.':'Nothing here yet.'}</div>`}</div>`;
+  html+=`<div class="hubsec"><h3>💡 General ideas &amp; posts</h3>${ideas.length?ideas.map(ideaRow).join(''):`<div class="hubempty">${hubTab==='ideas'?'Nothing captured yet — dump your first idea above.':'Nothing here yet.'}</div>`}</div>`;
+  $('#hubbody').innerHTML=html;
+}
+renderHub();
+
+/* ---------- attention ---------- *//* ---------- attention ---------- */
 const ATTN=[
   {bg:'rgba(251,113,133,.12)',ic:'✏️',t:'2 drafts need review',d:"They're ready for your feedback",href:'threadline-plan.html?f=review'},
   {bg:'rgba(32,184,120,.12)',ic:'🗓️',t:'3 open slots this week',d:'Fill your series and stay consistent',href:'threadline-build-page.html?mode=planner'},
