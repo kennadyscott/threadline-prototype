@@ -612,6 +612,7 @@ function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.mi
 async function hubAI(system,user,schema,maxTok){
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:user}],max_tokens:maxTok||700,output_config:{format:{type:'json_schema',schema:schema}}})});
+    if(r.status===402){ try{ const d=await r.json(); toast(d.error+' Upgrade in Settings →'); }catch(e){} return null; }
     if(!r.ok) return null;
     const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
     return t?JSON.parse(t):null;
@@ -1029,11 +1030,37 @@ function renderHub(){
           <div class="cmeta"><span class="chch">${(o.schedule||[]).length} slots</span><span class="chch">Starts ${o.schedule&&o.schedule[0]?fmtD(new Date(o.schedule[0].date)):'—'}</span></div></div></div>
           <div class="cdetail" style="display:block"><div class="csec"><h5>Timeline</h5>${rows(x)}</div>
           ${x.type==='camp'&&o.stretch?`<div class="csec"><h5>Stretch campaign — locked</h5><div class="lockb"><b>${esc(o.stretch.theme)}</b><ul class="plainul">${(o.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Holds until the 6-week metrics are evaluated — unlock it from Analytics when the numbers earn it.</span></div></div>`:''}</div>
-          <div class="cacts"><button class="hb pri" onclick="location.href='threadline-plan.html'">Open in Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:x.type==='spoke'?`spokeStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:x.type==='spoke'?`dropSpoke('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
+          <div class="cacts"><button class="hb pri" onclick="publishNow('${x.type}','${o.id}')">Publish now</button><button class="hb" onclick="location.href='threadline-plan.html'">Open in Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:x.type==='spoke'?`spokeStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:x.type==='spoke'?`dropSpoke('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
     return;
   }
 }
 renderHub();
+
+/* ---------- publish now (live app: /api/social; demo: explains itself) ---------- */
+function publishText(type,id){
+  if(type==='camp'){ const c=HUB.campaigns.find(x=>x.id===id); const a=c&&c.assets[0]; return a?a.caption:(c&&c.platform)||''; }
+  if(type==='mini'){ const m=HUB.minis.find(x=>x.id===id); const e=m&&m.episodes[0]; return e?(e.t+'\n\n'+e.hook):''; }
+  if(type==='spoke'){ const sp=HUB.spokes.find(x=>x.id===id); const pc=sp&&sp.pieces.find(z=>z.format==='Instagram post')||sp&&sp.pieces[0]; return pc?pc.body:''; }
+  const i=HUB.ideas.find(x=>x.id===id); return i?(i.t+(i.sum?'\n\n'+i.sum:'')):'';
+}
+async function publishNow(type,id){
+  const text=(publishText(type,id)||'').trim();
+  if(!text){ toast('Nothing to publish on this item yet'); return; }
+  let st;
+  try{ st=await fetch('/api/social',{credentials:'same-origin'}); }
+  catch(e){ toast('Publishing runs on the live app — this is the local demo'); return; }
+  if(st.status===503){ const d=await st.json().catch(()=>({})); toast('Connect your socials first — Settings → Connected accounts'); return; }
+  if(!st.ok){ toast('Sign in to publish'); return; }
+  const info=await st.json();
+  const platforms=(info.platforms&&info.platforms.length)?info.platforms:null;
+  if(!platforms){ toast('No platforms linked yet — link accounts in Settings'); return; }
+  if(!confirm('Publish this to '+platforms.join(', ')+'?\n\nThis posts to your real accounts:\n\n'+text.slice(0,180)+(text.length>180?'…':''))) return;
+  try{
+    const r=await fetch('/api/social',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({action:'publish',post:text,platforms:platforms})});
+    const d=await r.json();
+    toast(r.ok?'Published — live on '+platforms.join(', ')+' ✓':'Publish failed: '+(d.error||d.message||'unknown'));
+  }catch(e){ toast('Publish failed — network error'); }
+}
 
 /* ---------- one-time "brand is active" popup (shows once, then gone) ---------- */
 const FIRST_KEY='threadline.homeWelcomed';

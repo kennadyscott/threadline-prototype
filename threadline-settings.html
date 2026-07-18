@@ -150,6 +150,18 @@ svg.defs{position:absolute;width:0;height:0}
 .nitem.sub b{font-size:13px}
 </style>
 <style>.ncaret{cursor:pointer;padding:4px 6px}</style>
+<style>
+.plnote{font-size:12.5px;color:var(--faint);padding:6px 0}
+.plcur{font-size:13px;color:var(--muted);padding:4px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.plgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.plcard{border:1.5px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:6px}
+.plcard.on{border-color:var(--violet);box-shadow:0 0 0 1px var(--violet)}
+.plcard b{font-size:14.5px}
+.plprice{font-size:22px;font-weight:900;color:var(--ink)}
+.plprice i{font-style:normal;font-size:12px;color:var(--faint);font-weight:700}
+.plcard p{font-size:12px;color:var(--muted);line-height:1.45;flex:1;margin:0}
+.pfchip{font-size:10.5px;font-weight:800;text-transform:uppercase;background:var(--surface-2);border-radius:999px;padding:3px 9px;color:var(--muted)}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -205,7 +217,13 @@ svg.defs{position:absolute;width:0;height:0}
       </div>
 
       <div class="panel">
-        <div class="ph"><h3>Connected accounts</h3><span class="sub">Powers Analytics and (later) publishing.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
+        <div class="ph"><h3>Plan &amp; billing</h3><span class="sub">Managed AI included on every plan — usage resets monthly.</span></div>
+        <div id="planwrap"><div class="plnote">Billing loads on the live app.</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="ph"><h3>Connected accounts</h3><span class="sub">Powers Analytics and publishing.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
+        <div id="socialstatus"></div>
         <div id="conns"></div>
       </div>
 
@@ -289,6 +307,66 @@ function renderConns(){
 
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
 loadRules(); renderConns();
+
+/* ---------- Plan & billing (live app only) ---------- */
+const PLANS=[
+  ['starter','Starter','$19','250 AI actions / mo · 1 brand · publishing'],
+  ['pro','Pro','$39','1,500 AI actions / mo · campaigns + spokes at full speed'],
+  ['studio','Studio','$99','8,000 AI actions / mo · teams, reviews, multi-channel']
+];
+async function loadBilling(){
+  const wrap=document.getElementById('planwrap');
+  try{
+    const r=await fetch('/api/billing',{credentials:'same-origin'});
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    const cur=d.plan||'free';
+    wrap.innerHTML=`<div class="plcur">Current plan: <b>${cur[0].toUpperCase()+cur.slice(1)}</b>${d.status&&d.status!=='none'?` · ${d.status}`:''}${!d.migrated?' · <span style="color:#b57708">run the database migration to track usage</span>':''}</div>
+      <div class="plgrid">${PLANS.map(([k,n,pr,desc])=>`<div class="plcard${cur===k?' on':''}">
+        <b>${n}</b><span class="plprice">${pr}<i>/mo</i></span><p>${desc}</p>
+        ${cur===k?'<button class="sbtn" disabled>Current plan</button>':`<button class="sbtn pri" onclick="upgrade('${k}')">${cur==='free'?'Upgrade':'Switch'} →</button>`}
+      </div>`).join('')}</div>
+      ${cur!=='free'?'<button class="act" style="margin-top:10px" onclick="portal()">Manage billing →</button>':''}`;
+  }catch(e){ wrap.innerHTML='<div class="plnote">Plans &amp; upgrades live on the app — this is the local demo.</div>'; }
+}
+async function upgrade(plan){
+  try{
+    const r=await fetch('/api/billing',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({action:'checkout',plan})});
+    const d=await r.json();
+    if(r.ok&&d.url) location.href=d.url;
+    else toast(d.error||'Checkout unavailable'+(d.setup?' — '+d.setup:''));
+  }catch(e){ toast('Checkout runs on the live app'); }
+}
+async function portal(){
+  try{
+    const r=await fetch('/api/billing',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({action:'portal'})});
+    const d=await r.json();
+    if(r.ok&&d.url) location.href=d.url; else toast(d.error||'Portal unavailable');
+  }catch(e){ toast('Billing portal runs on the live app'); }
+}
+loadBilling();
+
+/* ---------- live social connection status ---------- */
+async function loadSocial(){
+  const el=document.getElementById('socialstatus');
+  try{
+    const r=await fetch('/api/social',{credentials:'same-origin'});
+    const d=await r.json();
+    if(r.status===503){ el.innerHTML=`<div class="plnote">Publishing isn't connected yet — ${esc(d.setup||'add your Ayrshare key in Vercel')}</div>`; return; }
+    if(!r.ok) throw 0;
+    el.innerHTML=`<div class="plcur">Live publishing: <b style="color:#178a5a">connected</b> · ${(d.platforms||[]).map(pf=>`<span class="pfchip">${esc(pf)}</span>`).join('')||'no platforms linked yet'}
+      <button class="act" style="margin-left:10px" onclick="connectSocial()">Link accounts →</button></div>`;
+  }catch(e){ el.innerHTML=''; }
+}
+async function connectSocial(){
+  try{
+    const r=await fetch('/api/social',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({action:'connect'})});
+    const d=await r.json();
+    if(d.url) window.open(d.url,'_blank');
+    else toast(d.note||d.error||'Link accounts in the Ayrshare dashboard');
+  }catch(e){ toast('Account linking runs on the live app'); }
+}
+loadSocial();
 </script>
 <script>
 /* mobile drawer nav */
