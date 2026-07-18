@@ -345,16 +345,16 @@ svg.defs{position:absolute;width:0;height:0}
 .ph2{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;flex-wrap:wrap}
 .eyeb2{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--violet)}
 .bigh{font-size:21px;margin-top:2px}
-.spcanvas{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;position:relative;margin-top:16px;align-items:center}
+.spcanvas{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;position:relative;margin-top:16px;align-items:center}
 @media(max-width:920px){.spcanvas{grid-template-columns:1fr}}
 #splines{position:absolute;inset:0;pointer-events:none;z-index:0}
 .spcol{display:flex;flex-direction:column;gap:22px;justify-content:center;position:relative;z-index:1}
 .spmid{display:flex;flex-direction:column;gap:18px;align-items:stretch;position:relative;z-index:1}
-.spcore{border:2.5px solid transparent;border-radius:22px;padding:18px;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,var(--violet),var(--blue)) border-box;box-shadow:0 14px 40px rgba(128,61,255,.14);text-align:center}
+.spcore{border:2px solid transparent;border-radius:18px;padding:13px 16px;max-width:360px;margin:0 auto;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,var(--violet),var(--blue)) border-box;box-shadow:0 10px 30px rgba(128,61,255,.13);text-align:center}
 .corelab{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--violet);margin-bottom:8px}
-.spcore textarea{width:100%;border:none;outline:none;background:none;font-family:inherit;font-size:15.5px;font-weight:700;color:var(--ink);text-align:center;resize:vertical;min-height:56px}
-.spcore .spgo{margin-top:10px;padding:10px 22px}
-.spbot{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.spcore textarea{width:100%;border:none;outline:none;background:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--ink);text-align:center;resize:vertical;min-height:40px;line-height:1.4}
+.spcore .spgo{margin-top:8px;padding:8px 18px;font-size:13px}
+.spbot{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px}
 @media(max-width:920px){.spbot{grid-template-columns:1fr}}
 .spc{border:1px solid var(--line);border-radius:15px;padding:13px 15px;background:var(--surface);cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 16px rgba(20,20,60,.05)}
 .spc:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,20,60,.1)}
@@ -803,18 +803,29 @@ function drawSpokeLines(){
   const cr=cv.getBoundingClientRect(), kr=core.getBoundingClientRect();
   svg.setAttribute('width',cv.scrollWidth); svg.setAttribute('height',cv.scrollHeight);
   svg.setAttribute('viewBox','0 0 '+cv.scrollWidth+' '+cv.scrollHeight);
-  const kx=kr.left-cr.left+kr.width/2, ky=kr.top-cr.top+kr.height/2;
+  const K={l:kr.left-cr.left,r:kr.right-cr.left,t:kr.top-cr.top,b:kr.bottom-cr.top};
+  K.cx=(K.l+K.r)/2; K.cy=(K.t+K.b)/2;
   let d='';
   cv.querySelectorAll('.spc').forEach(c=>{
     const r=c.getBoundingClientRect();
-    const cx=r.left-cr.left+r.width/2, cy=r.top-cr.top+r.height/2;
-    const sx=cx<kx-40?r.right-cr.left:cx>kx+40?r.left-cr.left:cx;
-    const sy=Math.abs(cx-kx)<=40?r.top-cr.top:cy;
-    const ex=cx<kx-40?kr.left-cr.left:cx>kx+40?kr.right-cr.left:kx;
-    const ey=Math.abs(cx-kx)<=40?kr.bottom-cr.top:ky;
-    const mx=(sx+ex)/2;
-    d+=`<path d="M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}" stroke="${c.dataset.c}" stroke-width="2" fill="none" opacity=".55"/>
-        <circle cx="${(sx+ex)/2}" cy="${(sy+ey)/2}" r="4" fill="#fff" stroke="${c.dataset.c}" stroke-width="2"/>`;
+    const R={l:r.left-cr.left,r:r.right-cr.left,t:r.top-cr.top,b:r.bottom-cr.top};
+    R.cx=(R.l+R.r)/2; R.cy=(R.t+R.b)/2;
+    const col=c.dataset.c; let sx,sy,ex,ey,path;
+    if(c.parentElement.id==='spB'){
+      sx=R.cx; sy=R.t; ex=K.cx+(R.cx<K.cx?-40:40); ey=K.b;
+      path=`M${sx},${sy} C${sx},${sy-22} ${ex},${ey+22} ${ex},${ey}`;
+    } else if(R.cx<K.cx){
+      sx=R.r; sy=R.cy; ex=K.l; ey=K.cy+(R.cy<K.cy?-20:20);
+      const dx=(ex-sx)*0.5;
+      path=`M${sx},${sy} C${sx+dx},${sy} ${ex-dx},${ey} ${ex},${ey}`;
+    } else {
+      sx=R.l; sy=R.cy; ex=K.r; ey=K.cy+(R.cy<K.cy?-20:20);
+      const dx=(sx-ex)*0.5;
+      path=`M${sx},${sy} C${sx-dx},${sy} ${ex+dx},${ey} ${ex},${ey}`;
+    }
+    d+=`<path d="${path}" stroke="${col}" stroke-width="2" fill="none" opacity=".5"/>
+        <circle cx="${sx}" cy="${sy}" r="3.5" fill="#fff" stroke="${col}" stroke-width="2"/>
+        <circle cx="${ex}" cy="${ey}" r="3.5" fill="#fff" stroke="${col}" stroke-width="2"/>`;
   });
   svg.innerHTML=d;
 }

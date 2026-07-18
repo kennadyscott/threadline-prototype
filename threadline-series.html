@@ -248,6 +248,21 @@ svg.defs{position:absolute;width:0;height:0}
 .nitem.sub b{font-size:13px}
 </style>
 <style>.ncaret{cursor:pointer;padding:4px 6px}</style>
+<style>
+.fch{font-size:10.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 9px;color:var(--muted);margin-right:4px}
+.secdiv h4{font-size:15px;display:flex;align-items:center;gap:8px}
+.secdiv .cap{font-size:11px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.secdiv p{font-size:12.5px;color:var(--faint);margin:3px 0 12px}
+.rankchip{font-size:10.5px;font-weight:800;color:var(--violet);background:rgba(128,61,255,.08);border-radius:999px;padding:3px 9px;margin-left:6px}
+.chkrow{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1.5px dashed var(--line-2);margin-top:10px;padding-top:11px;font-size:12.5px;color:var(--muted)}
+.chkrow span{flex:1;min-width:220px}
+.chkrow.quiet{color:#178a5a;font-weight:700}
+.ab.ok2{border-color:rgba(32,184,120,.5);color:#178a5a;font-weight:800}
+.ab.end2{border-color:rgba(251,113,133,.5);color:#e05575;font-weight:800}
+.ab.pri2{border:none;background:linear-gradient(120deg,var(--violet),var(--blue));color:#fff;font-weight:800}
+.ab.pri2:disabled{opacity:.5;cursor:not-allowed}
+.acard.future{opacity:.92;border-style:dashed}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -340,7 +355,15 @@ function renderNav(){
 renderNav();
 
 /* ---------- data ---------- */
-const ACTIVE=B.series.slice(0,3).map((s,i)=>({name:s[0],cad:(s[1]||'Weekly ·').split('·')[0].trim(),pillar:s[3]||EDU_PILLAR,desc:s[2],next:['Wed, Jul 15','Fri, Jul 17','Mon, Jul 20'][i],reserve:[5,2,6][i],published:[12,7,9][i],health:['h-ok','h-low','h-ok'][i],hlabel:['On track','Reserve low','On track'][i],paused:0}));
+const ACTIVE=B.series.slice(0,3).map((s,i)=>({name:s[0],cad:(s[1]||'Weekly ·').split('·')[0].trim(),pillar:s[3]||EDU_PILLAR,desc:s[2],next:['Wed, Jul 15','Fri, Jul 17','Mon, Jul 20'][i],reserve:[5,2,6][i],published:[12,7,9][i],health:['h-ok','h-low','h-ok'][i],hlabel:['On track','Reserve low','On track'][i],paused:0,extended:0}));
+let FUTURE=[{name:'Client Question Fridays',cad:'Weekly',pillar:(B.pillars[0]||['Education'])[0],desc:'Answer one real client question, every Friday.'}];
+const MAX_ACTIVE=5;
+function seriesRank(i){ const order=ACTIVE.map((a,j)=>[j,a.published]).sort((x,y)=>y[1]-x[1]).map(x=>x[0]); return order.indexOf(i)+1; }
+function endSeries(i){ const gone=ACTIVE.splice(i,1)[0]; render(); toastUndo('“'+gone.name+'” ended — its history stays in Analytics',()=>{ ACTIVE.splice(Math.min(i,ACTIVE.length),0,gone); render(); }); }
+function extendSeries(i){ ACTIVE[i].extended=1; render(); toast('Extended — next checkpoint in 6 weeks'); }
+function activateFuture(i){ if(ACTIVE.length>=MAX_ACTIVE){ toast('5 series max — end or pause one to make room'); return; }
+  const f=FUTURE.splice(i,1)[0]; ACTIVE.push({name:f.name,cad:f.cad,pillar:f.pillar,desc:f.desc,next:'Next week',reserve:6,published:0,health:'h-ok',hlabel:'Just activated',paused:0,extended:0}); render(); toast('“'+f.name+'” is live — recurring slots created'); }
+function dropFuture(i){ FUTURE.splice(i,1); render(); toast('Removed from the queue'); }
 const CONCEPTS=[
   {icon:'👓',bg:'rgba(128,61,255,.1)',name:'Founder POV',pillar:POV_PILLAR,ptag:'pt-v',cad:'Weekly',
    desc:'Unfiltered perspectives, lessons, and frameworks from the founder’s seat.',
@@ -423,7 +446,7 @@ function conceptHTML(c){
     <div><div class="cname">${c.name} <span class="ptag ${c.ptag}">${c.pillar}</span></div>
       <div class="cdesc">${c.desc}</div>${c.warn?`<div class="cwarn">⚠ ${c.warn}</div>`:''}</div>
     <div><div class="cmeta"><h6>Cadence</h6><div class="cv">${c.cad}</div></div>
-      <div class="cmeta"><h6>Formats</h6><div class="fchips"><i class="f1">▤</i><i class="f2">▶</i><i class="f3">☰</i></div></div>
+      <div class="cmeta"><h6>Formats</h6><div class="fchips"><span class="fch" title="Multi-slide carousel">Carousel</span><span class="fch" title="Short vertical video">Reel</span><span class="fch" title="Single image or text post">Static</span></div></div>
       <div class="cmeta"><h6>Effort</h6><div class="cv" style="font-size:12px;color:var(--muted)">${c.effort}</div></div></div>
     <div class="eps"><h6>Sample post ideas</h6><ul>${c.eps.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>
     <div class="cacts">
@@ -466,26 +489,46 @@ function closeAct(){ $('#actOverlay').classList.remove('on'); }
 function confirmAct(){
   const c=CONCEPTS[actId]; c.state='active';
   const nm=$('#am-name').value.trim()||c.name;
-  ACTIVE.push({name:nm,cad:$('#am-cad').value,pillar:$('#am-pillar').value,desc:c.desc,next:'Wed, Jul 15',reserve:6,published:0,health:'h-ok',hlabel:'Just activated',paused:0});
+  if(ACTIVE.length>=MAX_ACTIVE){
+    FUTURE.push({name:nm,cad:$('#am-cad').value,pillar:$('#am-pillar').value,desc:c.desc});
+    closeAct(); render();
+    toastUndo(`You're at 5 active series — “${nm}” joined the Future queue`,()=>{ c.state='new'; FUTURE.pop(); render(); });
+    return;
+  }
+  ACTIVE.push({name:nm,cad:$('#am-cad').value,pillar:$('#am-pillar').value,desc:c.desc,next:'Wed, Jul 15',reserve:6,published:0,health:'h-ok',hlabel:'Just activated',paused:0,extended:0});
   closeAct(); render();
   toastUndo(`${nm} is active — 6 starter ideas added, recurring slots created for 8 weeks`,()=>{ c.state='new'; ACTIVE.pop(); render(); });
 }
 
 /* ---------- active series view ---------- */
 function activeView(){
-  return `<div class="acards">${ACTIVE.map((a,i)=>`<div class="acard">
+  return `<div class="secdiv"><h4>Active series <span class="cap">${ACTIVE.length} / ${MAX_ACTIVE}</span></h4><p>Five run at a time — every 6 weeks, each one has to earn its slot against the others.</p></div>
+  <div class="acards">${ACTIVE.map((a,i)=>{
+    const atCheckpoint=a.published>=6&&!a.extended&&!a.paused;
+    return `<div class="acard">
     <div class="cicon" style="background:rgba(128,61,255,.08)">🧵</div>
     <div class="st"><b>${esc(a.name)}</b><span>${a.cad} · ${esc(a.pillar)}</span>
-      <div style="margin-top:6px"><span class="hstat ${a.paused?'h-paused':a.health}">${a.paused?'⏸ Paused':a.hlabel}</span></div></div>
+      <div style="margin-top:6px"><span class="hstat ${a.paused?'h-paused':a.health}">${a.paused?'⏸ Paused':a.hlabel}</span> <span class="rankchip">#${seriesRank(i)} of ${ACTIVE.length} by engagement</span></div></div>
     <div class="astat">Next: <b>${a.paused?'—':a.next}</b><br>Reserve: <b>${a.reserve} ideas</b>${a.reserve<=2?' ⚠':''}</div>
-    <div class="astat">Published: <b>${a.published} installments</b><br>Formats: <b>Mixed</b></div>
+    <div class="astat">Published: <b>${a.published} posts</b><br>Formats: <b>Mixed</b></div>
     <div class="aacts">
       <button class="ab" onclick="toast('Opening series detail — upcoming, reserve & insights')">Open</button>
       <button class="ab" onclick="ACTIVE[${i}].reserve++;render();toast('Idea added to reserve')">＋ Add idea</button>
       <button class="ab" onclick="location.href='threadline-plan.html'">View in Plan</button>
       <button class="ab" onclick="ACTIVE[${i}].paused=ACTIVE[${i}].paused?0:1;render();toast(ACTIVE[${i}].paused?'Paused — future slots on hold, history preserved':'Resumed — recurring slots restored')">${a.paused?'▶ Resume':'⏸ Pause'}</button>
     </div>
-  </div>`).join('')}</div>
+    ${atCheckpoint?`<div class="chkrow"><span><b>6-week checkpoint.</b> Ranked #${seriesRank(i)} of ${ACTIVE.length} — keep it running, or free the slot?</span>
+      <button class="ab ok2" onclick="extendSeries(${i})">Extend 6 more weeks</button>
+      <button class="ab end2" onclick="endSeries(${i})">End series</button></div>`
+    :a.extended?`<div class="chkrow quiet"><span>✓ Extended — next checkpoint in 6 weeks.</span></div>`:''}
+  </div>`;}).join('')}</div>
+  <div class="secdiv" style="margin-top:22px"><h4>Future series <span class="cap">${FUTURE.length} queued</span></h4><p>Waiting for an open slot — they activate the moment one of the five frees up.</p></div>
+  ${FUTURE.length?`<div class="acards">${FUTURE.map((f,i)=>`<div class="acard future">
+    <div class="cicon" style="background:var(--surface-2)">🕒</div>
+    <div class="st"><b>${esc(f.name)}</b><span>${f.cad} · ${esc(f.pillar)}</span><div style="margin-top:4px;font-size:12px;color:var(--muted)">${esc(f.desc||'')}</div></div>
+    <div class="aacts"><button class="ab pri2" onclick="activateFuture(${i})"${ACTIVE.length>=MAX_ACTIVE?' disabled title="End or pause an active series first"':''}>Activate${ACTIVE.length>=MAX_ACTIVE?' (full)':' now'}</button>
+    <button class="ab" onclick="dropFuture(${i})">Remove</button></div>
+  </div>`).join('')}</div>`:`<div class="footnote">Nothing queued — activate a 6th series any time and it waits here.</div>`}
   ${ACTIVE.some(a=>a.reserve<=2)?`<div class="footnote">⚠ <span><b>${esc((ACTIVE.find(a=>a.reserve<=2)||{}).name)}</b> is running low — ${(ACTIVE.find(a=>a.reserve<=2)||{}).reserve} ideas left in reserve. Let’s build a few more before next month.</span><span class="sp"></span><button onclick="location.href='threadline-build-page.html?mode=idea'">Fill reserve with Build ›</button></div>`:''}`;
 }
 
@@ -504,26 +547,13 @@ function renderRail(){
   const filled=Math.min(7,3+ACTIVE.filter(a=>!a.paused).length);
   const monthly=ACTIVE.filter(a=>!a.paused).reduce((n,a)=>n+(a.cad==='Weekly'?4:2),4);
   $('#rail').innerHTML=`
-  <div class="rpanel"><h3>Series strategy</h3><p class="rsub">How these series work together.</p>
-    <div class="stratrow"><div class="si" style="background:rgba(128,61,255,.1)">✦</div><div>Balanced mix of <b>point of view, behind-the-scenes, proof, and education</b>.</div></div>
-    <div class="stratrow"><div class="si" style="background:rgba(245,165,36,.14)">🧡</div><div>Strong founder voice with social proof to back it up.</div></div>
-    <div class="stratrow"><div class="si" style="background:rgba(32,184,120,.12)">🗓</div><div>Cadence fits your stated capacity — no production crunch.</div></div>
-    <button class="rlink" onclick="toast('Strategy map: how pillars → series → slots connect')">View series strategy map →</button>
-  </div>
   <div class="rpanel impact"><h3>Planner impact</h3><p class="rsub">Estimated impact on your Plan.</p>
     <div class="ir"><div class="il"><span>Weekly slots filled</span><b>${filled} / 7</b></div><div class="ibar"><i style="width:${filled/7*100}%;background:var(--grad2)"></i></div></div>
     <div class="ir"><div class="il"><span>Monthly content pieces</span><b>${monthly}</b></div><div class="ibar"><i style="width:${Math.min(100,monthly*4)}%;background:var(--grad2)"></i></div></div>
     <div class="ir"><div class="il"><span>Pillar balance</span><b style="color:#178a5a">Balanced</b></div><div class="ibar">${B.pillars.map((p,i)=>`<i style="width:${100/B.pillars.length}%;background:${p[1]}"></i>`).join('')}</div></div>
     <button class="rlink" onclick="toast('Planner preview — recurring slots across the next 8 weeks')">See planner preview →</button>
   </div>
-  <div class="rpanel"><h3>Best series match</h3><p class="rsub">Top performer for your goals.</p>
-    <div class="bestcard" onclick="openAct(0)"><div class="cicon" style="background:rgba(128,61,255,.1)">👓</div><div><b>Founder POV</b><span>High potential for trust &amp; authority.</span></div><span class="bfit">Best fit</span></div>
-    <div class="bwhy"><b>Why it’s a great fit</b><br>Positions you as a thought leader and builds strong audience connection.</div>
-  </div>
-  <div class="rpanel reserve"><span class="rn">12 ideas</span><h3>Starter post reserve</h3><p class="rsub">Kickstart your new series.</p>
-    <div style="font-size:12.5px;color:var(--muted);line-height:1.5">AI-generated post ideas are ready to add to your Plan.</div>
-    <button class="rlink" onclick="toast('Post ideas — sourced from Idea Bank + your brand foundation')">View post ideas →</button>
-  </div>`;
+  `;
 }
 
 /* ---------- render ---------- */
