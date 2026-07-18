@@ -344,6 +344,8 @@ tr.item:hover .rowdel{opacity:1}
 .rowdel:hover{color:#e05575}
 .bulk .danger{color:#e05575}
 .bulk .danger:hover{background:rgba(251,113,133,.1)}
+.lcx{border:none;background:none;color:var(--faint);font-weight:800;font-size:11px;cursor:pointer;padding:4px;font-family:inherit}
+.lcx:hover{color:#e05575}
 .ribr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;border-bottom:1px dashed var(--line-2)}
 .ribr:last-of-type{border-bottom:none}
 .ribr .ibdot{margin-top:4px;flex:none}
@@ -513,18 +515,37 @@ $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':
 /* ---------- data ---------- */
 const SER={}; B.series.forEach((s,i)=>SER[s[0]]={color:['#803dff','#3b82f6','#22d3ee','#fb7185','#f5a524'][i%5],pillar:s[3]||B.pillars[0][0]});
 const STATUS={
-  'Idea':{bg:'rgba(59,130,246,.1)',c:'#3b82f6',solid:'#93a5c4'},
-  'Planned':{bg:'rgba(128,61,255,.1)',c:'#803dff',solid:'#3b82f6'},
-  'Draft':{bg:'rgba(245,165,36,.16)',c:'#b57708',solid:'#f5a524'},
   'In Progress':{bg:'rgba(245,165,36,.16)',c:'#b57708',solid:'#f5a524'},
   'Ready for Review':{bg:'rgba(251,113,133,.13)',c:'#e05575',solid:'#fb7185'},
   'Approved':{bg:'rgba(34,211,238,.15)',c:'#0e7f95',solid:'#0891b2'},
   'Scheduled':{bg:'rgba(32,184,120,.12)',c:'#178a5a',solid:'#803dff'},
   'Published':{bg:'rgba(15,23,42,.08)',c:'#54607a',solid:'#20b878'},
 };
+const STATUS_MIGRATE={'Idea':'In Progress','Planned':'Scheduled','Draft':'In Progress'};
 const CAMPN=(B.name||'Brand')+' Point-of-View Campaign';
-const FMT={'Carousel':'#8b5cf6','Short Video':'#ec4899','Text Post':'#64748b','Graphic':'#0891b2','Reel':'#fb7185','Email':'#f5a524','Video':'#3b82f6','Article':'#0f766e'};
+const FMT={'Carousel':'#8b5cf6','Static':'#3b82f6','Reel':'#ec4899','Article':'#0f766e','Email':'#f5a524'};
+const FMT_MIGRATE={'Short Video':'Reel','Text Post':'Static','Graphic':'Static','Video':'Reel'};
 function fmtColor(f){ return FMT[f]||'#64748b'; }
+const CLKEY='threadline.customLabels';
+let CL=(function(){ try{ return JSON.parse(localStorage.getItem(CLKEY))||{}; }catch(e){ return {}; } })();
+CL.status=CL.status||[]; CL.fmt=CL.fmt||[];
+CL.status.forEach(l=>{ if(!STATUS[l.name]) STATUS[l.name]={bg:'rgba(128,61,255,.1)',c:l.color,solid:l.color}; });
+CL.fmt.forEach(l=>{ if(!FMT[l.name]) FMT[l.name]=l.color; });
+function saveCL(){ try{ localStorage.setItem(CLKEY,JSON.stringify(CL)); }catch(e){} }
+function addLabel(cat){
+  const n=(prompt('Name the new '+(cat==='status'?'status':'format')+' label:')||'').trim(); if(!n) return;
+  if((cat==='status'&&STATUS[n])||(cat==='fmt'&&FMT[n])){ toast('“'+n+'” already exists'); return; }
+  const color=PALETTE[(CL[cat].length+4)%PALETTE.length];
+  CL[cat].push({name:n,color:color}); saveCL();
+  if(cat==='status') STATUS[n]={bg:'rgba(128,61,255,.1)',c:color,solid:color}; else FMT[n]=color;
+  renderLC(); render(); toast('Label added — recolor it below any time');
+}
+function delLabel(cat,name){
+  CL[cat]=CL[cat].filter(l=>l.name!==name); saveCL();
+  if(cat==='status') delete STATUS[name]; else delete FMT[name];
+  if(LC[cat]) delete LC[cat][name];
+  renderLC(); render();
+}
 const LCKEY='threadline.labelColors';
 let LC=(function(){ try{ return JSON.parse(localStorage.getItem(LCKEY))||{}; }catch(e){ return {}; } })();
 LC.status=LC.status||{}; LC.series=LC.series||{}; LC.fmt=LC.fmt||{};
@@ -541,11 +562,15 @@ function renderLC(){
   const el=document.getElementById('lcwrap'); if(!el) return;
   const dots=(cat,key,cur,pal)=>(pal||PALETTE).map(c=>`<span class="lcd${cur===c?' on':''}" style="background:${c}" onclick="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}','${c}')" title="${c}"></span>`).join('')
     +`<label class="lcd custom" title="Pick any color"><input type="color" value="${cur&&/^#/.test(cur)?cur:'#803dff'}" onchange="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}',this.value)">＋</label>`;
+  const isCustom=(cat,name)=>CL[cat]&&CL[cat].some(l=>l.name===name);
+  const delbtn=(cat,name)=>isCustom(cat,name)?`<button class="lcx" title="Remove this label" onclick="delLabel('${cat}','${name.replace(/'/g,"\\'")}')">✕</button>`:'';
   el.innerHTML=
     `<div class="lcgrp">Status</div>`+
-    Object.keys(STATUS).map(st=>`<div class="lcrow"><span class="lcchip" style="background:${STATUS[st].solid}">${st}</span><span class="lcs">${dots('status',st,STATUS[st].solid)}</span></div>`).join('')+
+    Object.keys(STATUS).map(st=>`<div class="lcrow"><span class="lcchip" style="background:${STATUS[st].solid}">${st}</span><span class="lcs">${dots('status',st,STATUS[st].solid)}</span>${delbtn('status',st)}</div>`).join('')+
+    `<button class="addinline" onclick="addLabel('status')">＋ Add status label</button>`+
     `<div class="lcgrp">Format</div>`+
-    Object.keys(FMT).map(f=>`<div class="lcrow"><span class="lcchip" style="background:${FMT[f]}">${f}</span><span class="lcs">${dots('fmt',f,FMT[f])}</span></div>`).join('')+
+    Object.keys(FMT).map(f=>`<div class="lcrow"><span class="lcchip" style="background:${FMT[f]}">${f}</span><span class="lcs">${dots('fmt',f,FMT[f])}</span>${delbtn('fmt',f)}</div>`).join('')+
+    `<button class="addinline" onclick="addLabel('fmt')">＋ Add format label</button>`+
     `<div class="lcgrp">Series</div>`+
     Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span><span class="lcs">${dots('series',sn,SER[sn].color,PALETTE_B)}</span></div>`).join('')+
     `<div class="lcgrp">Campaigns</div>
@@ -635,7 +660,7 @@ function openWork(kind,name){
   ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
   document.body.appendChild(ov);
 }
-function statusPill(st){ const s=STATUS[st]||STATUS.Idea; return `<span class="spill" style="background:${s.solid||s.c};color:#fff">${st}</span>`; }
+function statusPill(st){ const s=STATUS[st]||STATUS['In Progress']; return `<span class="spill" style="background:${s.solid||s.c};color:#fff">${st}</span>`; }
 function chanIcons(ch){ return `<div class="chans">${(ch||[]).map(c=>`<span class="chip-ch ch-${c}">${c}</span>`).join('')}</div>`; }
 
 /* ---------- view switcher ---------- */
@@ -656,7 +681,7 @@ function commitAddRow(g,fromBlur){
   const ai=document.getElementById('addinput'); if(!ai) return;
   const v=ai.value.trim();
   if(!v){ if(fromBlur){ addTarget=null; render(); } return; }
-  const nu={id:NEXT_ID(),t:v,m:7,d:0,w:'',status:'Idea',fmt:'Carousel',ser:S0,ch:['in'],asset:'',note:''};
+  const nu={id:NEXT_ID(),t:v,m:7,d:0,w:'',status:'In Progress',fmt:'Carousel',ser:S0,ch:['in'],asset:'',note:''};
   if(groupBy==='month'){ nu.m=/August/.test(g)?8:7; }
   else if(groupBy==='series'&&SER[g]) nu.ser=g;
   else if(groupBy==='campaign'&&g!=='Not in a campaign') nu.camp=g;
@@ -738,7 +763,7 @@ function openRow(x){
     </div></td><td></td></tr>`;
 }
 function fillSlot(id,src){ const x=ITEMS.find(i=>i.id===id); if(!x) return;
-  x.open=0; x.t='My weekly reset ritual'; x.status='Planned'; x.fmt='Carousel'; x.ch=['in','ig']; x.asset='🌀'; x.note='From '+x.ser+' reserve.';
+  x.open=0; x.t='My weekly reset ritual'; x.status='Scheduled'; x.fmt='Carousel'; x.ch=['in','ig']; x.asset='🌀'; x.note='From '+x.ser+' reserve.';
   render(); toast('Filled from reserve — “My weekly reset ritual” placed in the '+x.ser+' slot'); }
 function skipSlot(id){ const x=ITEMS.find(i=>i.id===id); x.arch=1; render(); toastUndo('Occurrence skipped — series cadence continues',()=>{ x.arch=0; render(); }); }
 function addIdea(){ const t=prompt('New content idea:'); if(!t) return;
@@ -754,14 +779,14 @@ function bulkDelete(){ const n=checks.size; if(!n) return; const gone=ITEMS.filt
 function bulkArchive(){ const ids=[...checks]; ids.forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.arch=1; }); checks.clear(); render(); toastUndo(ids.length+' items archived',()=>{ ids.forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.arch=0; }); render(); }); }
 
 /* ---------- KANBAN ---------- */
-const KCOLS=['Planned','In Progress','Ready for Review','Approved','Scheduled','Published'];
+function KCOLS(){ return Object.keys(STATUS); }
 const KFILTERS=[['all','All content'],['mine','My work'],['review','Needs my review'],['ready','Ready to schedule']];
 function kanbanHTML(){
   const items=ITEMS.filter(x=>!x.arch&&!x.open&&(kfilter==='all'||kfilter==='mine'||(kfilter==='review'&&x.status==='Ready for Review')||(kfilter==='ready'&&x.status==='Approved')));
   return `<div class="kviews">${KFILTERS.map(([k,l])=>`<button class="kv${kfilter===k?' on':''}" onclick="kfilter='${k}';render()">${l}</button>`).join('')}</div>
-  <div class="board">${KCOLS.map(col=>{
-    const cards=items.filter(x=>(x.status===col)||(col==='In Progress'&&x.status==='Draft'));
-    const slots=(col==='Planned'&&kfilter==='all')?ITEMS.filter(x=>x.open&&!x.arch):[];
+  <div class="board">${KCOLS().map(col=>{
+    const cards=items.filter(x=>x.status===col);
+    const slots=(col==='In Progress'&&kfilter==='all')?ITEMS.filter(x=>x.open&&!x.arch):[];
     return `<div class="kcol" data-col="${col}" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="kdrop(event,'${col}')">
       <h6>${col}<span class="kn">${cards.length}</span></h6>
       ${cards.map(x=>`<div class="kcard" draggable="true" ondragstart="kdrag(event,${x.id})" ondragend="this.classList.remove('dragging')" onclick="openWs(${x.id})">
@@ -820,7 +845,7 @@ function dateMenu(e,id){ menuAt(e,[
   ['🔁 Reuse post at a later date',()=>reuseLater(id),'Duplicates the post — adjust, then reschedule'],
   ['📲 Reuse post on a different platform',()=>reusePlatform(id),'Duplicates for a new channel — tailor as needed'],
 ]); }
-function dupOf(src){ return Object.assign({},src,{id:NEXT_ID(),open:0,arch:0,cm:0,status:'Planned'}); }
+function dupOf(src){ return Object.assign({},src,{id:NEXT_ID(),open:0,arch:0,cm:0,status:'In Progress'}); }
 function reuseLater(id){ const src=ITEMS.find(i=>i.id===id); if(!src) return;
   const dup=dupOf(src); dup.m=8; dup.d=Math.min(src.d||5,28); dup.w='Wed, Aug '+dup.d; dup.note='Reused from “'+src.t.slice(0,26)+'…” — adjust & reschedule.';
   ITEMS.push(dup); render(); openWs(dup.id); toast('Post duplicated for a later date — linked to the original'); }
@@ -905,7 +930,7 @@ function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
     <div class="sparkline">⚡ <span>Original Spark preserved — <b>view in Idea Bank</b></span></div>
     <div class="dgrid" style="margin-top:14px">
       <div class="df"><label>Status</label><select id="ws-st">${Object.keys(STATUS).map(s=>`<option${s===x.status?' selected':''}>${s}</option>`).join('')}</select></div>
-      <div class="df"><label>Format</label><select id="ws-f">${['Carousel','Short Video','Text Post','Graphic','Reel','Email','Video','Article'].map(f=>`<option${f===x.fmt?' selected':''}>${f}</option>`).join('')}</select></div>
+      <div class="df"><label>Format</label><select id="ws-f">${Object.keys(FMT).map(f=>`<option${f===x.fmt?' selected':''}>${f}</option>`).join('')}</select></div>
       <div class="df"><label>Series</label><select id="ws-s">${B.series.map(s=>`<option${s[0]===x.ser?' selected':''}>${s[0]}</option>`).join('')}</select></div>
       <div class="df"><label>Post date</label><input id="ws-w" value="${esc(x.w||'')}" placeholder="e.g. Wed, Jul 22"></div>
     </div>
@@ -953,8 +978,8 @@ const AF=[
 function openAutofill(){ $('#afList').innerHTML=AF.map(a=>`<div class="sug"><div class="st2">${esc(a.t)}</div><div class="sm2">Format: Carousel · Channels: LinkedIn + Instagram</div><span class="sslot">→ ${a.slot}</span><div class="swhy">${a.why}</div></div>`).join(''); $('#afOverlay').classList.add('on'); }
 function closeAutofill(){ $('#afOverlay').classList.remove('on'); }
 function approveAutofill(){ closeAutofill();
-  const slot=ITEMS.find(x=>x.open&&!x.arch); if(slot){ slot.open=0; slot.t=AF[1].t; slot.status='Planned'; slot.ch=['in','ig']; slot.asset='❓'; slot.note='Auto-filled · approved by you.'; }
-  ITEMS.push({id:NEXT_ID(),t:AF[0].t,m:7,d:15,w:'Wed, Jul 15',status:'Planned',fmt:'Carousel',ser:S0,ch:['in','ig'],asset:'✦',note:'Auto-filled · approved by you.'});
+  const slot=ITEMS.find(x=>x.open&&!x.arch); if(slot){ slot.open=0; slot.t=AF[1].t; slot.status='Scheduled'; slot.ch=['in','ig']; slot.asset='❓'; slot.note='Auto-filled · approved by you.'; }
+  ITEMS.push({id:NEXT_ID(),t:AF[0].t,m:7,d:15,w:'Wed, Jul 15',status:'Scheduled',fmt:'Carousel',ser:S0,ch:['in','ig'],asset:'✦',note:'Auto-filled · approved by you.'});
   render(); toast('2 placements approved — slots filled, pillar balance preserved');
 }
 
@@ -994,6 +1019,7 @@ let IDEAS=[
   {t:(B.audience.language[0]||'"I just want this to work."').replace(/^"|"$/g,''),sum:'Their exact words \u2014 keep verbatim for hooks and headlines.',type:'Customer Language',pillar:null,when:'1 week ago',fmt:'Text Post'}
 ];
 IDEAS.forEach((x,i)=>{ x.id=1000+i; x.posted=0; });
+ITEMS.forEach(x=>{ if(STATUS_MIGRATE[x.status]) x.status=STATUS_MIGRATE[x.status]; if(FMT_MIGRATE[x.fmt]) x.fmt=FMT_MIGRATE[x.fmt]; });
 let ibPillar='all', ibOpen=false;
 let ibCollapsed=(function(){ try{ return localStorage.getItem('threadline.ibExpanded')!=='1'; }catch(e){ return true; } })();
 function ibToggle(){ ibCollapsed=!ibCollapsed; try{ localStorage.setItem('threadline.ibExpanded',ibCollapsed?'0':'1'); }catch(e){} renderIdeaBank(); }
@@ -1032,8 +1058,8 @@ function renderIdeaBank(){
 function ibBuild(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return; location.href='threadline-build-page.html?seed='+encodeURIComponent(i.t); }
 function ibSchedule(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return;
   const slot=ITEMS.find(x=>x.open&&!x.arch);
-  if(slot){ slot.open=0; slot.t=i.t; slot.status='Planned'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your open '+slot.ser+' slot on '+slot.w); }
-  else { ITEMS.push({id:NEXT_ID(),t:i.t,m:8,d:26,w:'Wed, Aug 26',status:'Planned',fmt:i.fmt||'Carousel',ser:S0,ch:['in'],asset:'\u2726',note:'From Idea Bank.'}); i.posted=1; render(); toast('Scheduled for Wed, Aug 26 \u2014 drag it anywhere in Plan'); } }
+  if(slot){ slot.open=0; slot.t=i.t; slot.status='Scheduled'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your open '+slot.ser+' slot on '+slot.w); }
+  else { ITEMS.push({id:NEXT_ID(),t:i.t,m:8,d:26,w:'Wed, Aug 26',status:'Scheduled',fmt:i.fmt||'Carousel',ser:S0,ch:['in'],asset:'\u2726',note:'From Idea Bank.'}); i.posted=1; render(); toast('Scheduled for Wed, Aug 26 \u2014 drag it anywhere in Plan'); } }
 function ibSpot(slotId){
   let ov=document.getElementById('ibPickOverlay');
   if(ov) ov.remove();
@@ -1056,7 +1082,7 @@ function pickFromBank(slotId,ideaId){
   const i=IDEAS.find(x=>x.id===ideaId); if(!i) return;
   const ov=document.getElementById('ibPickOverlay'); if(ov) ov.remove();
   const slot=slotId?ITEMS.find(x=>x.id===slotId&&x.open&&!x.arch):null;
-  if(slot){ slot.open=0; slot.t=i.t; slot.status='Planned'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your '+slot.ser+' slot on '+slot.w); }
+  if(slot){ slot.open=0; slot.t=i.t; slot.status='Scheduled'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your '+slot.ser+' slot on '+slot.w); }
   else ibSchedule(ideaId);
 }
 
