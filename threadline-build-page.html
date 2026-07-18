@@ -303,6 +303,13 @@ svg.defs{position:absolute;width:0;height:0}
 .spb.pri{border:none;color:#fff;background:linear-gradient(120deg,var(--violet),var(--blue))}
 .spbody{padding:14px 16px;font-size:13px;line-height:1.65;white-space:pre-wrap;color:var(--ink)}
 </style>
+<style>
+/* Create edit pass: one primary path, quiet alternates */
+.quiet2{border:none;background:none;color:var(--muted);font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;padding:6px 2px}
+.quiet2:hover{color:var(--violet)}
+.mode b{font-size:13.5px}
+.mode .mi{display:none}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -330,7 +337,7 @@ svg.defs{position:absolute;width:0;height:0}
         <div class="colmain">
           <div class="hero">
             <div>
-              <h1>Create with Threadline <span>✦</span></h1>
+              <h1>Create with Threadline</h1>
               <p>Your thought partner for content that connects.<br>Tell Threadline what you're working on, and we'll help you uncover ideas, shape angles, and build content that fits your strategy.</p>
             </div>
             <svg class="doodle" viewBox="0 0 220 130" fill="none">
@@ -347,55 +354,58 @@ svg.defs{position:absolute;width:0;height:0}
             </svg>
           </div>
 
-          <div class="panel">
-            <div class="ph"><h3>Start a thought partner session</h3><span class="rec">Recommended</span><button class="recentpill" onclick="openRecent()">🕘 Recent sessions</button></div>
+          <div class="panel" id="tpPanel">
+            <div class="ph"><h3>Start a thought partner session</h3><button class="recentpill" onclick="openRecent()">Recent sessions</button></div>
             <p class="psub">Tell Threadline what's on your mind, and we'll talk it through together.</p>
             <div class="chips" id="starters"></div>
             <div class="inputbox">
               <textarea id="mainInput" placeholder="Type anything... or ask Threadline a question"></textarea>
               <div class="inrow">
-                <button class="tool" onclick="toast('Add context: files, links, transcripts, customer feedback')">📎 Add context</button>
-                <button class="tool" onclick="toast('Voice notes with transcription — prototype')">🎙 Voice</button>
-                <button class="tool sur" onclick="surprise()">Surprise me ✦</button>
+                <button class="tool" onclick="toast('Add context: files, links, transcripts, customer feedback')">Add context</button>
+                <button class="tool" onclick="toast('Voice notes with transcription — prototype')">Voice</button>
+                <button class="tool sur" onclick="surprise()">Surprise me</button>
                 <button class="send" onclick="submitMain()">→</button>
               </div>
             </div>
           </div>
 
-          <div class="panel" style="margin-top:18px">
-            <div class="ph"><h3>The spoke model</h3><span class="rec" style="background:rgba(128,61,255,.1);color:var(--violet)">One idea → five pieces</span></div>
-            <p class="psub">Put one idea in the middle. Threadline spins it into five ready-to-shape pieces — a post, a caption, a script, an email, and the long-form version.</p>
-            <div class="spokein">
-              <textarea id="spokeIdea" placeholder="The idea in the middle — one sentence is enough"></textarea>
-              <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin it →</button>
+          <div id="createCore">
+            <div style="margin-top:26px"><h3 style="font-size:17px">Other ways to create</h3><p class="psub">Different starting points — the session above is the main path.</p></div>
+            <div class="modes" id="modes"></div>
+            <div class="panel" id="spokepanel" style="margin-top:14px;display:none">
+              <div class="ph"><h3>The spoke model</h3><span class="rec" style="background:rgba(128,61,255,.1);color:var(--violet)">One idea → five pieces</span></div>
+              <p class="psub">Put one idea in the middle. Threadline spins it into five ready-to-shape pieces — a post, a caption, a script, an email, and the long-form version.</p>
+              <div class="spokein">
+                <textarea id="spokeIdea" placeholder="The idea in the middle — one sentence is enough"></textarea>
+                <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin it →</button>
+              </div>
+              <div class="spwrap" id="spwrap" style="display:none">
+                <div class="sprail" id="sprail"></div>
+                <div class="spdetail" id="spdetail"></div>
+              </div>
             </div>
-            <div class="spwrap" id="spwrap" style="display:none">
-              <div class="sprail" id="sprail"></div>
-              <div class="spdetail" id="spdetail"></div>
-            </div>
+            <div style="margin-top:20px"><button class="quiet2" onclick="showTrends(true)">Trends &amp; Production →</button></div>
           </div>
 
-          <div style="margin-top:26px"><h3 style="font-size:17px">Other ways to create</h3><p class="psub">Different starting points for different needs.</p></div>
-          <div class="modes" id="modes"></div>
-
-
-
-          <div style="margin-top:26px"><h3 style="font-size:17px">🎬 Viral hooks for Reels</h3><p class="psub">Proven opening lines — pick one and Threadline writes the reel with you.</p></div>
-          <div class="panel">
-            <div class="hooktabs" id="hooktabs"></div>
-            <div id="hooklist"></div>
-            <div class="broll">
-              <div class="bh"><b>📹 B-roll to film this week</b><span>Batch 10–15 second vertical clips in natural light — no talking needed. One filming session covers a month of reels.</span></div>
-              <div class="brgrid" id="brgrid"></div>
-              <div style="margin-top:11px"><button class="use" onclick="toast('B-roll shot list saved to Idea Bank — check it off as you film')">Save shot list to Idea Bank</button></div>
+          <div id="trendsView" style="display:none">
+            <div style="margin-top:4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><button class="back" onclick="showTrends(false)">← Back to Create</button><h3 style="font-size:17px;margin:0">Trends &amp; Production</h3></div>
+            <p class="psub">Research and filming support, kept out of the way so Create stays calm.</p>
+            <div style="margin-top:18px"><h3 style="font-size:15.5px">Viral hooks for Reels</h3><p class="psub">Proven opening lines — pick one and Threadline writes the reel with you.</p></div>
+            <div class="panel">
+              <div class="hooktabs" id="hooktabs"></div>
+              <div id="hooklist"></div>
+              <div class="broll">
+                <div class="bh"><b>B-roll to film this week</b><span>Batch 10–15 second vertical clips in natural light — no talking needed. One filming session covers a month of reels.</span></div>
+                <div class="brgrid" id="brgrid"></div>
+                <div style="margin-top:11px"><button class="use" onclick="toast('B-roll shot list saved to Idea Bank — check it off as you film')">Save shot list to Idea Bank</button></div>
+              </div>
             </div>
-          </div>
-
-          <div style="margin-top:26px"><h3 style="font-size:17px">📈 Trending in your category</h3><p class="psub" id="trendsub">Market research for your niche — what\u2019s working on Instagram Reels &amp; TikTok right now.</p></div>
-          <div class="panel">
-            <div class="trhead"><span class="who" id="trwho"></span><button class="trbtn" id="trbtn" onclick="refreshTrends()">✦ Research my niche</button></div>
-            <div class="trgrid" id="trgrid"></div>
-            <p class="trnote">✦ Threadline researches content patterns for your category. Live platform trend data — audio charts, specific sounds — unlocks when you connect your accounts in Analytics.</p>
+            <div style="margin-top:24px"><h3 style="font-size:15.5px">Trending in your category</h3><p class="psub" id="trendsub">Market research for your niche — what\u2019s working on Instagram Reels &amp; TikTok right now.</p></div>
+            <div class="panel">
+              <div class="trhead"><span class="who" id="trwho"></span><button class="trbtn" id="trbtn" onclick="refreshTrends()">Research my niche</button></div>
+              <div class="trgrid" id="trgrid"></div>
+              <p class="trnote">Threadline researches content patterns for your category. Live platform trend data — audio charts, specific sounds — unlocks when you connect your accounts in Analytics.</p>
+            </div>
           </div>
         </div>
 
@@ -456,7 +466,7 @@ svg.defs{position:absolute;width:0;height:0}
   <div class="df"><label>Title</label><input id="d-title"></div>
   <div class="df"><label>Series / pillar</label><select id="d-series"></select></div>
   <div class="df"><label>Placement</label><div class="radio" id="d-place"></div></div>
-  <div class="df"><label>Format</label><select id="d-format"><option>LinkedIn post</option><option>Carousel</option><option>Reel</option><option>Story</option><option>Email</option></select></div>
+  <div class="df"><label>Format</label><select id="d-format"><option>Carousel</option><option>Static</option><option>Reel</option><option>Article</option><option>Email</option></select></div>
   <div class="togglerow"><input type="checkbox" id="d-draft" checked> Create draft now</div>
   <div class="dacts"><button class="dbtn ghost" onclick="closeDrawer()">Cancel</button><div class="grow"></div><button class="dbtn pri" onclick="confirmPlan()">Post to Plan</button></div>
 </div>
@@ -493,8 +503,21 @@ const MODES=[
   {k:'sharpen',ic:'🎯',bg:'rgba(251,113,133,.12)',t:'Message Sharpening',d:'Make your point of view stronger.'},
   {k:'repurpose',ic:'📄',bg:'rgba(245,165,36,.14)',t:'Content Repurposer',d:'One piece \u2192 many formats.'},
 ];
-$('#modes').innerHTML=MODES.map(m=>`<div class="mode" onclick="startSession({mode:'${m.k}'})"><div class="mi" style="background:${m.bg}">${m.ic}</div><b>${m.t}</b><p>${m.d}</p></div>`).join('')
- +`<div class="mode ctx" onclick="openCtx()"><div class="mi" style="background:rgba(34,211,238,.12)">\u{1F4CE}</div><b>From your content</b><p>Upload a file, video, or transcript \u2014 or paste an idea.</p></div>`;
+$('#modes').innerHTML=`<div class="mode" onclick="toggleSpoke()"><b>The spoke model</b><p>One idea \u2192 five pieces: post, caption, script, email, long-form.</p></div>`
+ +MODES.map(m=>`<div class="mode" onclick="startSession({mode:'${m.k}'})"><b>${m.t}</b><p>${m.d}</p></div>`).join('')
+ +`<div class="mode ctx" onclick="openCtx()"><b>From your content</b><p>Upload a file, video, or transcript \u2014 or paste an idea.</p></div>`;
+function toggleSpoke(){
+  const p=$('#spokepanel'); const show=p.style.display==='none';
+  p.style.display=show?'':'none';
+  if(show){ p.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>$('#spokeIdea').focus(),350); }
+}
+function showTrends(on){
+  ['tpPanel','createCore'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=on?'none':''; });
+  const hero=document.querySelector('.hero'); if(hero) hero.style.display=on?'none':'';
+  const rail=document.querySelector('#landingView .rail'); if(rail) rail.style.display=on?'none':'';
+  document.getElementById('trendsView').style.display=on?'':'none';
+  window.scrollTo({top:0,behavior:'instant'});
+}
 
 const RECENT=[
   {ic:'💬',bg:'rgba(128,61,255,.1)',t:'Overcoming objections in sales conversations',w:'Today at 9:41 AM'},
