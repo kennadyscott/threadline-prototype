@@ -321,6 +321,15 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .lcd{width:18px;height:18px;border-radius:6px;cursor:pointer;border:2px solid transparent;box-sizing:border-box}
 .lcd:hover{transform:scale(1.15)}
 .lcd.on{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--surface)}
+.mheadrow{display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--surface);z-index:5;padding:2px 0 8px;margin-top:-4px}
+.dbtns{display:flex;align-items:center;gap:10px;margin-top:16px}
+.dbtns .grow,.mheadrow .grow{flex:1}
+.dbtn{border-radius:11px;padding:10px 18px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;border:1.5px solid var(--line);background:var(--surface);color:var(--muted)}
+.dbtn.ghost:hover{color:var(--ink);border-color:var(--faint)}
+.dbtn.pri{border:none;color:#fff;background:linear-gradient(120deg,var(--violet),var(--blue))}
+.dbtn.pri:hover{filter:brightness(1.06)}
+.xbtn{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;cursor:pointer;font-weight:800;font-size:13px;color:var(--muted);display:inline-grid;place-items:center;flex:none}
+.xbtn:hover{color:var(--ink);border-color:var(--faint)}
 .ribr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;border-bottom:1px dashed var(--line-2)}
 .ribr:last-of-type{border-bottom:none}
 .ribr .ibdot{margin-top:4px;flex:none}
@@ -432,8 +441,8 @@ svg.defs{position:absolute;width:0;height:0}
 </div></div>
 
 <div class="overlay" id="rulesOverlay"><div class="modal" style="max-height:84vh;overflow-y:auto">
-  <h3>⚙ Planning rules</h3>
-  <p class="msub">How Threadline plans — and how your team reviews.</p>
+  <div class="mheadrow"><h3 style="margin:0">⚙ Settings</h3><div class="grow"></div><button class="dbtn pri" style="padding:8px 18px" onclick="saveRules()">Save</button><button class="xbtn" onclick="closeRules()" title="Close without saving">✕</button></div>
+  <p class="msub">How Threadline plans — views, rules, and label colors.</p>
   <div class="rulesec"><h6>Team & reviews</h6>
     <label class="ckrow"><input type="checkbox" id="r-required"><b>Require review before posts can be scheduled<span>Uncheck if you're a single person running your own account — you'll mark posts ready yourself.</span></b></label>
     <div class="mrow" style="margin-top:10px">
@@ -502,6 +511,7 @@ const LCKEY='threadline.labelColors';
 let LC=(function(){ try{ return JSON.parse(localStorage.getItem(LCKEY))||{}; }catch(e){ return {}; } })();
 LC.status=LC.status||{}; LC.series=LC.series||{}; LC.fmt=LC.fmt||{};
 const PALETTE=['#803dff','#3b82f6','#0891b2','#20b878','#f5a524','#fb7185','#ec4899','#64748b','#0f172a'];
+const PALETTE_B=['#6d28d9','#0ea5e9','#14b8a6','#84cc16','#f97316','#e11d48','#a855f7','#8d7b68','#1e3a5f'];
 function applyLabelColors(){
   Object.entries(LC.status).forEach(([k,v])=>{ if(STATUS[k]) STATUS[k].solid=v; });
   Object.entries(LC.series).forEach(([k,v])=>{ if(SER[k]) SER[k].color=v; });
@@ -511,16 +521,16 @@ applyLabelColors();
 function campColor(){ return LC.campaign||'#803dff'; }
 function renderLC(){
   const el=document.getElementById('lcwrap'); if(!el) return;
-  const dots=(cat,key,cur)=>PALETTE.map(c=>`<span class="lcd${cur===c?' on':''}" style="background:${c}" onclick="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}','${c}')" title="${c}"></span>`).join('');
+  const dots=(cat,key,cur,pal)=>(pal||PALETTE).map(c=>`<span class="lcd${cur===c?' on':''}" style="background:${c}" onclick="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}','${c}')" title="${c}"></span>`).join('');
   el.innerHTML=
     `<div class="lcgrp">Status</div>`+
     Object.keys(STATUS).map(st=>`<div class="lcrow"><span class="lcchip" style="background:${STATUS[st].solid}">${st}</span><span class="lcs">${dots('status',st,STATUS[st].solid)}</span></div>`).join('')+
     `<div class="lcgrp">Format</div>`+
     Object.keys(FMT).map(f=>`<div class="lcrow"><span class="lcchip" style="background:${FMT[f]}">${f}</span><span class="lcs">${dots('fmt',f,FMT[f])}</span></div>`).join('')+
     `<div class="lcgrp">Series</div>`+
-    Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span><span class="lcs">${dots('series',sn,SER[sn].color)}</span></div>`).join('')+
+    Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span><span class="lcs">${dots('series',sn,SER[sn].color,PALETTE_B)}</span></div>`).join('')+
     `<div class="lcgrp">Campaigns</div>
-     <div class="lcrow"><span class="lcchip" style="background:${campColor()}">Campaign</span><span class="lcs">${dots('campaign','campaign',campColor())}</span></div>`;
+     <div class="lcrow"><span class="lcchip" style="background:${campColor()}">Campaign</span><span class="lcs">${dots('campaign','campaign',campColor(),PALETTE_B)}</span></div>`;
 }
 function setLabelColor(cat,key,c){
   if(cat==='campaign') LC.campaign=c; else { LC[cat]=LC[cat]||{}; LC[cat][key]=c; }
