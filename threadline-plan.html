@@ -321,6 +321,11 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .lcd{width:18px;height:18px;border-radius:6px;cursor:pointer;border:2px solid transparent;box-sizing:border-box}
 .lcd:hover{transform:scale(1.15)}
 .lcd.on{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--surface)}
+.ribr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;border-bottom:1px dashed var(--line-2)}
+.ribr:last-of-type{border-bottom:none}
+.ribr .ibdot{margin-top:4px;flex:none}
+.ribt{font-size:12px;font-weight:600;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ribr:hover .ribt{color:var(--ink)}
 .gearbtn:hover{color:var(--violet);border-color:var(--violet)}
 .serpill.blink{cursor:pointer}
 .serpill.blink:hover{filter:brightness(.92)}
@@ -491,13 +496,16 @@ const STATUS={
   'Published':{bg:'rgba(15,23,42,.08)',c:'#54607a',solid:'#20b878'},
 };
 const CAMPN=(B.name||'Brand')+' Point-of-View Campaign';
+const FMT={'Carousel':'#8b5cf6','Short Video':'#ec4899','Text Post':'#64748b','Graphic':'#0891b2','Reel':'#fb7185','Email':'#f5a524','Video':'#3b82f6'};
+function fmtColor(f){ return FMT[f]||'#64748b'; }
 const LCKEY='threadline.labelColors';
 let LC=(function(){ try{ return JSON.parse(localStorage.getItem(LCKEY))||{}; }catch(e){ return {}; } })();
-LC.status=LC.status||{}; LC.series=LC.series||{};
+LC.status=LC.status||{}; LC.series=LC.series||{}; LC.fmt=LC.fmt||{};
 const PALETTE=['#803dff','#3b82f6','#0891b2','#20b878','#f5a524','#fb7185','#ec4899','#64748b','#0f172a'];
 function applyLabelColors(){
   Object.entries(LC.status).forEach(([k,v])=>{ if(STATUS[k]) STATUS[k].solid=v; });
   Object.entries(LC.series).forEach(([k,v])=>{ if(SER[k]) SER[k].color=v; });
+  Object.entries(LC.fmt).forEach(([k,v])=>{ if(FMT[k]) FMT[k]=v; });
 }
 applyLabelColors();
 function campColor(){ return LC.campaign||'#803dff'; }
@@ -507,13 +515,15 @@ function renderLC(){
   el.innerHTML=
     `<div class="lcgrp">Status</div>`+
     Object.keys(STATUS).map(st=>`<div class="lcrow"><span class="lcchip" style="background:${STATUS[st].solid}">${st}</span><span class="lcs">${dots('status',st,STATUS[st].solid)}</span></div>`).join('')+
+    `<div class="lcgrp">Format</div>`+
+    Object.keys(FMT).map(f=>`<div class="lcrow"><span class="lcchip" style="background:${FMT[f]}">${f}</span><span class="lcs">${dots('fmt',f,FMT[f])}</span></div>`).join('')+
     `<div class="lcgrp">Series</div>`+
     Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span><span class="lcs">${dots('series',sn,SER[sn].color)}</span></div>`).join('')+
     `<div class="lcgrp">Campaigns</div>
      <div class="lcrow"><span class="lcchip" style="background:${campColor()}">Campaign</span><span class="lcs">${dots('campaign','campaign',campColor())}</span></div>`;
 }
 function setLabelColor(cat,key,c){
-  if(cat==='campaign') LC.campaign=c; else LC[cat][key]=c;
+  if(cat==='campaign') LC.campaign=c; else { LC[cat]=LC[cat]||{}; LC[cat][key]=c; }
   try{ localStorage.setItem(LCKEY,JSON.stringify(LC)); }catch(e){}
   applyLabelColors(); render(); if(typeof renderRail==='function') renderRail(); renderLC();
 }
@@ -649,7 +659,7 @@ function itemRow(x){
     <td><span class="ttitle">${esc(x.t)}${x.cm?`<span class="cnote">${x.cm} comment${x.cm>1?'s':''}</span>`:''}</span></td>
     <td class="datecell" style="white-space:nowrap;color:var(--muted);font-weight:700;cursor:pointer" title="Change date · reuse this post" onclick="event.stopPropagation();dateMenu(event,${x.id})">${x.w||'—'} <span style="color:var(--faint);font-size:10px">▾</span></td>
     <td>${statusPill(x.status)}</td>
-    <td style="color:var(--muted);font-weight:600">${x.fmt}</td>
+    <td><span class="spill" style="background:${fmtColor(x.fmt)};color:#fff">${x.fmt}</span></td>
     <td>${belongsPill(x)}</td>
     <td>${chanIcons(x.ch)}</td>
     <td><span class="assetbox${x.asset?' has':''}" style="cursor:pointer" title="${x.asset?'Asset attached — click to view':'Upload or create asset'}" onclick="event.stopPropagation();openAsset(${x.id})">${x.asset?'✓':'＋'}</span></td>
@@ -883,24 +893,22 @@ function approveAutofill(){ closeAutofill();
 }
 
 /* ---------- right rail ---------- */
+function expandBank(){ if(typeof ibCollapsed!=='undefined'&&ibCollapsed) ibToggle(); const b=document.getElementById('ibank'); if(b) b.scrollIntoView({behavior:'smooth',block:'center'}); }
 function renderRail(){
-  const wk=ITEMS.filter(x=>!x.arch&&!x.open&&x.m===7&&x.d>=6&&x.d<=12);
-  const sched=wk.filter(x=>x.status==='Scheduled').length, prog=wk.filter(x=>/Progress|Draft/.test(x.status)).length, plan=wk.filter(x=>x.status==='Planned').length;
   const counts={}; ITEMS.filter(x=>!x.arch&&!x.open&&!x.un).forEach(x=>counts[x.ser]=(counts[x.ser]||0)+1);
   const tot=Object.values(counts).reduce((a,b)=>a+b,0);
   let acc=0; const segs=Object.entries(counts).map(([n,c])=>{ const from=acc/tot*360, to=(acc+c)/tot*360; acc+=c; return `${(SER[n]||{}).color||'#ccc'} ${from}deg ${to}deg`; }).join(', ');
+  const bank=IDEAS.filter(i=>!i.posted);
   $('#rail').innerHTML=`
   <div class="rpanel"><div class="pulse2">
-    <div class="pcol"><h3>This week</h3><p class="rsub">Jul 6 – 12</p>
-      <div class="srow">Scheduled<span class="sv">${sched}</span></div>
-      <div class="srow">In progress<span class="sv">${prog}</span></div>
-      <div class="srow">Planned<span class="sv">${plan}</span></div>
-      <div class="srow">Total<span class="sv">${wk.length}</span></div>
-      <button class="rlink" onclick="setView('calendar')">Open Calendar →</button></div>
     <div class="pcol"><h3>Pillar balance</h3><p class="rsub">This month</p>
       <div class="donut sm" data-n="${tot}" style="background:conic-gradient(${segs})"></div>
       <div class="leg">${Object.entries(counts).map(([n,c])=>`<div class="lr"><span class="ld" style="background:${(SER[n]||{}).color}"></span>${esc(n)}<span class="ln">${c}</span></div>`).join('')}</div>
       <button class="rlink" onclick="location.href='threadline-analytics.html'">Analytics →</button></div>
+    <div class="pcol"><h3>Idea Bank</h3><p class="rsub">${bank.length} unscheduled</p>
+      ${bank.slice(0,4).map(i=>{ const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
+        return `<div class="ribr" onclick="ibSpot()" title="${esc(i.sum||'')} — click to schedule it"><span class="ibdot" style="background:${tm.c}"></span><span class="ribt">${esc(i.t)}</span></div>`; }).join('')||'<div style="font-size:12px;color:var(--faint)">Nothing waiting — nice.</div>'}
+      <button class="rlink" onclick="expandBank()">Open the bank ↓</button></div>
   </div></div>
   `;
 }
