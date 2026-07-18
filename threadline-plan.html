@@ -292,6 +292,12 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .minimenu button:hover{background:var(--surface-2)}
 .minimenu button span{display:block;font-size:11px;color:var(--faint);font-weight:600}
 .rulesec{border:1px solid var(--line-2);border-radius:13px;padding:13px 15px;margin-bottom:14px}
+.gearbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:15px;color:var(--muted);display:inline-grid;place-items:center}
+.gearbtn:hover{color:var(--violet);border-color:var(--violet)}
+.serpill.blink{cursor:pointer}
+.serpill.blink:hover{filter:brightness(.92)}
+.serpill b{font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+.wplat{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:12px}
 .rulesec h6{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
 .rulesec label.ckrow{display:flex;align-items:flex-start;gap:10px;font-weight:700;font-size:13.5px;padding:4px 0;cursor:pointer}
 .rulesec label.ckrow input{accent-color:var(--violet);width:17px;height:17px;margin-top:2px}
@@ -357,7 +363,7 @@ svg.defs{position:absolute;width:0;height:0}
 
     <div class="content">
       <div class="colmain">
-        <div class="greet"><h1>Plan <span style="font-size:20px">📅</span></h1><p>Organize your content system by rhythm, status, and schedule.</p></div>
+        <div class="greet"><h1 style="display:flex;align-items:center;gap:10px">Plan <button class="gearbtn" onclick="openRules()" title="Planning rules — reviews, cadence, scheduling defaults">⚙</button></h1><p>Organize your content system by rhythm, status, and schedule.</p></div>
         <div id="welcome"></div>
         <div class="views" id="views"></div>
         <div class="cbar">
@@ -452,18 +458,19 @@ const STATUS={
   'Scheduled':{bg:'rgba(32,184,120,.12)',c:'#178a5a'},
   'Published':{bg:'rgba(15,23,42,.08)',c:'#54607a'},
 };
+const CAMPN=(B.name||'Brand')+' Point-of-View Campaign';
 const S0=B.series[0]?B.series[0][0]:'Series', S1=B.series[1]?B.series[1][0]:'Series', S2=B.series[2]?B.series[2][0]:'Series', S3=B.series[3]?B.series[3][0]:S0, S4=B.series[4]?B.series[4][0]:S1;
 const Q=B.audience.questions;
 let ITEMS=[
   // July
-  {t:'The moment our client saw the biggest shift',m:7,d:8,w:'Wed, Jul 8',status:'Scheduled',fmt:'Carousel',ser:S2,ch:['in','ig'],asset:'📈',note:'Include metrics + quote.'},
+  {t:'The moment our client saw the biggest shift',m:7,d:8,w:'Wed, Jul 8',status:'Scheduled',fmt:'Carousel',ser:S2,camp:CAMPN,ch:['in','ig'],asset:'📈',note:'Include metrics + quote.'},
   {t:'Myth: You need to be everywhere',m:7,d:15,w:'Wed, Jul 15',status:'Scheduled',fmt:'Short Video',ser:S3,ch:['tt','ig'],asset:'🎥',note:'Myth vs reality format.'},
   {t:strip(B.messaging.beliefs).split('.')[0],m:7,d:16,w:'Thu, Jul 16',status:'Ready for Review',fmt:'Text Post',ser:S0,ch:['in'],asset:'📝',note:'Waiting on your review.',cm:1},
   {t:'3 beliefs I’ve outgrown',m:7,d:22,w:'Wed, Jul 22',status:'In Progress',fmt:'Carousel',ser:S0,ch:['in','ig'],asset:'📓',note:'Personal lessons.'},
   {t:'OPEN',open:1,m:7,d:24,w:'Fri, Jul 24',ser:S1,fmt:'Carousel or short video'},
   {t:'Refill your content cup',m:7,d:29,w:'Wed, Jul 29',status:'Planned',fmt:'Short Video',ser:S4,ch:['ig','tt','fb'],asset:'☕',note:'Team selfie optional.'},
   // August
-  {t:'Client win: results jumped 38%',m:8,d:5,w:'Wed, Aug 5',status:'Planned',fmt:'Carousel',ser:S2,ch:['in','ig'],asset:'📊',note:'Before/after graphics.'},
+  {t:'Client win: results jumped 38%',m:8,d:5,w:'Wed, Aug 5',status:'Planned',fmt:'Carousel',ser:S2,camp:CAMPN,ch:['in','ig'],asset:'📊',note:'Before/after graphics.'},
   {t:'What I wish I knew sooner',m:8,d:12,w:'Wed, Aug 12',status:'Draft',fmt:'Short Video',ser:S0,ch:['tt','ig'],asset:'🗣',note:'Talking head format.'},
   {t:Q[0]||'The question they always ask',m:8,d:19,w:'Wed, Aug 19',status:'Planned',fmt:'Graphic',ser:S3,ch:['ig','fb'],asset:'❓',note:'Answer it straight.'},
   {t:'The hidden cost of being too clever',m:8,d:26,w:'Wed, Aug 26',status:'Idea',fmt:'Carousel',ser:S0,ch:['in','ig'],asset:'🧠',note:'Clarity over cleverness.'},
@@ -478,6 +485,50 @@ let checks=new Set(), kfilter='all';
 
 /* ---------- shared ---------- */
 function serPill(name){ const s=SER[name]||{color:'#803dff'}; return `<span class="serpill" style="background:${s.color}1a;color:${s.color}">${esc(name)}</span>`; }
+function belongsPill(x){
+  if(x.camp) return `<span class="serpill blink" style="background:rgba(128,61,255,.1);color:var(--violet)" title="Part of a campaign — click for the full brief" onclick="event.stopPropagation();openWork('camp','${esc(x.camp).replace(/'/g,"\\'")}')"><b>Campaign</b> · ${esc(x.camp.replace(/ Campaign$/,''))}</span>`;
+  if(x.ser&&!x.un){ const c=(SER[x.ser]||{}).color||'#803dff';
+    return `<span class="serpill blink" style="background:${c}1a;color:${c}" title="Part of a series — click for the series view" onclick="event.stopPropagation();openWork('ser','${esc(x.ser).replace(/'/g,"\\'")}')"><b>Series</b> · ${esc(x.ser)}</span>`; }
+  return `<span class="serpill" style="background:var(--surface-2);color:var(--faint)">Post</span>`;
+}
+function hubData(){ try{ return JSON.parse(localStorage.getItem('threadline.hub')||'null'); }catch(e){ return null; } }
+function openWork(kind,name){
+  let ov=document.getElementById('workOverlay'); if(ov) ov.remove();
+  const hub=hubData(); let body='', title='', eyebrow='';
+  const inPlan=ITEMS.filter(x=>!x.arch&&!x.open&&(kind==='camp'?x.camp===name:x.ser===name));
+  const planRows=inPlan.length?`<div class="rulesec"><h6>In this plan</h6>${inPlan.map(x=>`<div class="rule" style="cursor:pointer" onclick="document.getElementById('workOverlay').remove();openWs(${x.id})">${esc(x.t)}<b style="font-weight:700;color:var(--faint)">${x.w||''}</b></div>`).join('')}</div>`:'';
+  if(kind==='camp'){
+    eyebrow='Full campaign'; title=name;
+    const c=hub&&(hub.campaigns||[]).find(k=>k.name===name);
+    if(c){
+      const done=c.assets.filter(a=>a.status==='approved').length;
+      body=`<p class="wplat">${esc(c.platform)}</p>
+      <div class="rulesec"><h6>Primary goal</h6><div style="font-size:13px;font-weight:700">${esc(c.strategy.primary)}</div></div>
+      <div class="rulesec"><h6>Message hierarchy</h6>${['emotional','educational','product','brand'].map(k=>`<div class="rule">${k[0].toUpperCase()+k.slice(1)}<b style="font-weight:600;text-align:right;max-width:60%">${esc(c.messages[k]||'')}</b></div>`).join('')}</div>
+      <div class="rulesec"><h6>Rollout</h6>${c.structure.map((pp,i)=>`<div class="rule">${i+1}. ${esc(pp.phase)}<b></b></div>`).join('')}</div>
+      <div class="rulesec"><h6>Assets · ${done}/${c.assets.length} approved</h6>${c.assets.map(a=>`<div class="rule">${esc(a.title)}<b style="color:${a.status==='approved'?'var(--green)':a.status==='revise'?'#b57708':'var(--faint)'}">${a.status==='approved'?'Approved':a.status==='revise'?'Revise':'Pending'}</b></div>`).join('')}</div>`;
+    } else {
+      body=`<p class="wplat">The full campaign brief lives in your content hub.</p>`;
+    }
+    body+=planRows;
+  } else {
+    eyebrow='Series'; title=name;
+    const m=hub&&(hub.minis||[]).find(k=>k.name===name);
+    if(m) body=`<p class="wplat">${esc(m.premise)}</p>
+      <div class="rulesec"><h6>The posts in this series</h6>${m.episodes.map((e,i)=>`<div class="rule">Post ${i+1} — ${esc(e.t)}<b></b></div>`).join('')}</div>`;
+    else body=`<p class="wplat">A recurring format — every ${esc(name)} post follows the same recognizable angle.</p>`;
+    body+=planRows;
+  }
+  ov=document.createElement('div'); ov.id='workOverlay'; ov.className='overlay on';
+  ov.innerHTML=`<div class="modal" style="max-width:600px;max-height:82vh;overflow-y:auto">
+    <div style="font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--violet)">${eyebrow}</div>
+    <h3 style="margin:2px 0 10px">${esc(title)}</h3>
+    ${body}
+    <div class="dbtns" style="margin-top:14px"><button class="dbtn ghost" onclick="document.getElementById('workOverlay').remove()">Close</button><div class="grow"></div><button class="dbtn pri" onclick="location.href='${kind==='camp'?'threadline-app-home.html':'threadline-series.html'}'">${kind==='camp'?'Open in Content Hub →':'Open Series page →'}</button></div>
+  </div>`;
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
 function statusPill(st){ const s=STATUS[st]||STATUS.Idea; return `<span class="spill" style="background:${s.bg};color:${s.c}">${st}</span>`; }
 function chanIcons(ch){ return `<div class="chans">${(ch||[]).map(c=>`<span class="chip-ch ch-${c}">${c}</span>`).join('')}</div>`; }
 
@@ -497,7 +548,7 @@ function plannerHTML(){
                 ['August 2026', ITEMS.filter(x=>x.m===8&&!x.arch)]];
   const total=ITEMS.filter(x=>!x.arch&&!x.open).length;
   return `<div class="tablewrap" id="twrap"><table>
-    <tr><th></th><th>Content Idea</th><th>Post Date</th><th>Status</th><th>Format</th><th>Series / Pillar</th><th>Channels</th><th>Assets</th><th>Notes</th></tr>
+    <tr><th></th><th>Content Idea</th><th>Post Date</th><th>Status</th><th>Format</th><th>Belongs to</th><th>Channels</th><th>Assets</th><th>Notes</th></tr>
     ${groups.map(([g,items])=>`<tr class="ghead"><td colspan="9">▾ ${g}<span class="gn">${items.filter(x=>!x.open).length}</span></td></tr>
       ${items.map(x=>x.open?openRow(x):itemRow(x)).join('')}`).join('')}
   </table>
@@ -510,7 +561,7 @@ function itemRow(x){
     <td class="datecell" style="white-space:nowrap;color:var(--muted);font-weight:700;cursor:pointer" title="Change date · reuse this post" onclick="event.stopPropagation();dateMenu(event,${x.id})">${x.w||'—'} <span style="color:var(--faint);font-size:10px">▾</span></td>
     <td>${statusPill(x.status)}</td>
     <td style="color:var(--muted);font-weight:600">${x.fmt}</td>
-    <td>${serPill(x.ser)}</td>
+    <td>${belongsPill(x)}</td>
     <td>${chanIcons(x.ch)}</td>
     <td><span class="assetbox${x.asset?' has':''}" style="cursor:pointer" title="${x.asset?'Asset attached — click to view':'Upload or create asset'}" onclick="event.stopPropagation();openAsset(${x.id})">${x.asset?'✓':'＋'}</span></td>
     <td class="tnote">${esc(x.note||'')}</td>
@@ -742,11 +793,6 @@ function renderRail(){
   const tot=Object.values(counts).reduce((a,b)=>a+b,0);
   let acc=0; const segs=Object.entries(counts).map(([n,c])=>{ const from=acc/tot*360, to=(acc+c)/tot*360; acc+=c; return `${(SER[n]||{}).color||'#ccc'} ${from}deg ${to}deg`; }).join(', ');
   $('#rail').innerHTML=`
-  <div class="rpanel"><h3>Planner rules <span style="color:var(--faint);font-size:12px">ⓘ</span></h3>
-    <div class="rule">Reviews required<b style="color:${getRules().required?'var(--green)':'var(--faint)'}">${getRules().required?'On':'Off'}</b></div>
-    ${getRules().required?`<div class="rule" style="font-size:11.5px;padding-top:0">↳ ${esc(getRules().reviewer)} reviews · ${esc(getRules().submit).toLowerCase()} submit<b></b></div>`:''}
-    ${['Group by Month','Auto-schedule suggestions','Avoid weekends','Respect content cadence'].map(r=>`<div class="rule">${r}<b>On</b></div>`).join('')}
-    <button class="rlink" onclick="openRules()">⚙ Edit planning rules</button></div>
   <div class="rpanel snap"><h3>This week's snapshot</h3><p class="rsub">Jul 6 – Jul 12</p>
     <div class="srow"><span class="si" style="background:rgba(32,184,120,.12)">🟢</span>Scheduled<span class="sv">${sched}</span></div>
     <div class="srow"><span class="si" style="background:rgba(245,165,36,.14)">🟡</span>In Progress<span class="sv">${prog}</span></div>

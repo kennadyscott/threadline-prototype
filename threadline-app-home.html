@@ -581,6 +581,7 @@ let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r){ const h=J
       if(!c.secNotes) c.secNotes={}; });
     return h; } }catch(e){} return hubSeed(); })();
 function hubSave(){ try{ localStorage.setItem(HUBKEY,JSON.stringify(HUB)); }catch(e){} }
+hubSave(); // persist the seed too — Plan reads campaigns/series from this store
 let hubTab='ideas', openCamp=null;
 const HUBTABS=[['ideas','Ideas'],['progress','In progress'],['approval','Approval'],['scheduled','Scheduled']];
 function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.minis.filter(m=>m.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
