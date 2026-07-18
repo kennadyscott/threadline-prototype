@@ -357,6 +357,11 @@ renderNav();
 /* ---------- data ---------- */
 const ACTIVE=B.series.slice(0,3).map((s,i)=>({name:s[0],cad:(s[1]||'Weekly ·').split('·')[0].trim(),pillar:s[3]||EDU_PILLAR,desc:s[2],next:['Wed, Jul 15','Fri, Jul 17','Mon, Jul 20'][i],reserve:[5,2,6][i],published:[12,7,9][i],health:['h-ok','h-low','h-ok'][i],hlabel:['On track','Reserve low','On track'][i],paused:0,extended:0}));
 let FUTURE=[{name:'Client Question Fridays',cad:'Weekly',pillar:(B.pillars[0]||['Education'])[0],desc:'Answer one real client question, every Friday.'}];
+let DRAFTS=[{name:'Objection of the Week',cad:'Weekly',pillar:(B.pillars[1]||B.pillars[0])[0],desc:'Take one common objection and dismantle it honestly.'}];
+function activateDraft(i){ const d=DRAFTS.splice(i,1)[0];
+  if(ACTIVE.length>=MAX_ACTIVE){ FUTURE.push(d); render(); toast('You\u2019re at 5 active \u2014 \u201c'+d.name+'\u201d joined Future series'); return; }
+  ACTIVE.push({name:d.name,cad:d.cad,pillar:d.pillar,desc:d.desc,next:'Next week',reserve:6,published:0,health:'h-ok',hlabel:'Just activated',paused:0,extended:0}); render(); toast('\u201c'+d.name+'\u201d is live \u2014 recurring slots created'); }
+function dropDraft(i){ DRAFTS.splice(i,1); render(); toast('Draft removed'); }
 const MAX_ACTIVE=5;
 function seriesRank(i){ const order=ACTIVE.map((a,j)=>[j,a.published]).sort((x,y)=>y[1]-x[1]).map(x=>x[0]); return order.indexOf(i)+1; }
 function endSeries(i){ const gone=ACTIVE.splice(i,1)[0]; render(); toastUndo('“'+gone.name+'” ended — its history stays in Analytics',()=>{ ACTIVE.splice(Math.min(i,ACTIVE.length),0,gone); render(); }); }
@@ -395,7 +400,7 @@ const TEMPLATES=[
 
 /* ---------- tabs ---------- */
 let tab='gen', generated=true;
-const TABS=[['gen','Generator'],['active','Active series'],['tpl','Templates']];
+const TABS=[['gen','Generator'],['active','Your series'],['tpl','Templates']];
 function renderTabs(){ $('#tabs').innerHTML=TABS.map(([k,l])=>`<button class="tab${tab===k?' on':''}" onclick="setTab('${k}')">${l}${k==='active'?` <span class="n">${ACTIVE.length}</span>`:''}</button>`).join(''); }
 function setTab(k){ tab=k; render(); }
 
@@ -451,8 +456,7 @@ function conceptHTML(c){
     <div class="eps"><h6>Sample post ideas</h6><ul>${c.eps.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>
     <div class="cacts">
       ${c.state==='active'?`<button class="cb done">✓ Activated</button>`:`<button class="cb pri" onclick="openAct(${c.id})">▶ Activate series</button>`}
-      ${c.state==='draft'?`<button class="cb done">✓ Draft saved</button>`:`<button class="cb" onclick="saveDraft(${c.id})">🔖 Save draft</button>`}
-      <button class="cb" onclick="toast('Plan preview: ${c.name} adds ${c.cad==='Weekly'?'4':'2'} pieces/month — pillar balance stays even')">📅 Add to Planner</button>
+      ${c.state==='draft'?`<button class="cb done">✓ Draft saved</button>`:`<button class="cb" onclick="saveDraft(${c.id})">Save draft</button>`}
     </div>
   </div>`;
 }
@@ -473,7 +477,9 @@ function regenerate(){
   $('#results').innerHTML=''; $('#think').classList.add('on');
   setTimeout(()=>{ $('#think').classList.remove('on'); $('#results').innerHTML=resultsHTML(); toast('Regenerated — same strategic mix, fresh post ideas'); },900);
 }
-function saveDraft(id){ CONCEPTS[id].state='draft'; render(); toast('Saved as draft — find it here anytime'); }
+function saveDraft(id){ const c=CONCEPTS[id]; c.state='draft';
+  DRAFTS.push({name:c.name,cad:c.cad,pillar:c.pillar,desc:c.desc});
+  render(); toast('Saved to Drafts — activate it any time from Your series'); }
 
 /* ---------- activation ---------- */
 let actId=null;
@@ -529,6 +535,13 @@ function activeView(){
     <div class="aacts"><button class="ab pri2" onclick="activateFuture(${i})"${ACTIVE.length>=MAX_ACTIVE?' disabled title="End or pause an active series first"':''}>Activate${ACTIVE.length>=MAX_ACTIVE?' (full)':' now'}</button>
     <button class="ab" onclick="dropFuture(${i})">Remove</button></div>
   </div>`).join('')}</div>`:`<div class="footnote">Nothing queued — activate a 6th series any time and it waits here.</div>`}
+  <div class="secdiv" style="margin-top:22px"><h4>Drafts <span class="cap">${DRAFTS.length}</span></h4><p>Saved directions you haven't committed to. Activate one and it takes an open slot — or joins Future if you're full.</p></div>
+  ${DRAFTS.length?`<div class="acards">${DRAFTS.map((d,i)=>`<div class="acard future" style="border-style:dotted">
+    <div class="cicon" style="background:var(--surface-2)">✎</div>
+    <div class="st"><b>${esc(d.name)}</b><span>${d.cad} · ${esc(d.pillar)}</span><div style="margin-top:4px;font-size:12px;color:var(--muted)">${esc(d.desc||'')}</div></div>
+    <div class="aacts"><button class="ab pri2" onclick="activateDraft(${i})">Activate series</button>
+    <button class="ab" onclick="dropDraft(${i})">Remove</button></div>
+  </div>`).join('')}</div>`:`<div class="footnote">No drafts — save one from the Generator when a direction feels close but not ready.</div>`}
   ${ACTIVE.some(a=>a.reserve<=2)?`<div class="footnote">⚠ <span><b>${esc((ACTIVE.find(a=>a.reserve<=2)||{}).name)}</b> is running low — ${(ACTIVE.find(a=>a.reserve<=2)||{}).reserve} ideas left in reserve. Let’s build a few more before next month.</span><span class="sp"></span><button onclick="location.href='threadline-build-page.html?mode=idea'">Fill reserve with Build ›</button></div>`:''}`;
 }
 
