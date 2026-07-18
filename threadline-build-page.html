@@ -340,6 +340,33 @@ svg.defs{position:absolute;width:0;height:0}
 .crcard span{font-size:13px;color:var(--muted);line-height:1.5;flex:1}
 .crcard i{font-style:normal;font-weight:800;font-size:12.5px;color:var(--violet)}
 </style>
+<style>
+/* content-multiplier spoke canvas */
+.ph2{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;flex-wrap:wrap}
+.eyeb2{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--violet)}
+.bigh{font-size:21px;margin-top:2px}
+.spcanvas{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:18px;position:relative;margin-top:16px;align-items:center}
+@media(max-width:920px){.spcanvas{grid-template-columns:1fr}}
+#splines{position:absolute;inset:0;pointer-events:none;z-index:0}
+.spcol{display:flex;flex-direction:column;gap:22px;justify-content:center;position:relative;z-index:1}
+.spmid{display:flex;flex-direction:column;gap:18px;align-items:stretch;position:relative;z-index:1}
+.spcore{border:2.5px solid transparent;border-radius:22px;padding:18px;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(135deg,var(--violet),var(--blue)) border-box;box-shadow:0 14px 40px rgba(128,61,255,.14);text-align:center}
+.corelab{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:var(--violet);margin-bottom:8px}
+.spcore textarea{width:100%;border:none;outline:none;background:none;font-family:inherit;font-size:15.5px;font-weight:700;color:var(--ink);text-align:center;resize:vertical;min-height:56px}
+.spcore .spgo{margin-top:10px;padding:10px 22px}
+.spbot{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:920px){.spbot{grid-template-columns:1fr}}
+.spc{border:1px solid var(--line);border-radius:15px;padding:13px 15px;background:var(--surface);cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 16px rgba(20,20,60,.05)}
+.spc:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,20,60,.1)}
+.spceye{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.spc b{font-size:13.5px;line-height:1.35}
+.spcmeta{font-size:11px;color:var(--faint)}
+.spprev{font-size:11.5px;font-weight:800;color:var(--violet);margin-top:4px}
+.spbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.mixlab{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+.mixchip{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:4px 11px;margin-right:4px}
+.mixchip b{color:var(--ink)}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -401,20 +428,34 @@ svg.defs{position:absolute;width:0;height:0}
 
           <div id="createCore">
             <div class="panel hl" id="spokepanel" style="margin-top:18px">
-              <div class="ph"><h3>The spoke model</h3><span class="rec" style="background:rgba(128,61,255,.1);color:var(--violet)">One idea → six pieces</span></div>
-              <p class="psub">Put one idea in the middle — or hand Threadline something you've already made. It spins the whole set: an Instagram post, a carousel, a reel, a 3-part email series, a blog/LinkedIn article, and an X/Threads callout.</p>
-              <div class="spokein">
-                <textarea id="spokeIdea" placeholder="The idea in the middle — a sentence, or paste a piece you've already made"></textarea>
-                <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin it →</button>
+              <div class="ph2">
+                <div><div class="eyeb2">Content multiplier</div><h3 class="bigh">One idea. A whole content ecosystem.</h3>
+                <p class="psub" style="margin-top:4px">Start with the thought worth sharing. Threadline helps you find every way it can travel.</p></div>
+                <button class="quiet2" onclick="toast('Past spins — every spoke you\u2019ve run, with all its pieces')">View past spins →</button>
+              </div>
+              <div class="spcanvas" id="spcanvas">
+                <svg id="splines"></svg>
+                <div class="spcol" id="spL"></div>
+                <div class="spmid">
+                  <div class="spcore">
+                    <div class="corelab">The core idea</div>
+                    <textarea id="spokeIdea" placeholder="Teachers struggle to protect their boundaries…"></textarea>
+                    <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin this idea ✦</button>
+                  </div>
+                  <div class="spbot" id="spB"></div>
+                </div>
+                <div class="spcol" id="spR"></div>
               </div>
               <div class="sptools">
                 <button class="tool" onclick="spokeUpload()">Upload a file — image, PDF, deck, or article</button>
                 <button class="tool" onclick="spokeExisting()">Grab a piece you've already made</button>
                 <input type="file" id="spokeFile" style="display:none" onchange="spokeFilePicked(this)">
               </div>
-              <div class="spwrap" id="spwrap" style="display:none">
-                <div class="sprail" id="sprail"></div>
-                <div class="spdetail" id="spdetail"></div>
+              <div class="spbar" id="spbar" style="display:none">
+                <span class="mixlab">The mix</span><span id="spmix"></span>
+                <span class="sp" style="flex:1"></span>
+                <button class="spb" onclick="spinSpokes()">Regenerate paths</button>
+                <button class="spb pri" onclick="sendSpokesHome()">Send all 6 to Home ✦</button>
               </div>
             </div>
 
@@ -723,15 +764,86 @@ async function spinSpokes(){
   }catch(e){}
   if(!pieces){ pieces=spokeFallback(idea); toast('Live drafting runs in the real app \u2014 showing the template spin for now'); }
   SPOKES=pieces; spokeSel=0; renderSpokes();
-  go.disabled=false; go.textContent='Spin it \u2192';
+  go.disabled=false; go.textContent=SPOKES?'Spin again \u2726':'Spin this idea \u2726';
 }
+const SPFMT={
+ 'Instagram post':{c:'#dd2a7b',meta:'caption-led · feed'},
+ 'Carousel':{c:'#f58529',meta:'6 slides · save-worthy'},
+ 'Reel':{c:'#803dff',meta:'~35 sec · talking head'},
+ 'Email series':{c:'#3b82f6',meta:'3 parts · one arc'},
+ 'Article':{c:'#b57708',meta:'≈1,200 words · blog or LinkedIn'},
+ 'X post':{c:'#0e7f95',meta:'under 280 chars · callout'}
+};
+function spInfo(f){ return SPFMT[f]||{c:'#803dff',meta:''}; }
+function spCard(pc,i){ const inf=spInfo(pc.format);
+  return `<div class="spc" data-i="${i}" data-c="${inf.c}" onclick="spPreview(${i})">
+    <div class="spceye" style="color:${inf.c}">${esc(pc.format)}</div>
+    <b>${esc(pc.title)}</b><span class="spcmeta">${esc(inf.meta)}</span>
+    <span class="spprev">Preview →</span></div>`; }
 function renderSpokes(){
-  $('#spwrap').style.display='grid';
-  $('#sprail').innerHTML=SPOKES.map((pc,i)=>`<button class="spitem${i===spokeSel?' active':''}" onclick="spokeSel=${i};renderSpokes()"><b>${esc(pc.title)}</b><span class="spchip">${esc(pc.format)}</span></button>`).join('');
-  const pc=SPOKES[spokeSel];
-  $('#spdetail').innerHTML=`<div class="sphead"><div class="eyeb">${esc(pc.format)}</div><h4>${esc(pc.title)}</h4>
-    <div class="row2"><button class="spb pri" onclick="spokeRefine()">Refine in a session \u2192</button><button class="spb" onclick="spokeCopy()">Copy</button></div></div>
-    <div class="spbody">${esc(pc.body)}</div>`;
+  const by=f=>{ const i=SPOKES.findIndex(p=>p.format===f); return i>=0?[SPOKES[i],i]:null; };
+  const order=['Carousel','Instagram post','Reel','Email series','Article','X post'];
+  const found=order.map(by).filter(Boolean);
+  const extras=SPOKES.map((p,i)=>[p,i]).filter(([p])=>!order.includes(p.format));
+  const allp=found.concat(extras).slice(0,6);
+  const L=allp.slice(0,2), R=allp.slice(2,4), Bt=allp.slice(4,6);
+  $('#spL').innerHTML=L.map(([p,i])=>spCard(p,i)).join('');
+  $('#spR').innerHTML=R.map(([p,i])=>spCard(p,i)).join('');
+  $('#spB').innerHTML=Bt.map(([p,i])=>spCard(p,i)).join('');
+  const cats={Social:0,Video:0,Email:0,Written:0};
+  SPOKES.forEach(p=>{ const f=p.format; if(f==='Reel')cats.Video++; else if(f==='Email series')cats.Email++; else if(f==='Article')cats.Written++; else cats.Social++; });
+  $('#spmix').innerHTML=Object.entries(cats).filter(([k,v])=>v).map(([k,v])=>`<span class="mixchip">${k} <b>${v}</b></span>`).join('');
+  $('#spbar').style.display='flex';
+  $('#spokeGo').textContent='Spin again ✦';
+  requestAnimationFrame(drawSpokeLines);
+}
+function drawSpokeLines(){
+  const cv=$('#spcanvas'), svg=$('#splines'); if(!cv||!svg) return;
+  const core=cv.querySelector('.spcore'); if(!core) return;
+  const cr=cv.getBoundingClientRect(), kr=core.getBoundingClientRect();
+  svg.setAttribute('width',cv.scrollWidth); svg.setAttribute('height',cv.scrollHeight);
+  svg.setAttribute('viewBox','0 0 '+cv.scrollWidth+' '+cv.scrollHeight);
+  const kx=kr.left-cr.left+kr.width/2, ky=kr.top-cr.top+kr.height/2;
+  let d='';
+  cv.querySelectorAll('.spc').forEach(c=>{
+    const r=c.getBoundingClientRect();
+    const cx=r.left-cr.left+r.width/2, cy=r.top-cr.top+r.height/2;
+    const sx=cx<kx-40?r.right-cr.left:cx>kx+40?r.left-cr.left:cx;
+    const sy=Math.abs(cx-kx)<=40?r.top-cr.top:cy;
+    const ex=cx<kx-40?kr.left-cr.left:cx>kx+40?kr.right-cr.left:kx;
+    const ey=Math.abs(cx-kx)<=40?kr.bottom-cr.top:ky;
+    const mx=(sx+ex)/2;
+    d+=`<path d="M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}" stroke="${c.dataset.c}" stroke-width="2" fill="none" opacity=".55"/>
+        <circle cx="${(sx+ex)/2}" cy="${(sy+ey)/2}" r="4" fill="#fff" stroke="${c.dataset.c}" stroke-width="2"/>`;
+  });
+  svg.innerHTML=d;
+}
+window.addEventListener('resize',()=>{ if(SPOKES) drawSpokeLines(); });
+function spPreview(i){
+  spokeSel=i; const pc=SPOKES[i]; const inf=spInfo(pc.format);
+  let ov=document.getElementById('spPrev'); if(ov) ov.remove();
+  ov=document.createElement('div'); ov.id='spPrev'; ov.className='overlay on';
+  ov.innerHTML=`<div class="modal" style="max-width:560px;max-height:82vh;overflow-y:auto">
+    <div class="eyeb2" style="color:${inf.c}">${esc(pc.format)} · ${esc(inf.meta)}</div>
+    <h3 style="margin:2px 0 12px">${esc(pc.title)}</h3>
+    <div class="spbody" style="padding:0">${esc(pc.body)}</div>
+    <div class="macts" style="margin-top:16px"><button class="mbtn ghost" onclick="document.getElementById('spPrev').remove()">Close</button><div class="grow"></div><button class="mbtn ghost" onclick="spokeCopy()">Copy</button><button class="mbtn pri" onclick="document.getElementById('spPrev').remove();spokeRefine()">Refine in a session →</button></div>
+  </div>`;
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
+function sendSpokesHome(){
+  if(!SPOKES||!SPOKES.length) return;
+  const idea=($('#spokeIdea').value||'').trim()||SPOKES[0].title;
+  const name=(idea.split(/(?<=[.?!])\s/)[0]||idea).replace(/[.?!,;:]+$/,'').slice(0,60);
+  let hub=null; try{ hub=JSON.parse(localStorage.getItem('threadline.hub')); }catch(e){}
+  if(!hub) hub={ideas:[],minis:[],campaigns:[]};
+  hub.spokes=hub.spokes||[];
+  hub.spokes.unshift({id:'sp'+Math.random().toString(36).slice(2,9),name:name,core:idea,
+    pieces:SPOKES.map(p=>({format:p.format,title:p.title,body:p.body})),status:'idea',appr:'awaiting'});
+  try{ localStorage.setItem('threadline.hub',JSON.stringify(hub)); }catch(e){}
+  toast('Sent to Home — it\u2019s waiting under \u201cSpoked\u201d');
+  setTimeout(()=>location.href='threadline-app-home.html',900);
 }
 function spokeRefine(){ const pc=SPOKES[spokeSel]; startSession({mode:'free',seed:'Refine this '+pc.format+' draft with me \u2014 keep my voice, make it sharper:\n\n'+pc.body,title:'Spoke: '+pc.title.slice(0,40)}); }
 function spokeCopy(){ const pc=SPOKES[spokeSel]; try{ navigator.clipboard.writeText(pc.body); toast('Copied \u2014 paste it anywhere'); }catch(e){ toast('Select and copy from the preview'); } }

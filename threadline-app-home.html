@@ -383,7 +383,7 @@ svg.defs{position:absolute;width:0;height:0}
 <style>
 /* hierarchy restyle: solid blocks + full-post mockups */
 .tchip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:var(--ink);border-radius:5px;padding:3px 9px;flex:none}
-.tchip.t-camp{background:var(--violet)}.tchip.t-mini{background:#0891b2}
+.tchip.t-camp{background:var(--violet)}.tchip.t-mini{background:#0891b2}.tchip.t-spoke{background:linear-gradient(120deg,#803dff,#3b82f6)}
 .plat,.goalp{background:var(--ink);color:#fff;border-radius:10px;padding:13px 16px;font-size:13.5px;line-height:1.55;max-width:72ch}
 .goalp b{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);margin-bottom:4px}
 .minilab{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin:12px 0 5px}
@@ -564,6 +564,7 @@ function hubSeed(){
         {t:'Myth: You can\u2019t start small',hook:'Every brand you admire started with post #1.'}
       ]
     }],
+    spokes:[],
     campaigns:[{
       id:'c1', name:(B.name||'Brand')+' Point-of-View Campaign', prio:'Lead campaign',
       channels:['LinkedIn','Instagram','Email'], status:'progress',
@@ -594,7 +595,8 @@ function hubSeed(){
     }]
   };
 }
-let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r){ const h=JSON.parse(r); h.minis=h.minis||[];
+let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r){ const h=JSON.parse(r); h.minis=h.minis||[]; h.spokes=h.spokes||[];
+    (h.spokes||[]).forEach(sp=>{ if(!sp.appr) sp.appr='awaiting'; });
     (h.ideas||[]).forEach(i=>{ if(!i.kind) i.kind='Post'; if(i.status==='ready'){ i.status='approval'; i.appr=i.appr||'awaiting'; } });
     (h.minis||[]).forEach(m=>{ if(m.status==='ready'){ m.status='approval'; m.appr=m.appr||'awaiting'; } });
     (h.campaigns||[]).forEach(c=>{ if(c.status==='ready') c.status='approval';
@@ -606,7 +608,7 @@ function hubSave(){ try{ localStorage.setItem(HUBKEY,JSON.stringify(HUB)); }catc
 hubSave(); // persist the seed too — Plan reads campaigns/series from this store
 let hubTab='ideas', openCamp=null;
 const HUBTABS=[['ideas','Ideas'],['progress','In progress'],['approval','Approval'],['scheduled','Scheduled']];
-function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.minis.filter(m=>m.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
+function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.minis.filter(m=>m.status===st).length + (HUB.spokes||[]).filter(x=>x.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
 async function hubAI(system,user,schema,maxTok){
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:user}],max_tokens:maxTok||700,output_config:{format:{type:'json_schema',schema:schema}}})});
@@ -702,6 +704,11 @@ function ideaToMini(id){
   createMini(i.t.slice(0,50), i.sum||i.t);
 }
 function miniStatus(id,st){ const m=HUB.minis.find(x=>x.id===id); if(!m) return; m.status=st; if(st==='approval'&&!m.appr) m.appr='awaiting'; hubSave(); hubTab=st==='idea'?'ideas':st; renderHub(); toast(st==='approval'?'Series submitted for approval ✅':st==='progress'?'Series back in the build':'Moved back to ideas'); }
+function spokeStatus(id,st){ const o=HUB.spokes.find(x=>x.id===id); if(!o) return; o.status=st; if(st==='approval'&&!o.appr) o.appr='awaiting'; hubSave(); hubTab=st==='idea'?'ideas':st; renderHub(); toast(st==='approval'?'Spoke submitted for approval ✅':st==='progress'?'Spoke in the build':'Moved back to ideas'); }
+function dropSpoke(id){ HUB.spokes=HUB.spokes.filter(x=>x.id!==id); hubSave(); renderHub(); toast('Spoke archived'); }
+function scheduleSpoke(id){ const o=HUB.spokes.find(x=>x.id===id); if(!o) return; const mon=nextMonday();
+  o.schedule=o.pieces.map((pc,i)=>{ const d=new Date(mon); d.setDate(d.getDate()+i); return {title:pc.title,week:1,ch:pc.format,date:d.toISOString()}; });
+  o.status='scheduled'; hubSave(); hubTab='scheduled'; renderHub(); toast('Spoke scheduled — one piece a day across the week 🗓'); }
 function dropMini(id){ HUB.minis=HUB.minis.filter(x=>x.id!==id); hubSave(); renderHub(); toast('Mini-series archived'); }
 function miniCard(m){
   const open=openMini===m.id;
@@ -732,6 +739,16 @@ function miniDetail(m){
       </div>`;
 }
 
+function spokeDetail(o){
+  return `<div class="csec"><h5>The core idea</h5><p class="platp">${esc(o.core||o.name)}</p></div>
+      <div class="csec"><h5>The spoke — every way it travels</h5>
+        ${o.pieces.map((pc,i)=>`<div class="acard"><div class="ahead2"><span class="tchip t-spoke">${esc(pc.format)}</span><b>${esc(pc.title)}</b></div>
+          <div class="amock"><div class="likm" style="max-width:none"><div class="licap">${esc(pc.body)}</div></div></div>
+          <div class="arow" style="padding:10px 14px;border-top:1px solid var(--line)">
+            <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Refine this ${esc(pc.format)} from my spoke: ${esc(pc.title).replace(/'/g,'’')}')">Build this piece →</button>
+          </div></div>`).join('')}
+      </div>`;
+}
 /* ---- campaigns ---- */
 const CAMP_SCHEMA={type:'object',properties:{platform:{type:'string'},strategy:{type:'object',properties:{primary:{type:'string'},supporting:{type:'array',items:{type:'string'}}},required:['primary','supporting'],additionalProperties:false},audiences:{type:'array',items:{type:'object',properties:{who:{type:'string'},why:{type:'string'}},required:['who','why'],additionalProperties:false}},messages:{type:'object',properties:{emotional:{type:'string'},educational:{type:'string'},product:{type:'string'},brand:{type:'string'}},required:['emotional','educational','product','brand'],additionalProperties:false},structure:{type:'array',items:{type:'object',properties:{phase:{type:'string'},what:{type:'string'}},required:['phase','what'],additionalProperties:false}},stretch:{type:'object',properties:{theme:{type:'string'},what:{type:'array',items:{type:'string'}}},required:['theme','what'],additionalProperties:false},assets:{type:'array',items:{type:'object',properties:{ch:{type:'string'},title:{type:'string'},caption:{type:'string'}},required:['ch','title','caption'],additionalProperties:false}}},required:['platform','strategy','audiences','messages','structure','stretch','assets'],additionalProperties:false};
 function openCampModal(){ $('#campOverlay').classList.add('on'); setTimeout(()=>$('#cp-name').focus(),60); }
@@ -874,10 +891,10 @@ const KIND_PRESETS=['Post','Article','Email','Video','Script'];
 function setKind(id,k){ const i=HUB.ideas.find(x=>x.id===id); if(!i) return;
   if(k==='__new'){ k=(prompt('Name this category (e.g. Newsletter, Case study):')||'').trim(); if(!k) return; k=k[0].toUpperCase()+k.slice(1); }
   i.kind=k; hubSave(); renderHub(); }
-function itemCat(x){ return x.type==='camp'?'Campaigns':x.type==='mini'?'Series':((x.o.kind||'Post')+'s'); }
+function itemCat(x){ return x.type==='camp'?'Campaigns':x.type==='mini'?'Series':x.type==='spoke'?'Spoked':((x.o.kind||'Post')+'s'); }
 function apprOf(x){ if(x.type==='camp'){ const a=x.o.assets; if(a.every(z=>z.status==='approved')) return 'approved'; if(a.some(z=>z.status==='revise')) return 'feedback'; return 'awaiting'; } return x.o.appr==='feedback'?'feedback':x.o.appr==='approved'?'approved':'awaiting'; }
-function setAppr(type,id,v){ const list=type==='mini'?HUB.minis:HUB.ideas; const o=list.find(z=>z.id===id); if(!o) return; o.appr=o.appr===v?'awaiting':v; hubSave(); renderHub(); }
-function noteFb(type,id,el){ const list=type==='mini'?HUB.minis:HUB.ideas; const o=list.find(z=>z.id===id); if(o){ o.fnote=el.value; hubSave(); } }
+function setAppr(type,id,v){ const list=type==='mini'?HUB.minis:type==='spoke'?HUB.spokes:HUB.ideas; const o=list.find(z=>z.id===id); if(!o) return; o.appr=o.appr===v?'awaiting':v; hubSave(); renderHub(); }
+function noteFb(type,id,el){ const list=type==='mini'?HUB.minis:type==='spoke'?HUB.spokes:HUB.ideas; const o=list.find(z=>z.id===id); if(o){ o.fnote=el.value; hubSave(); } }
 /* ---- auto-scheduling ---- */
 function nextMonday(){ const d=new Date(); d.setHours(9,0,0,0); d.setDate(d.getDate()+(((8-d.getDay())%7)||7)); return d; }
 function fmtD(d){ return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
@@ -906,6 +923,8 @@ function railItem(x){
       <div class="rmeta"><span class="tchip t-camp">Campaign</span><em>${done}/${o.assets.length}</em><span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div></button>`; }
   if(x.type==='mini') return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
       <div class="rmeta"><span class="tchip t-mini">Series</span><em>${o.episodes.length} posts · ${esc(o.cadence)}</em></div></button>`;
+  if(x.type==='spoke') return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
+      <div class="rmeta"><span class="tchip t-spoke">Spoked</span><em>${o.pieces.length} pieces · one idea</em></div></button>`;
   return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.t)}</b>
       <div class="rmeta"><span class="tchip">${esc(o.kind||'Post')}</span><em>${esc(o.pillar||'')}</em></div></button>`;
 }
@@ -937,6 +956,19 @@ function mdDetail(x){
       <div class="cmeta">${o.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}</div>
       <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${fb}</div>
       <div class="mdbody">${miniDetail(o)}</div>`; }
+  if(x.type==='spoke'){ const stg=apprOf(x);
+    const acts=o.status==='idea'
+      ?`<button class="hb pri" onclick="spokeStatus('${o.id}','progress')">Start building →</button><button class="hb" onclick="dropSpoke('${o.id}')">Archive</button>`
+      :inAppr
+      ?(stg==='approved'
+        ?`<button class="hb pri" onclick="scheduleSpoke('${o.id}')">Schedule — one piece a day</button><button class="hb" onclick="setAppr('spoke','${o.id}','awaiting')">↩ Un-approve</button>`
+        :`<button class="hb pri" onclick="setAppr('spoke','${o.id}','approved')">✓ Approve</button><button class="hb" onclick="setAppr('spoke','${o.id}','feedback')">↻ Request changes</button><button class="hb" onclick="spokeStatus('${o.id}','progress')">← Back to build</button>`)
+      :`<button class="hb pri" onclick="spokeStatus('${o.id}','approval')">Submit for approval →</button><button class="hb" onclick="spokeStatus('${o.id}','idea')">← Back to ideas</button><button class="hb" onclick="dropSpoke('${o.id}')">Archive</button>`;
+    const fb=inAppr&&stg==='feedback'?`<input class="anote" style="margin-top:10px;width:100%" placeholder="What needs to change?" value="${esc(o.fnote||'')}" onchange="noteFb('spoke','${o.id}',this)">`:'';
+    return `<div class="mdhead"><div class="eyebrow">Spoked — one idea, ${o.pieces.length} pieces${inAppr?' · In approval':''}</div><h2>${esc(o.name)}</h2>
+      <div class="cmeta">${o.pieces.map(pc=>`<span class="chch">${esc(pc.format)}</span>`).join('')}</div>
+      <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${fb}</div>
+      <div class="mdbody">${spokeDetail(o)}</div>`; }
   const stg=apprOf(x);
   const acts=o.status==='idea'
     ?`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(o.t).replace(/'/g,'’')}')">Build →</button><button class="hb" onclick="ideaStatus('${o.id}','progress');hubTab='progress';renderHub()">Start</button><button class="hb" onclick="ideaToMini('${o.id}')">Make it a series</button><button class="hb" onclick="ideaToCampaign('${o.id}')">Build a campaign</button><button class="hb" onclick="dropIdea('${o.id}')">Remove</button>`
@@ -960,7 +992,8 @@ function renderHub(){
   const ideas=HUB.ideas.filter(i=>i.status===st);
   if(hubTab==='ideas'||hubTab==='progress'||hubTab==='approval'){
     const minisX=HUB.minis.filter(m=>m.status===st);
-    const all=[...camps.map(c=>({type:'camp',o:c})),...minisX.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
+    const spokesX=(HUB.spokes||[]).filter(x=>x.status===st);
+    const all=[...camps.map(c=>({type:'camp',o:c})),...spokesX.map(x=>({type:'spoke',o:x})),...minisX.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
     const pre=hubTab==='ideas'?hubCaptureHTML():'';
     if(!all.length){ $('#hubbody').innerHTML=pre+`<div class="hubempty" style="margin-top:16px">${hubTab==='ideas'?'Nothing captured yet — dump your first idea above.':hubTab==='progress'?'Nothing in progress yet — hit <b>Start</b> on anything in the Ideas tab.':'Nothing waiting on approval — submit finished work from In progress.'}</div>`; return; }
     let items=all, fbar='';
@@ -985,17 +1018,18 @@ function renderHub(){
   }
   if(hubTab==='scheduled'){
     const minisX=HUB.minis.filter(m=>m.status===st);
-    const items=[...camps.map(c=>({type:'camp',o:c})),...minisX.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
+    const spokesX=(HUB.spokes||[]).filter(x=>x.status===st);
+    const items=[...camps.map(c=>({type:'camp',o:c})),...spokesX.map(x=>({type:'spoke',o:x})),...minisX.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
     if(!items.length){ $('#hubbody').innerHTML=`<div class="hubempty" style="margin-top:16px">Nothing scheduled yet — approve content in the Approval tab, then schedule it from there.</div>`; return; }
     const rows=x=>(x.o.schedule||[]).map(sc=>`<div class="schrow"><span class="swk">W${sc.week}</span><b>${fmtD(new Date(sc.date))}</b><span class="tchip">${esc(sc.ch)}</span><span class="st2">${esc(sc.title)}</span></div>`).join('');
     $('#hubbody').innerHTML=`<div class="spoke" style="margin-top:16px"><b>On the calendar.</b> Threadline placed everything by structure and cadence. Stretch campaigns stay locked until the metrics come back.</div>`+
       items.map(x=>{ const o=x.o;
         return `<div class="camp" style="margin-top:14px"><div class="chead" style="cursor:default">
-          <div class="ct2"><b>${esc(o.name||o.t)} <span class="prio">${x.type==='camp'?'Campaign':x.type==='mini'?'Series':esc(o.kind||'Post')}</span></b>
+          <div class="ct2"><b>${esc(o.name||o.t)} <span class="prio">${x.type==='camp'?'Campaign':x.type==='mini'?'Series':x.type==='spoke'?'Spoked':esc(o.kind||'Post')}</span></b>
           <div class="cmeta"><span class="chch">${(o.schedule||[]).length} slots</span><span class="chch">Starts ${o.schedule&&o.schedule[0]?fmtD(new Date(o.schedule[0].date)):'—'}</span></div></div></div>
           <div class="cdetail" style="display:block"><div class="csec"><h5>Timeline</h5>${rows(x)}</div>
           ${x.type==='camp'&&o.stretch?`<div class="csec"><h5>Stretch campaign — locked</h5><div class="lockb"><b>${esc(o.stretch.theme)}</b><ul class="plainul">${(o.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Holds until the 6-week metrics are evaluated — unlock it from Analytics when the numbers earn it.</span></div></div>`:''}</div>
-          <div class="cacts"><button class="hb pri" onclick="location.href='threadline-plan.html'">Open in Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
+          <div class="cacts"><button class="hb pri" onclick="location.href='threadline-plan.html'">Open in Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:x.type==='spoke'?`spokeStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:x.type==='spoke'?`dropSpoke('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
     return;
   }
 }
