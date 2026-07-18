@@ -335,6 +335,10 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .lcd.custom input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .cadsel{border:1.5px solid var(--line);border-radius:9px;padding:7px 10px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--surface);outline:none}
 .cadsel:focus{border-color:var(--violet)}
+.addrow td{padding:5px 10px;border-bottom:1px solid var(--line-2)}
+.addinline{border:none;background:none;color:var(--faint);font-weight:800;font-size:12.5px;cursor:pointer;padding:6px 2px;font-family:inherit}
+.addinline:hover{color:var(--violet)}
+.addinp{width:100%;box-sizing:border-box;border:1.5px solid var(--violet);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;outline:none;background:var(--surface);color:var(--ink)}
 .ribr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;border-bottom:1px dashed var(--line-2)}
 .ribr:last-of-type{border-bottom:none}
 .ribr .ibdot{margin-top:4px;flex:none}
@@ -640,7 +644,25 @@ function setView(k){ view=k; render(); }
 function setMain(){ try{ localStorage.setItem(VKEY,view); }catch(e){} render(); toast('Saved — '+VIEWS.find(v=>v[0]===view)[2]+' is your main view'); }
 
 /* ---------- PLANNER ---------- */
-let groupBy='month', sortCol=null, sortDir=1;
+let groupBy='month', sortCol=null, sortDir=1, addTarget=null;
+function startAddRow(g){ addTarget=g; render(); setTimeout(()=>{ const ai=document.getElementById('addinput'); if(ai) ai.focus(); },30); }
+function cancelAddRow(){ addTarget=null; render(); }
+function commitAddRow(g,fromBlur){
+  const ai=document.getElementById('addinput'); if(!ai) return;
+  const v=ai.value.trim();
+  if(!v){ if(fromBlur){ addTarget=null; render(); } return; }
+  const nu={id:NEXT_ID(),t:v,m:7,d:0,w:'',status:'Idea',fmt:'Carousel',ser:S0,ch:['in'],asset:'',note:''};
+  if(groupBy==='month'){ nu.m=/August/.test(g)?8:7; }
+  else if(groupBy==='series'&&SER[g]) nu.ser=g;
+  else if(groupBy==='campaign'&&g!=='Not in a campaign') nu.camp=g;
+  else if(groupBy==='fmt'&&FMT[g]) nu.fmt=g;
+  else if(groupBy==='pillar'){ const sn=Object.keys(SER).find(k=>SER[k].pillar===g); if(sn) nu.ser=sn; }
+  else if(groupBy==='owner') nu.owner=g;
+  ITEMS.push(nu);
+  if(fromBlur){ addTarget=null; render(); }
+  else { render(); setTimeout(()=>{ const a2=document.getElementById('addinput'); if(a2) a2.focus(); },30); }
+  toast('Added to the plan — set a date and status when it\u2019s ready');
+}
 const GROUPINGS=[['month','Month'],['campaign','Campaign'],['series','Series'],['pillar','Pillar'],['fmt','Format'],['owner','Owner']];
 function gbMenu(e){
   e.stopPropagation();
@@ -678,10 +700,13 @@ function plannerHTML(){
     <tr><th></th><th class="thsort" onclick="sortBy('title')" title="Sort within each group">Content Idea${ar('title')}</th><th class="thsort" onclick="sortBy('date')" title="Sort within each group">Post Date${ar('date')}</th><th class="thsort" onclick="sortBy('status')" title="Sort within each group">Status${ar('status')}</th><th class="thsort" onclick="sortBy('fmt')" title="Sort within each group">Format${ar('fmt')}</th><th class="thsort" onclick="sortBy('belongs')" title="Sort within each group">Belongs to${ar('belongs')}</th><th>Channels</th><th>Assets</th><th>Notes</th></tr>
     ${groups.map(([g,items])=>{
       const rows=sortItems(items.filter(x=>!x.open)); const opens=items.filter(x=>x.open);
-      return `<tr class="ghead"><td colspan="9">▾ ${esc(g)}<span class="gn">${rows.length}</span></td></tr>${rows.map(itemRow).join('')}${opens.map(openRow).join('')}`;
+      const adder=addTarget===g
+        ?`<tr class="addrow"><td></td><td colspan="8"><input id="addinput" class="addinp" placeholder="Type a content idea — Enter to add, Esc to cancel" onkeydown="if(event.key==='Enter')commitAddRow('${esc(g).replace(/'/g,'&#39;')}');if(event.key==='Escape')cancelAddRow();" onblur="commitAddRow('${esc(g).replace(/'/g,'&#39;')}',true)"></td></tr>`
+        :`<tr class="addrow"><td></td><td colspan="8"><button class="addinline" onclick="startAddRow('${esc(g).replace(/'/g,'&#39;')}')">＋ Add item</button></td></tr>`;
+      return `<tr class="ghead"><td colspan="9">▾ ${esc(g)}<span class="gn">${rows.length}</span></td></tr>${rows.map(itemRow).join('')}${opens.map(openRow).join('')}${adder}`;
     }).join('')}
   </table>
-  <div class="tfoot"><span>Showing 1–${total} of ${total} ideas</span><span class="sp"></span><button class="addbtn" onclick="addIdea()">＋ Add content idea</button></div></div>`;
+  <div class="tfoot"><span>Showing 1–${total} of ${total} ideas</span><span class="sp"></span><button class="addbtn" onclick="startAddRow('${esc(groups[0][0]).replace(/'/g,'&#39;')}')">＋ Add content idea</button></div></div>`;
 }
 function itemRow(x){
   return `<tr class="item" onclick="openWs(${x.id})">
