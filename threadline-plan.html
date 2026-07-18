@@ -171,7 +171,7 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .serpill b{font-weight:800;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;display:block;opacity:.75;margin-bottom:1px}
 .chans{display:flex;gap:4px}
 .chip-ch{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font-size:9.5px;font-weight:900;color:#fff}
-.ch-in{background:#0a66c2}.ch-ig{background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af)}.ch-tt{background:#111}.ch-fb{background:#1877f2}.ch-em{background:#54607a}
+.ch-in{background:#0a66c2}.ch-ig{background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af)}.ch-tt{background:#111}.ch-fb{background:#1877f2}.ch-em{background:#54607a}.ch-bl{background:#0f766e}
 .assetbox{width:34px;height:28px;border-radius:7px;background:var(--surface-2);display:grid;place-items:center;font-size:14px;color:var(--faint);font-weight:800}
 .assetbox.has{color:#178a5a;background:rgba(32,184,120,.1)}
 .tnote{color:var(--muted);font-size:12px;max-width:150px}
@@ -330,6 +330,11 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .dbtn.pri:hover{filter:brightness(1.06)}
 .xbtn{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;cursor:pointer;font-weight:800;font-size:13px;color:var(--muted);display:inline-grid;place-items:center;flex:none}
 .xbtn:hover{color:var(--ink);border-color:var(--faint)}
+.openchip{display:block;width:100%;box-sizing:border-box;text-align:center;border:1.5px dashed var(--line-2);border-radius:6px;padding:8px 10px;font-weight:800;font-size:11px;color:var(--faint);background:none}
+.lcd.custom{background:conic-gradient(#f00,#ff8a00,#ffe600,#2ecc40,#00d0ff,#803dff,#ff2fa0,#f00);position:relative;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.lcd.custom input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cadsel{border:1.5px solid var(--line);border-radius:9px;padding:7px 10px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--surface);outline:none}
+.cadsel:focus{border-color:var(--violet)}
 .ribr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;border-bottom:1px dashed var(--line-2)}
 .ribr:last-of-type{border-bottom:none}
 .ribr .ibdot{margin-top:4px;flex:none}
@@ -455,6 +460,10 @@ svg.defs{position:absolute;width:0;height:0}
     <label class="ckrow"><input type="checkbox" checked><b>Avoid weekends</b></label>
     <label class="ckrow"><input type="checkbox" checked><b>Respect content cadence</b></label>
   </div>
+  <div class="rulesec"><h6>Posting rhythm</h6>
+    <div style="font-size:11.5px;color:var(--faint);margin-bottom:8px">Open slots come from these cadences — Threadline holds a space on the calendar for every series rhythm, and flags it when nothing is planned for it.</div>
+    <div id="cadwrap"></div>
+  </div>
   <div class="rulesec"><h6>Views</h6>
     <div class="df"><label>Default view — what Plan opens to</label><select id="r-view"><option value="planner">Planner</option><option value="kanban">Kanban</option><option value="calendar">Calendar</option></select></div>
     <div style="font-size:11.5px;color:var(--faint);margin-top:6px">Switch views any time with the tabs above the planner.</div>
@@ -505,7 +514,7 @@ const STATUS={
   'Published':{bg:'rgba(15,23,42,.08)',c:'#54607a',solid:'#20b878'},
 };
 const CAMPN=(B.name||'Brand')+' Point-of-View Campaign';
-const FMT={'Carousel':'#8b5cf6','Short Video':'#ec4899','Text Post':'#64748b','Graphic':'#0891b2','Reel':'#fb7185','Email':'#f5a524','Video':'#3b82f6'};
+const FMT={'Carousel':'#8b5cf6','Short Video':'#ec4899','Text Post':'#64748b','Graphic':'#0891b2','Reel':'#fb7185','Email':'#f5a524','Video':'#3b82f6','Article':'#0f766e'};
 function fmtColor(f){ return FMT[f]||'#64748b'; }
 const LCKEY='threadline.labelColors';
 let LC=(function(){ try{ return JSON.parse(localStorage.getItem(LCKEY))||{}; }catch(e){ return {}; } })();
@@ -521,7 +530,8 @@ applyLabelColors();
 function campColor(){ return LC.campaign||'#803dff'; }
 function renderLC(){
   const el=document.getElementById('lcwrap'); if(!el) return;
-  const dots=(cat,key,cur,pal)=>(pal||PALETTE).map(c=>`<span class="lcd${cur===c?' on':''}" style="background:${c}" onclick="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}','${c}')" title="${c}"></span>`).join('');
+  const dots=(cat,key,cur,pal)=>(pal||PALETTE).map(c=>`<span class="lcd${cur===c?' on':''}" style="background:${c}" onclick="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}','${c}')" title="${c}"></span>`).join('')
+    +`<label class="lcd custom" title="Pick any color"><input type="color" value="${cur&&/^#/.test(cur)?cur:'#803dff'}" onchange="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}',this.value)">＋</label>`;
   el.innerHTML=
     `<div class="lcgrp">Status</div>`+
     Object.keys(STATUS).map(st=>`<div class="lcrow"><span class="lcchip" style="background:${STATUS[st].solid}">${st}</span><span class="lcs">${dots('status',st,STATUS[st].solid)}</span></div>`).join('')+
@@ -531,6 +541,15 @@ function renderLC(){
     Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span><span class="lcs">${dots('series',sn,SER[sn].color,PALETTE_B)}</span></div>`).join('')+
     `<div class="lcgrp">Campaigns</div>
      <div class="lcrow"><span class="lcchip" style="background:${campColor()}">Campaign</span><span class="lcs">${dots('campaign','campaign',campColor(),PALETTE_B)}</span></div>`;
+}
+const CADKEY='threadline.cadence';
+let CAD=(function(){ try{ return JSON.parse(localStorage.getItem(CADKEY))||{}; }catch(e){ return {}; } })();
+function renderCadence(){
+  const el=document.getElementById('cadwrap'); if(!el) return;
+  el.innerHTML=Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span>
+    <select class="cadsel" onchange="CAD['${sn.replace(/'/g,"\\'")}']=this.value;try{localStorage.setItem(CADKEY,JSON.stringify(CAD))}catch(e){}">
+      ${['Weekly','Every 2 weeks','Monthly','Paused'].map(o=>`<option${(CAD[sn]||'Weekly')===o?' selected':''}>${o}</option>`).join('')}
+    </select></div>`).join('');
 }
 function setLabelColor(cat,key,c){
   if(cat==='campaign') LC.campaign=c; else { LC[cat]=LC[cat]||{}; LC[cat][key]=c; }
@@ -551,7 +570,7 @@ let ITEMS=[
   {t:'Client win: results jumped 38%',m:8,d:5,w:'Wed, Aug 5',status:'Planned',fmt:'Carousel',ser:S2,camp:CAMPN,ch:['in','ig'],asset:'',note:'Before/after graphics.'},
   {t:'What I wish I knew sooner',m:8,d:12,w:'Wed, Aug 12',status:'Draft',fmt:'Short Video',ser:S0,ch:['tt','ig'],asset:'',note:'Talking head format.'},
   {t:Q[0]||'The question they always ask',m:8,d:19,w:'Wed, Aug 19',status:'Planned',fmt:'Graphic',ser:S3,ch:['ig','fb'],asset:'',note:'Answer it straight.'},
-  {t:'The hidden cost of being too clever',m:8,d:26,w:'Wed, Aug 26',status:'Idea',fmt:'Carousel',ser:S0,ch:['in','ig'],asset:'',note:'Clarity over cleverness.'},
+  {t:'The hidden cost of being too clever',m:8,d:26,w:'Wed, Aug 26',status:'Idea',fmt:'Article',ser:S0,ch:['in','bl'],asset:'',note:'Long-form: clarity over cleverness. Runs on the blog + LinkedIn.'},
 ];
 ITEMS.forEach((x,i)=>x.id=i);
 const NEXT_ID=()=>Math.max(...ITEMS.map(x=>x.id))+1;
@@ -622,7 +641,7 @@ function setMain(){ try{ localStorage.setItem(VKEY,view); }catch(e){} render(); 
 
 /* ---------- PLANNER ---------- */
 let groupBy='month', sortCol=null, sortDir=1;
-const GROUPINGS=[['month','Month'],['campaign','Campaign'],['series','Series'],['pillar','Pillar'],['owner','Owner']];
+const GROUPINGS=[['month','Month'],['campaign','Campaign'],['series','Series'],['pillar','Pillar'],['fmt','Format'],['owner','Owner']];
 function gbMenu(e){
   e.stopPropagation();
   let m=document.getElementById('gbmenu'); if(m){ m.remove(); return; }
@@ -636,11 +655,12 @@ function gbMenu(e){
 function setGroup(k){ groupBy=k; const m=document.getElementById('gbmenu'); if(m) m.remove();
   const lb=document.getElementById('gblabel'); if(lb) lb.textContent=GROUPINGS.find(g=>g[0]===k)[1]; render(); }
 function groupsFor(){
-  const act=ITEMS.filter(x=>!x.arch);
+  const act=ITEMS.filter(x=>!x.arch&&(groupBy!=='fmt'||!x.open));
   if(groupBy==='month') return [['July 2026',act.filter(x=>x.m===7)],['August 2026',act.filter(x=>x.m===8)]];
   const keyf=groupBy==='campaign'?(x=>x.camp||'Not in a campaign')
     :groupBy==='series'?(x=>x.ser||'No series')
     :groupBy==='pillar'?(x=>(SER[x.ser]||{}).pillar||'General')
+    :groupBy==='fmt'?(x=>x.fmt||'No format')
     :(x=>x.owner||'Kennady');
   const m=new Map();
   act.forEach(x=>{ const k=keyf(x); if(!m.has(k)) m.set(k,[]); m.get(k).push(x); });
@@ -679,7 +699,7 @@ function itemRow(x){
 function openRow(x){
   return `<tr class="openrow"><td></td>
     <td colspan="2"><span class="oslot">⬡ Open series slot — ${esc(x.ser)}</span><div style="color:var(--faint);font-size:11.5px;margin-top:2px">${x.w} · Preferred: ${x.fmt}</div></td>
-    <td>${statusPill('Planned').replace('Planned','Open slot')}</td>
+    <td><span class="openchip">Open</span></td>
     <td colspan="4"><div class="oactions">
       <button class="ob" onclick="event.stopPropagation();fillSlot(${x.id},'reserve')">Use next reserve idea</button>
       <button class="ob" onclick="event.stopPropagation();ibSpot(${x.id})">Choose from Idea Bank</button>
@@ -746,7 +766,7 @@ const RKEY='threadline.teamRules';
 function getRules(){ try{ return Object.assign({required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}, JSON.parse(localStorage.getItem(RKEY)||'{}')); }catch(e){ return {required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}; } }
 function openRules(){ const r=getRules(); $('#r-required').checked=!!r.required; $('#r-reviewer').value=r.reviewer; $('#r-submit').value=r.submit;
   try{ $('#r-view').value=localStorage.getItem(VKEY)||'planner'; }catch(e){}
-  renderLC();
+  renderLC(); renderCadence();
   $('#rulesOverlay').classList.add('on'); }
 function closeRules(){ $('#rulesOverlay').classList.remove('on'); }
 function saveRules(){ const r={required:$('#r-required').checked?1:0,reviewer:$('#r-reviewer').value,submit:$('#r-submit').value};
@@ -849,7 +869,7 @@ function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
     <div class="sparkline">⚡ <span>Original Spark preserved — <b>view in Idea Bank</b></span></div>
     <div class="dgrid" style="margin-top:14px">
       <div class="df"><label>Status</label><select id="ws-st">${Object.keys(STATUS).map(s=>`<option${s===x.status?' selected':''}>${s}</option>`).join('')}</select></div>
-      <div class="df"><label>Format</label><select id="ws-f">${['Carousel','Short Video','Text Post','Graphic','Reel','Email','Video'].map(f=>`<option${f===x.fmt?' selected':''}>${f}</option>`).join('')}</select></div>
+      <div class="df"><label>Format</label><select id="ws-f">${['Carousel','Short Video','Text Post','Graphic','Reel','Email','Video','Article'].map(f=>`<option${f===x.fmt?' selected':''}>${f}</option>`).join('')}</select></div>
       <div class="df"><label>Series</label><select id="ws-s">${B.series.map(s=>`<option${s[0]===x.ser?' selected':''}>${s[0]}</option>`).join('')}</select></div>
       <div class="df"><label>Post date</label><input id="ws-w" value="${esc(x.w||'')}" placeholder="e.g. Wed, Jul 22"></div>
     </div>
