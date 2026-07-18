@@ -73,7 +73,7 @@ input,textarea,select{font-family:inherit}
 .newspark{display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25);transition:.14s}
 .newspark:hover{filter:brightness(1.06)}
 
-.content{display:grid;grid-template-columns:1fr;gap:24px;padding:26px 28px 0;max-width:980px;margin:0 auto;width:100%}
+.content{display:grid;grid-template-columns:1fr;gap:24px;padding:26px 28px 0;max-width:1160px;margin:0 auto;width:100%}
 .colmain{min-width:0}
 
 .greet h1{font-size:clamp(24px,3vw,32px)}
@@ -121,6 +121,28 @@ input,textarea,select{font-family:inherit}
 .hb{border:1.5px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:800;font-size:12.5px;color:var(--muted);background:var(--surface);cursor:pointer}
 .hb:hover{border-color:var(--violet);color:var(--violet)}
 .hb.pri{background:var(--grad2);color:#fff;border-color:transparent}
+/* in-progress master-detail */
+.mdwrap{display:grid;grid-template-columns:290px 1fr;gap:18px;margin-top:16px;align-items:start}
+@media(max-width:900px){.mdwrap{grid-template-columns:1fr}}
+.mdrail{position:sticky;top:14px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 28px);overflow-y:auto;padding-right:2px}
+@media(max-width:900px){.mdrail{position:static;max-height:none}}
+.rlabel{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:8px 2px 2px}
+.rlabel:first-child{margin-top:0}
+.ritem{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;color:var(--ink);font-family:inherit}
+.ritem:hover{border-color:color-mix(in srgb, var(--violet) 45%, var(--line))}
+.ritem.active{border-color:var(--violet);border-left-color:var(--violet);box-shadow:var(--shadow-sm)}
+.ritem b{font-size:13.5px;line-height:1.35;display:block;margin-bottom:6px}
+.rmeta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rmeta em{font-style:normal;font-size:10.5px;color:var(--faint);font-weight:800}
+.rdots{display:flex;gap:3px;margin-left:auto}
+.rdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.rdots i.approved{background:var(--green)}
+.rdots i.revise{background:var(--amber)}
+.mddetail{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);overflow:hidden;min-width:0}
+.mdhead{padding:18px 20px 14px;border-bottom:1px solid var(--line)}
+.mdhead .eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--violet);margin-bottom:5px}
+.mdhead h2{font-size:20px;line-height:1.25;margin:0 0 9px}
+.mdbody{padding:4px 20px 18px}
 .spoke{margin-top:12px;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;color:var(--slate);background:color-mix(in srgb, var(--violet) 6%, var(--surface));border:1px solid color-mix(in srgb, var(--violet) 18%, var(--line))}
 .secnote{font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--faint);opacity:.85}
 .hubsec{margin-top:20px}
@@ -135,8 +157,14 @@ input,textarea,select{font-family:inherit}
 .camp .ct2 b{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .camp .prio{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--violet);background:rgba(128,61,255,.09);border-radius:999px;padding:3px 9px}
 .camp .csnip{color:var(--muted);font-size:12.5px;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.camp .cmeta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
-.camp .chch{font-size:10.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.camp .cmeta,.mdhead .cmeta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.camp .chch,.mdhead .chch,.mdbody .chch,.rmeta .chch{font-size:10.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.mdhead .cmeta{margin-top:0}
+.mdhead .cdots{display:flex;gap:3px;align-items:center}
+.mdhead .cdots em{font-style:normal;font-size:10.5px;color:var(--faint);font-weight:800;margin-right:4px}
+.mdhead .cdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.mdhead .cdots i.approved{background:var(--green)}
+.mdhead .cdots i.revise{background:var(--amber)}
 .camp .cdots{display:flex;gap:3px;align-items:center;margin-left:auto}
 .camp .cdots em{font-style:normal;font-size:10.5px;color:var(--faint);font-weight:800;margin-right:4px}
 .camp .cdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
@@ -297,6 +325,16 @@ input,textarea,select{font-family:inherit}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--slate);color:#fff;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:90}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 svg.defs{position:absolute;width:0;height:0}
+</style>
+<style>
+/* menu = slide-out drawer at every width */
+.app{display:block}
+.hamb{display:inline-flex}
+.app .sidebar{display:flex;position:fixed;top:0;left:0;bottom:0;height:100dvh;width:min(300px,84vw);z-index:70;transform:translateX(-105%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 24px 70px rgba(15,18,34,.28)}
+.app.nav-open .sidebar{transform:translateX(0)}
+.scrim{display:block;position:fixed;inset:0;background:rgba(15,18,34,.45);z-index:65;opacity:0;pointer-events:none;transition:opacity .25s}
+.app.nav-open .scrim{opacity:1;pointer-events:auto}
+.main{min-height:100vh}
 </style>
 </head>
 <body>
@@ -533,15 +571,16 @@ function miniCard(m){
       </div>
     </div>
     <div class="cacts">${acts}<button class="hb" onclick="openMini=openMini==='${m.id}'?null:'${m.id}';renderHub()">${open?'Close ▴':'Open ▾'}</button></div>
-    ${open?`<div class="cdetail">
-      <div class="csec"><h5>The format</h5><p>${esc(m.premise)}</p></div>
+    ${open?`<div class="cdetail">${miniDetail(m)}</div>`:''}
+  </div>`;
+}
+function miniDetail(m){
+  return `<div class="csec"><h5>The format</h5><p>${esc(m.premise)}</p></div>
       <div class="csec"><h5>Episodes</h5>
         ${m.episodes.map((e,i)=>`<div class="asset"><div class="ahead"><span class="chch">Ep ${i+1}</span><b>${esc(e.t)}</b></div>
           <div class="cap">${esc(e.hook)}</div>
           <div class="arow"><button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Write episode ${i+1} of my ${esc(m.name).replace(/'/g,'’')} mini-series: ${esc(e.t).replace(/'/g,'’')}')">Build this episode →</button></div></div>`).join('')}
-      </div>
-    </div>`:''}
-  </div>`;
+      </div>`;
 }
 
 /* ---- campaigns ---- */
@@ -597,8 +636,11 @@ function campCard(c){
       </div>
     </div>
     <div class="cacts">${acts}<button class="hb" onclick="openCamp=openCamp==='${c.id}'?null:'${c.id}';renderHub()">${open?'Close':'Open'} ${open?'▴':'▾'}</button></div>
-    ${open?`<div class="cdetail">
-      <div class="csec"><h5>Campaign platform</h5><p>${esc(c.platform)}</p></div>
+    ${open?`<div class="cdetail">${campDetail(c)}</div>`:''}
+  </div>`;
+}
+function campDetail(c){
+  return `<div class="csec"><h5>Campaign platform</h5><p>${esc(c.platform)}</p></div>
       <div class="csec"><h5>Strategy</h5><p><b>${esc(c.strategy.primary)}</b></p><ul>${c.strategy.supporting.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
       <div class="csec"><h5>Message hierarchy</h5>
         ${['emotional','educational','product','brand'].map(k=>`<div class="msgrow"><b>${k}</b><span>${esc(c.messages[k]||'')}</span></div>`).join('')}</div>
@@ -612,9 +654,7 @@ function campCard(c){
             <input class="anote" placeholder="Notes for the revision…" value="${esc(a.notes||'')}" onchange="noteAsset('${c.id}','${a.id}',this)">
             <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Revise this ${esc(a.ch)} asset for the ${esc(c.name).replace(/'/g,'’')} campaign: ${esc(a.title).replace(/'/g,'’')}')">Open in Create →</button>
           </div></div>`).join('')}
-      </div>
-    </div>`:''}
-  </div>`;
+      </div>`;
 }
 function ideaRow(i){
   const acts=i.status==='idea'
@@ -634,11 +674,54 @@ function ideaRow(i){
     <div class="ht3"><b>${esc(i.t)}</b><span>${esc(i.sum||'')} · ${esc(i.pillar||'')}</span></div>
     <div class="hacts">${acts}</div></div>`;
 }
+/* ---- In-progress workspace: rail of projects left, full detail right ---- */
+let hubSel=null;
+function railItem(x){
+  const o=x.o, on=hubSel===o.id?' active':'';
+  if(x.type==='camp'){ const done=o.assets.filter(a=>a.status==='approved').length;
+    return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
+      <div class="rmeta"><span class="chch">🎯 Campaign</span><em>${done}/${o.assets.length}</em><span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div></button>`; }
+  if(x.type==='mini') return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
+      <div class="rmeta"><span class="chch">📱 Series</span><em>${o.episodes.length} episodes · ${esc(o.cadence)}</em></div></button>`;
+  return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.t)}</b>
+      <div class="rmeta"><span class="chch">💡 Post</span><em>${esc(o.pillar||'')}</em></div></button>`;
+}
+function mdDetail(x){
+  const o=x.o;
+  if(x.type==='camp'){ const done=o.assets.filter(a=>a.status==='approved').length;
+    return `<div class="mdhead"><div class="eyebrow">Full campaign · ${esc(o.prio)}</div><h2>${esc(o.name)}</h2>
+      <div class="cmeta">${o.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}<span class="cdots" style="margin-left:0"><em>${done}/${o.assets.length} approved</em>${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div>
+      <div class="cacts" style="border-top:0;padding:10px 0 0"><button class="hb pri" onclick="campStatus('${o.id}','ready')">Mark ready ✓</button><button class="hb" onclick="campStatus('${o.id}','idea')">← Back to ideas</button><button class="hb" onclick="dropCamp('${o.id}')">Archive</button></div></div>
+      <div class="mdbody">${campDetail(o)}</div>`; }
+  if(x.type==='mini')
+    return `<div class="mdhead"><div class="eyebrow">Mini-series · ${esc(o.cadence)}</div><h2>${esc(o.name)}</h2>
+      <div class="cmeta">${o.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}</div>
+      <div class="cacts" style="border-top:0;padding:10px 0 0"><button class="hb pri" onclick="miniStatus('${o.id}','ready')">Mark ready ✓</button><button class="hb" onclick="location.href='threadline-series.html'">Open in Series →</button><button class="hb" onclick="miniStatus('${o.id}','idea')">←</button></div></div>
+      <div class="mdbody">${miniDetail(o)}</div>`;
+  return `<div class="mdhead"><div class="eyebrow">Single post</div><h2>${esc(o.t)}</h2>
+      <div class="cmeta">${o.pillar?`<span class="chch">${esc(o.pillar)}</span>`:''}</div>
+      <div class="cacts" style="border-top:0;padding:10px 0 0"><button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(o.t).replace(/'/g,'’')}')">Open in Create →</button><button class="hb" onclick="ideaStatus('${o.id}','ready');renderHub()">Mark ready ✓</button><button class="hb" onclick="ideaToMini('${o.id}')">📱 Series</button><button class="hb" onclick="ideaToCampaign('${o.id}')">🎯 Campaign</button><button class="hb" onclick="ideaStatus('${o.id}','idea')">←</button></div></div>
+      <div class="mdbody"><div class="csec"><h5>The idea</h5><p>${esc(o.sum||o.t)}</p></div>
+      <div class="csec"><h5>Spin it out</h5><p>This is a single post right now. If it has legs, promote it — 📱 turns it into a repeatable series, 🎯 builds a full campaign around it.</p></div></div>`;
+}
 function renderHub(){
   $('#hubtabs').innerHTML=HUBTABS.map(([k,ic,l])=>`<button class="hubtab${hubTab===k?' on':''}" onclick="hubTab='${k}';renderHub()">${ic} ${l} <i>${hubCount(k==='ideas'?'idea':k)}</i></button>`).join('');
   const st=hubTab==='ideas'?'idea':hubTab;
   const camps=HUB.campaigns.filter(c=>c.status===st);
   const ideas=HUB.ideas.filter(i=>i.status===st);
+  if(hubTab==='progress'){
+    const minisP=HUB.minis.filter(m=>m.status===st);
+    const items=[...camps.map(c=>({type:'camp',o:c})),...minisP.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
+    if(!items.length){ $('#hubbody').innerHTML=`<div class="hubempty" style="margin-top:16px">Nothing in progress yet — hit <b>Start</b> on anything in the Ideas tab.</div>`; return; }
+    if(!items.some(x=>x.o.id===hubSel)) hubSel=items[0].o.id;
+    const sel=items.find(x=>x.o.id===hubSel);
+    const group=(label,arr)=>arr.length?`<div class="rlabel">${label}</div>`+arr.map(railItem).join(''):'';
+    $('#hubbody').innerHTML=`<div class="mdwrap">
+      <div class="mdrail">${group('Campaigns',items.filter(x=>x.type==='camp'))}${group('Mini-series',items.filter(x=>x.type==='mini'))}${group('Posts',items.filter(x=>x.type==='idea'))}</div>
+      <div class="mddetail">${mdDetail(sel)}</div>
+    </div>`;
+    return;
+  }
   let html='';
   if(hubTab==='ideas'){
     html+=`<div class="hubcap"><textarea id="hubdump" placeholder="Dump an idea — or paste a whole braindump and split it…"></textarea>

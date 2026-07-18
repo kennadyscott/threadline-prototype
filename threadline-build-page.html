@@ -270,6 +270,16 @@ input,textarea,select{font-family:inherit}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 svg.defs{position:absolute;width:0;height:0}
 </style>
+<style>
+/* menu = slide-out drawer at every width */
+.app{display:block}
+.hamb{display:inline-flex}
+.app .sidebar{display:flex;position:fixed;top:0;left:0;bottom:0;height:100dvh;width:min(300px,84vw);z-index:70;transform:translateX(-105%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:0 24px 70px rgba(15,18,34,.28)}
+.app.nav-open .sidebar{transform:translateX(0)}
+.scrim{display:block;position:fixed;inset:0;background:rgba(15,18,34,.45);z-index:65;opacity:0;pointer-events:none;transition:opacity .25s}
+.app.nav-open .scrim{opacity:1;pointer-events:auto}
+.main{min-height:100vh}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
