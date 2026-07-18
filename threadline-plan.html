@@ -304,7 +304,16 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .minimenu button:hover{background:var(--surface-2)}
 .minimenu button span{display:block;font-size:11px;color:var(--faint);font-weight:600}
 .rulesec{border:1px solid var(--line-2);border-radius:13px;padding:13px 15px;margin-bottom:14px}
-.gearbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:15px;color:var(--muted);display:inline-grid;place-items:center}
+.gearbtn{border:1px solid var(--line);background:var(--surface);border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:15px;color:var(--muted);display:inline-grid;place-items:center;flex:none}
+.wsx{position:absolute;top:14px;right:16px;width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-weight:800;font-size:13px;cursor:pointer;z-index:5}
+.wsx:hover{color:var(--ink);border-color:var(--faint)}
+.thsort{cursor:pointer;user-select:none}
+.thsort:hover{color:var(--ink)}
+.sarr{font-size:9px;margin-left:4px;color:var(--violet)}
+.gbmenu{position:absolute;z-index:200;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.14);padding:6px;min-width:170px;display:flex;flex-direction:column}
+.gbo{border:none;background:none;text-align:left;font-family:inherit;font-weight:700;font-size:13px;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
+.gbo:hover{background:var(--surface-2);color:var(--ink)}
+.gbo.on{color:var(--violet)}
 .gearbtn:hover{color:var(--violet);border-color:var(--violet)}
 .serpill.blink{cursor:pointer}
 .serpill.blink:hover{filter:brightness(.92)}
@@ -375,16 +384,12 @@ svg.defs{position:absolute;width:0;height:0}
 
     <div class="content">
       <div class="colmain">
-        <div class="greet"><h1 style="display:flex;align-items:center;gap:10px">Plan <button class="gearbtn" onclick="openRules()" title="Planning rules — reviews, cadence, scheduling defaults">⚙</button></h1><p>Organize your content system by rhythm, status, and schedule.</p></div>
+        <div class="greet"><h1>Plan <span style="font-size:20px">📅</span></h1><p>Organize your content system by rhythm, status, and schedule.</p></div>
         <div id="welcome"></div>
         <div class="views" id="views"></div>
         <div class="cbar">
-          <button class="csel" onclick="toast('Search within Plan')">🔍 Search</button>
-          <button class="csel" onclick="toast('Filter by owner')">👤 Person</button>
-          <button class="csel" onclick="toast('Filter: status, series, pillar, format, channel…')">⚙ Filter</button>
-          <button class="csel" onclick="toast('Sort options')">↕ Sort</button>
-          <button class="csel" onclick="toast('Hide fields')">🙈 Hide</button>
-          <button class="csel" onclick="toast('Group by: Month · Week · Series · Pillar · Status · Owner')">▦ Group by: Month ▾</button>
+          <button class="csel" id="gbtn" onclick="gbMenu(event)">Group by: <b id="gblabel" style="color:var(--ink)">Month</b> ▾</button>
+          <span style="font-size:11.5px;color:var(--faint)">Click any column header to sort within a group</span>
           <span class="sp"></span>
           <button class="autofill" onclick="openAutofill()">✦ Auto-fill suggestions</button>
         </div>
@@ -428,6 +433,10 @@ svg.defs{position:absolute;width:0;height:0}
     <label class="ckrow"><input type="checkbox" checked><b>Auto-schedule suggestions</b></label>
     <label class="ckrow"><input type="checkbox" checked><b>Avoid weekends</b></label>
     <label class="ckrow"><input type="checkbox" checked><b>Respect content cadence</b></label>
+  </div>
+  <div class="rulesec"><h6>Views</h6>
+    <div class="df"><label>Default view — what Plan opens to</label><select id="r-view"><option value="planner">Planner</option><option value="kanban">Kanban</option><option value="calendar">Calendar</option></select></div>
+    <div style="font-size:11.5px;color:var(--faint);margin-top:6px">Switch views any time with the tabs above the planner.</div>
   </div>
   <div class="dbtns"><button class="dbtn ghost" onclick="closeRules()">Cancel</button><div class="grow"></div><button class="dbtn pri" onclick="saveRules()">Save rules</button></div>
 </div></div>
@@ -549,20 +558,51 @@ const VIEWS=[['planner','📋','Planner','Structured planning'],['kanban','🗂'
 function renderViews(){
   let main='planner'; try{ main=localStorage.getItem(VKEY)||'planner'; }catch(e){}
   $('#views').innerHTML=VIEWS.map(([k,i,l,d])=>`<button class="vtab${view===k?' on':''}" onclick="setView('${k}')"><span class="vi">${i}</span><span><b>${l}</b><span>${d}</span></span></button>`).join('')
-   +`<span class="sp"></span><button class="defsel" onclick="toast('Default view saves per user')">Default view: <b style="color:var(--ink)">${VIEWS.find(v=>v[0]===main)[2]}</b> ▾</button>`;
+   +`<span class="sp"></span><button class="gearbtn" onclick="openRules()" title="Settings — default view, planning rules">⚙</button>`;
 }
 function setView(k){ view=k; render(); }
 function setMain(){ try{ localStorage.setItem(VKEY,view); }catch(e){} render(); toast('Saved — '+VIEWS.find(v=>v[0]===view)[2]+' is your main view'); }
 
 /* ---------- PLANNER ---------- */
+let groupBy='month', sortCol=null, sortDir=1;
+const GROUPINGS=[['month','Month'],['campaign','Campaign'],['series','Series'],['pillar','Pillar'],['owner','Owner']];
+function gbMenu(e){
+  e.stopPropagation();
+  let m=document.getElementById('gbmenu'); if(m){ m.remove(); return; }
+  const r=e.currentTarget.getBoundingClientRect();
+  m=document.createElement('div'); m.id='gbmenu'; m.className='gbmenu';
+  m.style.left=r.left+'px'; m.style.top=(r.bottom+window.scrollY+6)+'px';
+  m.innerHTML=GROUPINGS.map(([k,l])=>`<button class="gbo${groupBy===k?' on':''}" onclick="setGroup('${k}')">${l}${groupBy===k?' <span style=\"float:right\">✓</span>':''}</button>`).join('');
+  document.body.appendChild(m);
+  setTimeout(()=>document.addEventListener('click',function h(){ const x=document.getElementById('gbmenu'); if(x) x.remove(); document.removeEventListener('click',h); },{once:true}),0);
+}
+function setGroup(k){ groupBy=k; const m=document.getElementById('gbmenu'); if(m) m.remove();
+  const lb=document.getElementById('gblabel'); if(lb) lb.textContent=GROUPINGS.find(g=>g[0]===k)[1]; render(); }
+function groupsFor(){
+  const act=ITEMS.filter(x=>!x.arch);
+  if(groupBy==='month') return [['July 2026',act.filter(x=>x.m===7)],['August 2026',act.filter(x=>x.m===8)]];
+  const keyf=groupBy==='campaign'?(x=>x.camp||'Not in a campaign')
+    :groupBy==='series'?(x=>x.ser||'No series')
+    :groupBy==='pillar'?(x=>(SER[x.ser]||{}).pillar||'General')
+    :(x=>x.owner||'Kennady');
+  const m=new Map();
+  act.forEach(x=>{ const k=keyf(x); if(!m.has(k)) m.set(k,[]); m.get(k).push(x); });
+  return [...m.entries()].sort((a,b)=>a[0]==='Not in a campaign'?1:b[0]==='Not in a campaign'?-1:0);
+}
+const SORTGET={title:x=>(x.t||'').toLowerCase(),date:x=>x.m*100+(x.d||99),status:x=>x.status||'',fmt:x=>x.fmt||'',belongs:x=>x.camp?'0'+x.camp.toLowerCase():'1'+(x.ser||'zz').toLowerCase()};
+function sortItems(arr){ if(!sortCol||!SORTGET[sortCol]) return arr; const g=SORTGET[sortCol];
+  return [...arr].sort((a,b)=>{ const A=g(a),B2=g(b); return (A>B2?1:A<B2?-1:0)*sortDir; }); }
+function sortBy(c){ if(sortCol===c) sortDir=-sortDir; else { sortCol=c; sortDir=1; } render(); }
 function plannerHTML(){
-  const groups=[['July 2026', ITEMS.filter(x=>x.m===7&&!x.arch)],
-                ['August 2026', ITEMS.filter(x=>x.m===8&&!x.arch)]];
+  const groups=groupsFor();
   const total=ITEMS.filter(x=>!x.arch&&!x.open).length;
+  const ar=c=>sortCol===c?`<span class="sarr">${sortDir>0?'▲':'▼'}</span>`:'';
   return `<div class="tablewrap" id="twrap"><table>
-    <tr><th></th><th>Content Idea</th><th>Post Date</th><th>Status</th><th>Format</th><th>Belongs to</th><th>Channels</th><th>Assets</th><th>Notes</th></tr>
-    ${groups.map(([g,items])=>`<tr class="ghead"><td colspan="9">▾ ${g}<span class="gn">${items.filter(x=>!x.open).length}</span></td></tr>
-      ${items.map(x=>x.open?openRow(x):itemRow(x)).join('')}`).join('')}
+    <tr><th></th><th class="thsort" onclick="sortBy('title')" title="Sort within each group">Content Idea${ar('title')}</th><th class="thsort" onclick="sortBy('date')" title="Sort within each group">Post Date${ar('date')}</th><th class="thsort" onclick="sortBy('status')" title="Sort within each group">Status${ar('status')}</th><th class="thsort" onclick="sortBy('fmt')" title="Sort within each group">Format${ar('fmt')}</th><th class="thsort" onclick="sortBy('belongs')" title="Sort within each group">Belongs to${ar('belongs')}</th><th>Channels</th><th>Assets</th><th>Notes</th></tr>
+    ${groups.map(([g,items])=>{
+      const rows=sortItems(items.filter(x=>!x.open)); const opens=items.filter(x=>x.open);
+      return `<tr class="ghead"><td colspan="9">▾ ${esc(g)}<span class="gn">${rows.length}</span></td></tr>${rows.map(itemRow).join('')}${opens.map(openRow).join('')}`;
+    }).join('')}
   </table>
   <div class="tfoot"><span>Showing 1–${total} of ${total} ideas</span><span class="sp"></span><button class="addbtn" onclick="addIdea()">＋ Add content idea</button></div></div>`;
 }
@@ -647,9 +687,12 @@ function calendarHTML(){
 /* ---------- team review rules (shared with Settings via localStorage) ---------- */
 const RKEY='threadline.teamRules';
 function getRules(){ try{ return Object.assign({required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}, JSON.parse(localStorage.getItem(RKEY)||'{}')); }catch(e){ return {required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}; } }
-function openRules(){ const r=getRules(); $('#r-required').checked=!!r.required; $('#r-reviewer').value=r.reviewer; $('#r-submit').value=r.submit; $('#rulesOverlay').classList.add('on'); }
+function openRules(){ const r=getRules(); $('#r-required').checked=!!r.required; $('#r-reviewer').value=r.reviewer; $('#r-submit').value=r.submit;
+  try{ $('#r-view').value=localStorage.getItem(VKEY)||'planner'; }catch(e){}
+  $('#rulesOverlay').classList.add('on'); }
 function closeRules(){ $('#rulesOverlay').classList.remove('on'); }
 function saveRules(){ const r={required:$('#r-required').checked?1:0,reviewer:$('#r-reviewer').value,submit:$('#r-submit').value};
+  try{ localStorage.setItem(VKEY,$('#r-view').value); }catch(e){} renderViews();
   try{ localStorage.setItem(RKEY,JSON.stringify(r)); }catch(e){}
   closeRules(); render(); toast(r.required?'Reviews required — '+r.reviewer+' approves before scheduling':'Solo mode — you mark posts ready yourself'); }
 
@@ -741,6 +784,7 @@ function useAsset(){ const x=ITEMS.find(i=>i.id===asId); if(x) x.asset='🎨'; c
 let wsId=null;
 function openWs(id){ wsId=id; const x=ITEMS.find(i=>i.id===id); if(!x) return;
   $('#ws').innerHTML=`
+    <button class="wsx" onclick="closeWs()" title="Close — back to the planner">✕</button>
     <span class="dk">Content workspace</span>
     <input class="dt" id="ws-t" value="${esc(x.t)}">
     <div class="dmeta">${x.w||'No date yet'} · ${esc(x.ser)} · Kennady</div>
@@ -783,6 +827,9 @@ function wsStatus(st){ const x=ITEMS.find(i=>i.id===wsId); if(!x) return;
   closeWs(); render(); toast('“'+x.t.slice(0,30)+'…” → '+st+(st==='Ready for Review'?' · assigned to '+getRules().reviewer:st==='Scheduled'?' · Wednesday 9:00 AM':''));
 }
 function closeWs(){ $('#scrim').classList.remove('on'); $('#ws').classList.remove('on'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeWs();
+  ['gbmenu','ibPickOverlay','workOverlay'].forEach(id=>{ const el=document.getElementById(id); if(el) el.remove(); });
+  if(typeof closeRules==='function') closeRules(); } });
 
 /* ---------- auto-fill ---------- */
 const AF=[
@@ -817,9 +864,7 @@ function renderRail(){
       <div class="leg">${Object.entries(counts).map(([n,c])=>`<div class="lr"><span class="ld" style="background:${(SER[n]||{}).color}"></span>${esc(n)}<span class="ln">${c}</span></div>`).join('')}</div>
       <button class="rlink" onclick="location.href='threadline-analytics.html'">Analytics →</button></div>
   </div></div>
-  <div class="rpanel"><h3>Views & controls</h3><p class="rsub">See your plan the way that works best for you.</p>
-    ${VIEWS.map(([k,i,l,d])=>`<button class="vc${view===k?' on':''}" onclick="setView('${k}')">${i} <span style="flex:1"><b style="font-size:13px">${l}</b><span>${d}</span></span>${view===k?'<span class="ck2">✓</span>':''}</button>`).join('')}
-    <button class="rlink" style="width:100%;justify-content:center" onclick="setMain()">✦ Set ${VIEWS.find(v=>v[0]===view)[2]} as main view</button></div>`;
+  `;
 }
 
 /* ---------- welcome ---------- */
