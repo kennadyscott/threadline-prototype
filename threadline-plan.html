@@ -314,6 +314,13 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .gbo{border:none;background:none;text-align:left;font-family:inherit;font-weight:700;font-size:13px;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer}
 .gbo:hover{background:var(--surface-2);color:var(--ink)}
 .gbo.on{color:var(--violet)}
+.lcgrp{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:10px 0 5px}
+.lcrow{display:flex;align-items:center;gap:12px;padding:3px 0;flex-wrap:wrap}
+.lcchip{font-size:11px;font-weight:800;color:#fff;border-radius:6px;padding:5px 10px;min-width:118px;text-align:center;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.lcs{display:flex;gap:5px;flex-wrap:wrap}
+.lcd{width:18px;height:18px;border-radius:6px;cursor:pointer;border:2px solid transparent;box-sizing:border-box}
+.lcd:hover{transform:scale(1.15)}
+.lcd.on{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--surface)}
 .gearbtn:hover{color:var(--violet);border-color:var(--violet)}
 .serpill.blink{cursor:pointer}
 .serpill.blink:hover{filter:brightness(.92)}
@@ -419,7 +426,7 @@ svg.defs{position:absolute;width:0;height:0}
   <div id="as-body"></div>
 </div></div>
 
-<div class="overlay" id="rulesOverlay"><div class="modal">
+<div class="overlay" id="rulesOverlay"><div class="modal" style="max-height:84vh;overflow-y:auto">
   <h3>⚙ Planning rules</h3>
   <p class="msub">How Threadline plans — and how your team reviews.</p>
   <div class="rulesec"><h6>Team & reviews</h6>
@@ -437,6 +444,10 @@ svg.defs{position:absolute;width:0;height:0}
   <div class="rulesec"><h6>Views</h6>
     <div class="df"><label>Default view — what Plan opens to</label><select id="r-view"><option value="planner">Planner</option><option value="kanban">Kanban</option><option value="calendar">Calendar</option></select></div>
     <div style="font-size:11.5px;color:var(--faint);margin-top:6px">Switch views any time with the tabs above the planner.</div>
+  </div>
+  <div class="rulesec"><h6>Label colors</h6>
+    <div style="font-size:11.5px;color:var(--faint);margin-bottom:4px">Make the board scan the way your brain sorts — click a swatch and every chip updates instantly.</div>
+    <div id="lcwrap"></div>
   </div>
   <div class="dbtns"><button class="dbtn ghost" onclick="closeRules()">Cancel</button><div class="grow"></div><button class="dbtn pri" onclick="saveRules()">Save rules</button></div>
 </div></div>
@@ -480,6 +491,32 @@ const STATUS={
   'Published':{bg:'rgba(15,23,42,.08)',c:'#54607a',solid:'#20b878'},
 };
 const CAMPN=(B.name||'Brand')+' Point-of-View Campaign';
+const LCKEY='threadline.labelColors';
+let LC=(function(){ try{ return JSON.parse(localStorage.getItem(LCKEY))||{}; }catch(e){ return {}; } })();
+LC.status=LC.status||{}; LC.series=LC.series||{};
+const PALETTE=['#803dff','#3b82f6','#0891b2','#20b878','#f5a524','#fb7185','#ec4899','#64748b','#0f172a'];
+function applyLabelColors(){
+  Object.entries(LC.status).forEach(([k,v])=>{ if(STATUS[k]) STATUS[k].solid=v; });
+  Object.entries(LC.series).forEach(([k,v])=>{ if(SER[k]) SER[k].color=v; });
+}
+applyLabelColors();
+function campColor(){ return LC.campaign||'#803dff'; }
+function renderLC(){
+  const el=document.getElementById('lcwrap'); if(!el) return;
+  const dots=(cat,key,cur)=>PALETTE.map(c=>`<span class="lcd${cur===c?' on':''}" style="background:${c}" onclick="setLabelColor('${cat}','${key.replace(/'/g,"\\'")}','${c}')" title="${c}"></span>`).join('');
+  el.innerHTML=
+    `<div class="lcgrp">Status</div>`+
+    Object.keys(STATUS).map(st=>`<div class="lcrow"><span class="lcchip" style="background:${STATUS[st].solid}">${st}</span><span class="lcs">${dots('status',st,STATUS[st].solid)}</span></div>`).join('')+
+    `<div class="lcgrp">Series</div>`+
+    Object.keys(SER).map(sn=>`<div class="lcrow"><span class="lcchip" style="background:${SER[sn].color}">${esc(sn)}</span><span class="lcs">${dots('series',sn,SER[sn].color)}</span></div>`).join('')+
+    `<div class="lcgrp">Campaigns</div>
+     <div class="lcrow"><span class="lcchip" style="background:${campColor()}">Campaign</span><span class="lcs">${dots('campaign','campaign',campColor())}</span></div>`;
+}
+function setLabelColor(cat,key,c){
+  if(cat==='campaign') LC.campaign=c; else LC[cat][key]=c;
+  try{ localStorage.setItem(LCKEY,JSON.stringify(LC)); }catch(e){}
+  applyLabelColors(); render(); if(typeof renderRail==='function') renderRail(); renderLC();
+}
 const S0=B.series[0]?B.series[0][0]:'Series', S1=B.series[1]?B.series[1][0]:'Series', S2=B.series[2]?B.series[2][0]:'Series', S3=B.series[3]?B.series[3][0]:S0, S4=B.series[4]?B.series[4][0]:S1;
 const Q=B.audience.questions;
 let ITEMS=[
@@ -507,7 +544,7 @@ let checks=new Set(), kfilter='all';
 /* ---------- shared ---------- */
 function serPill(name){ const s=SER[name]||{color:'#803dff'}; return `<span class="serpill" style="background:${s.color}1a;color:${s.color}">${esc(name)}</span>`; }
 function belongsPill(x){
-  if(x.camp) return `<span class="serpill blink" style="background:var(--violet);color:#fff" title="Part of a campaign — click for the full brief" onclick="event.stopPropagation();openWork('camp','${esc(x.camp).replace(/'/g,"\\'")}')"><b>Campaign</b> ${esc(x.camp.replace(/ Campaign$/,'').replace((B.name||'')+' ',''))}</span>`;
+  if(x.camp) return `<span class="serpill blink" style="background:${campColor()};color:#fff" title="Part of a campaign — click for the full brief" onclick="event.stopPropagation();openWork('camp','${esc(x.camp).replace(/'/g,"\\'")}')"><b>Campaign</b> ${esc(x.camp.replace(/ Campaign$/,'').replace((B.name||'')+' ',''))}</span>`;
   if(x.ser&&!x.un){ const c=(SER[x.ser]||{}).color||'#803dff';
     return `<span class="serpill blink" style="background:${c};color:#fff" title="Part of a series — click for the series view" onclick="event.stopPropagation();openWork('ser','${esc(x.ser).replace(/'/g,"\\'")}')">${esc(x.ser)}</span>`; }
   return `<span class="serpill" style="background:#e8ecf4;color:#54607a">Post</span>`;
@@ -689,6 +726,7 @@ const RKEY='threadline.teamRules';
 function getRules(){ try{ return Object.assign({required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}, JSON.parse(localStorage.getItem(RKEY)||'{}')); }catch(e){ return {required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}; } }
 function openRules(){ const r=getRules(); $('#r-required').checked=!!r.required; $('#r-reviewer').value=r.reviewer; $('#r-submit').value=r.submit;
   try{ $('#r-view').value=localStorage.getItem(VKEY)||'planner'; }catch(e){}
+  renderLC();
   $('#rulesOverlay').classList.add('on'); }
 function closeRules(){ $('#rulesOverlay').classList.remove('on'); }
 function saveRules(){ const r={required:$('#r-required').checked?1:0,reviewer:$('#r-reviewer').value,submit:$('#r-submit').value};
