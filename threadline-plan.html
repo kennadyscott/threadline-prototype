@@ -67,8 +67,7 @@ input,textarea,select{font-family:inherit}
 .newspark{display:inline-flex;align-items:center;gap:8px;background:var(--grad2);color:#fff;font-weight:800;font-size:14px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 20px rgba(128,61,255,.25)}
 .newspark:hover{filter:brightness(1.06)}
 
-.content{display:grid;grid-template-columns:1fr 300px;gap:22px;padding:26px 28px 0;max-width:1500px}
-@media(max-width:1150px){.content{grid-template-columns:1fr}}
+.content{display:grid;grid-template-columns:1fr;gap:22px;padding:26px 28px 0;max-width:1500px;margin:0 auto;width:100%}
 .colmain{min-width:0}
 .greet h1{font-size:clamp(24px,3vw,30px);display:flex;align-items:center;gap:10px}
 .greet p{color:var(--muted);font-size:14.5px;margin-top:4px}
@@ -433,7 +432,6 @@ svg.defs{position:absolute;width:0;height:0}
         <div id="view"></div>
         <div class="ibank" id="ibank"></div>
       </div>
-      <div class="rail" id="rail"></div>
     </div>
   </div>
 </div>
@@ -949,24 +947,7 @@ function approveAutofill(){ closeAutofill();
 
 /* ---------- right rail ---------- */
 function expandBank(){ if(typeof ibCollapsed!=='undefined'&&ibCollapsed) ibToggle(); const b=document.getElementById('ibank'); if(b) b.scrollIntoView({behavior:'smooth',block:'center'}); }
-function renderRail(){
-  const counts={}; ITEMS.filter(x=>!x.arch&&!x.open&&!x.un).forEach(x=>counts[x.ser]=(counts[x.ser]||0)+1);
-  const tot=Object.values(counts).reduce((a,b)=>a+b,0);
-  let acc=0; const segs=Object.entries(counts).map(([n,c])=>{ const from=acc/tot*360, to=(acc+c)/tot*360; acc+=c; return `${(SER[n]||{}).color||'#ccc'} ${from}deg ${to}deg`; }).join(', ');
-  const bank=IDEAS.filter(i=>!i.posted);
-  $('#rail').innerHTML=`
-  <div class="rpanel"><div class="pulse2">
-    <div class="pcol"><h3>Pillar balance</h3><p class="rsub">This month</p>
-      <div class="donut sm" data-n="${tot}" style="background:conic-gradient(${segs})"></div>
-      <div class="leg">${Object.entries(counts).map(([n,c])=>`<div class="lr"><span class="ld" style="background:${(SER[n]||{}).color}"></span>${esc(n)}<span class="ln">${c}</span></div>`).join('')}</div>
-      <button class="rlink" onclick="location.href='threadline-analytics.html'">Analytics →</button></div>
-    <div class="pcol"><h3>Idea Bank</h3><p class="rsub">${bank.length} unscheduled</p>
-      ${bank.slice(0,4).map(i=>{ const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
-        return `<div class="ribr" onclick="ibSpot()" title="${esc(i.sum||'')} — click to schedule it"><span class="ibdot" style="background:${tm.c}"></span><span class="ribt">${esc(i.t)}</span></div>`; }).join('')||'<div style="font-size:12px;color:var(--faint)">Nothing waiting — nice.</div>'}
-      <button class="rlink" onclick="expandBank()">Open the bank ↓</button></div>
-  </div></div>
-  `;
-}
+function renderRail(){ /* rail retired — planner runs full width; pillar balance lives in Analytics */ }
 
 /* ---------- welcome ---------- */
 const WKEY='threadline.planWelcomed';
