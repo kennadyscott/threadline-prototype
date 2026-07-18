@@ -467,7 +467,7 @@ svg.defs{position:absolute;width:0;height:0}
 
 <div class="overlay" id="miniOverlay"><div class="modal">
   <h3>📱 New mini-series</h3>
-  <p class="msub">A mini-series is a light, repeatable format for socials — one recognizable angle, episode after episode. Threadline drafts the first batch of episodes.</p>
+  <p class="msub">A mini-series is a light, repeatable format for socials — one recognizable angle, post after post. Threadline drafts the first batch of posts.</p>
   <div class="mf"><label>Series name (or leave blank — AI will name it)</label><input id="mn-name" placeholder="e.g. Myth vs. Reality"></div>
   <div class="mf"><label>What's the recurring idea?</label><input id="mn-idea" placeholder="e.g. bust one myth about our industry every week"></div>
   <div class="macts"><button class="mbtn ghost" onclick="closeMini()">Cancel</button><div class="grow"></div><button class="mbtn pri" id="mn-go" onclick="createMini()">✦ Spin the series</button></div>
@@ -659,19 +659,19 @@ async function createMini(seedName,seedIdea){
   const name=seedName||$('#mn-name').value.trim(); const idea=seedIdea||$('#mn-idea').value.trim();
   if(!name&&!idea){ $('#mn-name').focus(); return; }
   const go=$('#mn-go'); if(go){go.disabled=true;go.textContent='✦ Spinning…';}
-  let m=await hubAI('Design a social-media MINI-SERIES for this brand: a light, repeatable format built from one idea. Return: name (catchy, 2-4 words), premise (one sentence — the repeatable format), cadence (e.g. Weekly), channels (1-2 social channels that fit), episodes = 4-5 {t: episode title under 12 words, hook: one-line opening hook in the brand voice}.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nVoice: '+B.voice.traits.join(', ')+'\nAudience: '+B.audience.primary+'\n\nSeries idea: '+(name?name+' — ':'')+(idea||'spin something from the brand POV'), MINI_SCHEMA, 900);
+  let m=await hubAI('Design a social-media MINI-SERIES for this brand: a light, repeatable format built from one idea. Return: name (catchy, 2-4 words), premise (one sentence — the repeatable format), cadence (e.g. Weekly), channels (1-2 social channels that fit), episodes = 4-5 series POSTS (these are social posts, not video episodes) {t: post title under 12 words, hook: one-line opening hook in the brand voice}.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nVoice: '+B.voice.traits.join(', ')+'\nAudience: '+B.audience.primary+'\n\nSeries idea: '+(name?name+' — ':'')+(idea||'spin something from the brand POV'), MINI_SCHEMA, 900);
   if(!m) m={ name:name||'The Weekly Thread', premise:(idea||'One recurring angle, every week — light to make, easy to recognize.'),
     cadence:'Weekly', channels:['Instagram'],
-    episodes:[{t:'Episode 1 — the premise, stated plainly',hook:(window.stripTags?stripTags(B.messaging.primary):'')},
-      {t:'Episode 2 — the myth to bust',hook:(window.stripTags?stripTags(B.messaging.pov):'')},
-      {t:'Episode 3 — a real example',hook:'Show, don\u2019t tell.'},
-      {t:'Episode 4 — your audience\u2019s question',hook:B.audience.questions[0]||'Answer the one they always ask.'}] };
+    episodes:[{t:'Post 1 — the premise, stated plainly',hook:(window.stripTags?stripTags(B.messaging.primary):'')},
+      {t:'Post 2 — the myth to bust',hook:(window.stripTags?stripTags(B.messaging.pov):'')},
+      {t:'Post 3 — a real example',hook:'Show, don\u2019t tell.'},
+      {t:'Post 4 — your audience\u2019s question',hook:B.audience.questions[0]||'Answer the one they always ask.'}] };
   const mini={id:uid(),name:m.name||name,premise:m.premise,cadence:m.cadence||'Weekly',channels:(m.channels||['Instagram']).slice(0,3),
     episodes:(m.episodes||[]).slice(0,6),status:'idea'};
   HUB.minis.unshift(mini); hubSave(); closeMini();
   if($('#mn-name'))$('#mn-name').value=''; if($('#mn-idea'))$('#mn-idea').value='';
   if(go){go.disabled=false;go.textContent='✦ Spin the series';}
-  openMini=mini.id; renderHub(); toast('Mini-series drafted — '+mini.episodes.length+' episodes ready');
+  openMini=mini.id; renderHub(); toast('Mini-series drafted — '+mini.episodes.length+' posts ready');
 }
 function ideaToMini(id){
   const i=HUB.ideas.find(x=>x.id===id); if(!i) return;
@@ -693,7 +693,7 @@ function miniCard(m){
       <div class="ct2"><b>${esc(m.name)} <span class="prio" style="background:#0891b2">Mini-series · ${esc(m.cadence)}</span></b>
         <div class="csnip">${esc(m.premise)}</div>
         <div class="cmeta">${m.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}
-          <span class="cdots"><em>${m.episodes.length} episodes</em></span></div>
+          <span class="cdots"><em>${m.episodes.length} posts</em></span></div>
       </div>
     </div>
     <div class="cacts">${acts}<button class="hb" onclick="openMini=openMini==='${m.id}'?null:'${m.id}';renderHub()">${open?'Close ▴':'Open ▾'}</button></div>
@@ -702,10 +702,10 @@ function miniCard(m){
 }
 function miniDetail(m){
   return `<div class="csec"><h5>The format</h5><p>${esc(m.premise)}</p></div>
-      <div class="csec"><h5>Episodes</h5>
-        ${m.episodes.map((e,i)=>`<div class="asset"><div class="ahead"><span class="chch">Ep ${i+1}</span><b>${esc(e.t)}</b></div>
+      <div class="csec"><h5>The posts in this series</h5>
+        ${m.episodes.map((e,i)=>`<div class="asset"><div class="ahead"><span class="chch">Post ${i+1}</span><b>${esc(e.t)}</b></div>
           <div class="cap">${esc(e.hook)}</div>
-          <div class="arow"><button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Write episode ${i+1} of my ${esc(m.name).replace(/'/g,'’')} mini-series: ${esc(e.t).replace(/'/g,'’')}')">Build this episode →</button></div></div>`).join('')}
+          <div class="arow"><button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Write post ${i+1} of my ${esc(m.name).replace(/'/g,'’')} series: ${esc(e.t).replace(/'/g,'’')}')">Build this post →</button></div></div>`).join('')}
       </div>`;
 }
 
@@ -873,7 +873,7 @@ function scheduleCampaign(id){
 }
 function scheduleMini(id){ const m=HUB.minis.find(x=>x.id===id); if(!m) return; const mon=nextMonday();
   m.schedule=m.episodes.map((e,i)=>{ const d=new Date(mon); d.setDate(d.getDate()+i*7+chOff(m.channels[0])); return {title:e.t,week:i+1,ch:m.channels[0]||'Social',date:d.toISOString()}; });
-  m.status='scheduled'; hubSave(); hubTab='scheduled'; renderHub(); toast('Series scheduled — one episode per '+(m.cadence||'week').toLowerCase()+' 🗓'); }
+  m.status='scheduled'; hubSave(); hubTab='scheduled'; renderHub(); toast('Series scheduled — one post per '+(m.cadence||'week').toLowerCase()+' 🗓'); }
 function scheduleIdea(id){ const i=HUB.ideas.find(x=>x.id===id); if(!i) return; const d=nextMonday(); d.setDate(d.getDate()+1);
   i.schedule=[{title:i.t,week:1,ch:i.kind||'Post',date:d.toISOString()}]; i.status='scheduled'; hubSave(); hubTab='scheduled'; renderHub(); toast('Scheduled 🗓'); }
 function railItem(x){
@@ -882,7 +882,7 @@ function railItem(x){
     return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
       <div class="rmeta"><span class="tchip t-camp">Campaign</span><em>${done}/${o.assets.length}</em><span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div></button>`; }
   if(x.type==='mini') return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
-      <div class="rmeta"><span class="tchip t-mini">Series</span><em>${o.episodes.length} eps · ${esc(o.cadence)}</em></div></button>`;
+      <div class="rmeta"><span class="tchip t-mini">Series</span><em>${o.episodes.length} posts · ${esc(o.cadence)}</em></div></button>`;
   return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.t)}</b>
       <div class="rmeta"><span class="tchip">${esc(o.kind||'Post')}</span><em>${esc(o.pillar||'')}</em></div></button>`;
 }
@@ -906,7 +906,7 @@ function mdDetail(x){
       ?`<button class="hb pri" onclick="miniStatus('${o.id}','progress')">Start building →</button><button class="hb" onclick="dropMini('${o.id}')">Archive</button>`
       :inAppr
       ?(stg==='approved'
-        ?`<button class="hb pri" onclick="scheduleMini('${o.id}')">Schedule — one episode per ${esc((o.cadence||'week').toLowerCase().replace(/ly$/,''))}</button><button class="hb" onclick="setAppr('mini','${o.id}','awaiting')">↩ Un-approve</button>`
+        ?`<button class="hb pri" onclick="scheduleMini('${o.id}')">Schedule — one post per ${esc((o.cadence||'week').toLowerCase().replace(/ly$/,''))}</button><button class="hb" onclick="setAppr('mini','${o.id}','awaiting')">↩ Un-approve</button>`
         :`<button class="hb pri" onclick="setAppr('mini','${o.id}','approved')">✓ Approve</button><button class="hb" onclick="setAppr('mini','${o.id}','feedback')">↻ Request changes</button><button class="hb" onclick="miniStatus('${o.id}','progress')">← Back to build</button>`)
       :`<button class="hb pri" onclick="miniStatus('${o.id}','approval')">Submit for approval →</button><button class="hb" onclick="location.href='threadline-series.html'">Open in Series →</button><button class="hb" onclick="miniStatus('${o.id}','idea')">←</button>`;
     const fb=inAppr&&stg==='feedback'?`<input class="anote" style="margin-top:10px;width:100%" placeholder="What needs to change?" value="${esc(o.fnote||'')}" onchange="noteFb('mini','${o.id}',this)">`:'';

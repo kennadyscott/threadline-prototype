@@ -403,7 +403,7 @@ function conceptHTML(c){
     <div><div class="cmeta"><h6>Cadence</h6><div class="cv">${c.cad}</div></div>
       <div class="cmeta"><h6>Formats</h6><div class="fchips"><i class="f1">▤</i><i class="f2">▶</i><i class="f3">☰</i></div></div>
       <div class="cmeta"><h6>Effort</h6><div class="cv" style="font-size:12px;color:var(--muted)">${c.effort}</div></div></div>
-    <div class="eps"><h6>Sample episode ideas</h6><ul>${c.eps.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>
+    <div class="eps"><h6>Sample post ideas</h6><ul>${c.eps.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>
     <div class="cacts">
       ${c.state==='active'?`<button class="cb done">✓ Activated</button>`:`<button class="cb pri" onclick="openAct(${c.id})">▶ Activate series</button>`}
       ${c.state==='draft'?`<button class="cb done">✓ Draft saved</button>`:`<button class="cb" onclick="saveDraft(${c.id})">🔖 Save draft</button>`}
@@ -426,7 +426,7 @@ function regenerate(){
   // rotate sample episodes to feel fresh
   CONCEPTS.forEach(c=>c.eps.push(c.eps.shift()));
   $('#results').innerHTML=''; $('#think').classList.add('on');
-  setTimeout(()=>{ $('#think').classList.remove('on'); $('#results').innerHTML=resultsHTML(); toast('Regenerated — same strategic mix, fresh episode ideas'); },900);
+  setTimeout(()=>{ $('#think').classList.remove('on'); $('#results').innerHTML=resultsHTML(); toast('Regenerated — same strategic mix, fresh post ideas'); },900);
 }
 function saveDraft(id){ CONCEPTS[id].state='draft'; render(); toast('Saved as draft — find it here anytime'); }
 
@@ -498,9 +498,9 @@ function renderRail(){
     <div class="bestcard" onclick="openAct(0)"><div class="cicon" style="background:rgba(128,61,255,.1)">👓</div><div><b>Founder POV</b><span>High potential for trust &amp; authority.</span></div><span class="bfit">Best fit</span></div>
     <div class="bwhy"><b>Why it’s a great fit</b><br>Positions you as a thought leader and builds strong audience connection.</div>
   </div>
-  <div class="rpanel reserve"><span class="rn">12 ideas</span><h3>Starter episode reserve</h3><p class="rsub">Kickstart your new series.</p>
-    <div style="font-size:12.5px;color:var(--muted);line-height:1.5">AI-generated episode ideas are ready to add to your Plan.</div>
-    <button class="rlink" onclick="toast('Episode ideas — sourced from Idea Bank + your brand foundation')">View episode ideas →</button>
+  <div class="rpanel reserve"><span class="rn">12 ideas</span><h3>Starter post reserve</h3><p class="rsub">Kickstart your new series.</p>
+    <div style="font-size:12.5px;color:var(--muted);line-height:1.5">AI-generated post ideas are ready to add to your Plan.</div>
+    <button class="rlink" onclick="toast('Post ideas — sourced from Idea Bank + your brand foundation')">View post ideas →</button>
   </div>`;
 }
 
