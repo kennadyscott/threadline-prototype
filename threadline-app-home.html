@@ -150,11 +150,13 @@ input,textarea,select{font-family:inherit}
 .mdbody{padding:4px 20px 18px}
 .spoke{margin-top:12px;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;color:var(--slate);background:color-mix(in srgb, var(--violet) 6%, var(--surface));border:1px solid color-mix(in srgb, var(--violet) 18%, var(--line))}
 .secnote{font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--faint);opacity:.85}
-.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-.fchip{border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
-.fchip i{font-style:normal;background:var(--surface-2);border-radius:999px;padding:1px 7px;font-size:10.5px;font-weight:800}
-.fchip.on{background:var(--violet);border-color:var(--violet);color:#fff}
-.fchip.on i{background:rgba(255,255,255,.22)}
+.fbar{display:flex;gap:4px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.fbar .caplab{margin-right:6px}
+.fchip{border:none;border-radius:8px;padding:5px 11px;font-weight:700;font-size:12px;color:var(--muted);background:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit}
+.fchip:hover{background:var(--surface-2)}
+.fchip i{font-style:normal;color:var(--faint);font-size:10.5px;font-weight:800}
+.fchip.on{background:color-mix(in srgb, var(--violet) 10%, transparent);color:var(--violet)}
+.fchip.on i{color:var(--violet)}
 .kpick{display:flex;gap:7px;flex-wrap:wrap}
 .gate{margin-top:10px;background:rgba(245,165,36,.09);border:1px solid rgba(245,165,36,.4);color:#8a5a05;font-size:12px;font-weight:700;border-radius:8px;padding:8px 12px}
 .secnav{position:sticky;top:0;z-index:6;background:var(--surface);border-bottom:1px solid var(--line);display:flex;gap:2px;overflow-x:auto;padding:8px 16px;scrollbar-width:thin}
@@ -876,15 +878,13 @@ function scheduleIdea(id){ const i=HUB.ideas.find(x=>x.id===id); if(!i) return; 
   i.schedule=[{title:i.t,week:1,ch:i.kind||'Post',date:d.toISOString()}]; i.status='scheduled'; hubSave(); hubTab='scheduled'; renderHub(); toast('Scheduled 🗓'); }
 function railItem(x){
   const o=x.o, on=hubSel===o.id?' active':'';
-  const stg=hubTab==='approval'?apprOf(x):null;
-  const chip=stg?`<span class="schip ${stg==='approved'?'approved':stg==='feedback'?'revise':'pending'}" style="margin-left:auto">${stg==='approved'?'Approved':stg==='feedback'?'Feedback':'Awaiting'}</span>`:'';
   if(x.type==='camp'){ const done=o.assets.filter(a=>a.status==='approved').length;
     return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
-      <div class="rmeta"><span class="tchip t-camp">Campaign</span><em>${done}/${o.assets.length}</em>${chip||`<span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span>`}</div></button>`; }
+      <div class="rmeta"><span class="tchip t-camp">Campaign</span><em>${done}/${o.assets.length}</em><span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div></button>`; }
   if(x.type==='mini') return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
-      <div class="rmeta"><span class="tchip t-mini">Series</span><em>${o.episodes.length} eps · ${esc(o.cadence)}</em>${chip}</div></button>`;
+      <div class="rmeta"><span class="tchip t-mini">Series</span><em>${o.episodes.length} eps · ${esc(o.cadence)}</em></div></button>`;
   return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.t)}</b>
-      <div class="rmeta"><span class="tchip">${esc(o.kind||'Post')}</span><em>${esc(o.pillar||'')}</em>${chip}</div></button>`;
+      <div class="rmeta"><span class="tchip">${esc(o.kind||'Post')}</span><em>${esc(o.pillar||'')}</em></div></button>`;
 }
 function mdDetail(x){
   const o=x.o, inAppr=o.status==='approval';
@@ -945,20 +945,17 @@ function renderHub(){
       const cats=[...new Set(all.map(itemCat))];
       if(hubFilter!=='all'&&!cats.includes(hubFilter)) hubFilter='all';
       items=hubFilter==='all'?all:all.filter(x=>itemCat(x)===hubFilter);
-      fbar=`<div class="fbar"><button class="fchip${hubFilter==='all'?' on':''}" onclick="hubFilter='all';renderHub()">All <i>${all.length}</i></button>`+
+      fbar=`<div class="fbar"><span class="caplab">Filter</span><button class="fchip${hubFilter==='all'?' on':''}" onclick="hubFilter='all';renderHub()">All <i>${all.length}</i></button>`+
         cats.map(c=>`<button class="fchip${hubFilter===c?' on':''}" onclick="hubFilter='${c}';renderHub()">${esc(c)} <i>${all.filter(x=>itemCat(x)===c).length}</i></button>`).join('')+`</div>`;
-    } else {
-      const stages=[['all','All'],['awaiting','Awaiting approval'],['feedback','Feedback'],['approved','Approved']];
-      items=apprFilter==='all'?all:all.filter(x=>apprOf(x)===apprFilter);
-      fbar=`<div class="fbar">`+stages.map(([k,l])=>`<button class="fchip${apprFilter===k?' on':''}" onclick="apprFilter='${k}';renderHub()">${l} <i>${k==='all'?all.length:all.filter(x=>apprOf(x)===k).length}</i></button>`).join('')+`</div>`;
-      if(!items.length){ $('#hubbody').innerHTML=pre+fbar+`<div class="hubempty" style="margin-top:14px">Nothing in this stage right now.</div>`; return; }
     }
     if(!items.some(x=>x.o.id===hubSel)) hubSel=items[0].o.id;
     const sel=items.find(x=>x.o.id===hubSel);
     const group=(label,arr)=>arr.length?`<div class="rlabel">${label}</div>`+arr.map(railItem).join(''):'';
-    const cats2=[...new Set(items.map(itemCat))];
+    const rail=hubTab==='approval'
+      ?[['awaiting','Awaiting approval'],['feedback','Feedback'],['approved','Approved']].map(([k,l])=>group(l,items.filter(x=>apprOf(x)===k))).join('')
+      :[...new Set(items.map(itemCat))].map(c=>group(c,items.filter(x=>itemCat(x)===c))).join('');
     $('#hubbody').innerHTML=pre+fbar+`<div class="mdwrap">
-      <div class="mdrail">${cats2.map(c=>group(c,items.filter(x=>itemCat(x)===c))).join('')}</div>
+      <div class="mdrail">${rail}</div>
       <div class="mddetail">${mdDetail(sel)}</div>
     </div>`;
     return;
