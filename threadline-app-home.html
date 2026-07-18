@@ -112,8 +112,8 @@ input,textarea,select{font-family:inherit}
 .hubtabs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
 .hubtab{border:1.5px solid var(--line);border-radius:12px;padding:10px 18px;font-weight:800;font-size:13.5px;color:var(--muted);background:var(--surface);cursor:pointer;display:flex;align-items:center;gap:8px}
 .hubtab i{font-style:normal;background:var(--surface-2);border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:800}
-.hubtab.on{border-color:var(--violet);color:var(--violet);background:rgba(128,61,255,.06)}
-.hubtab.on i{background:rgba(128,61,255,.12)}
+.hubtab.on{border-color:var(--violet);color:#fff;background:var(--violet)}
+.hubtab.on i{background:rgba(255,255,255,.22);color:#fff}
 .hubcap{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:14px;box-shadow:var(--shadow-sm)}
 .hubcap textarea{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;font-size:14px;min-height:64px;resize:vertical;outline:none;background:var(--surface);color:var(--ink);font-family:inherit}
 .hubcap textarea:focus{border-color:var(--violet)}
@@ -155,7 +155,7 @@ input,textarea,select{font-family:inherit}
 .camp .cico{width:38px;height:38px;border-radius:11px;background:rgba(128,61,255,.1);display:grid;place-items:center;font-size:17px;flex-shrink:0}
 .camp .ct2{flex:1;min-width:0}
 .camp .ct2 b{font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.camp .prio{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--violet);background:rgba(128,61,255,.09);border-radius:999px;padding:3px 9px}
+.camp .prio{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:var(--violet);border-radius:5px;padding:3px 9px}
 .camp .csnip{color:var(--muted);font-size:12.5px;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .camp .cmeta,.mdhead .cmeta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
 .camp .chch,.mdhead .chch,.mdbody .chch,.rmeta .chch{font-size:10.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 10px;color:var(--muted)}
@@ -175,11 +175,14 @@ input,textarea,select{font-family:inherit}
 .csec h5{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
 .csec p{font-size:13px;color:var(--ink);line-height:1.55}
 .csec ul{margin-left:17px;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
-.msgrow{display:grid;grid-template-columns:92px 1fr;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line-2);font-size:12.5px}
-.msgrow:last-child{border-bottom:none}
-.msgrow b{color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
-.phrow{display:flex;gap:10px;font-size:12.5px;padding:5px 0}
-.phrow b{color:var(--ink);white-space:nowrap}
+.msgrow{display:flex;gap:10px;align-items:flex-start;padding:4px 0;font-size:13px}
+.msgrow b{flex:none;width:104px;text-align:center;background:var(--ink);color:#fff;border-radius:5px;padding:4px 8px;font-size:10px;letter-spacing:.08em;font-weight:800;text-transform:uppercase}
+.msgrow.emo b{background:var(--coral)}
+.msgrow span{padding-top:2px;line-height:1.5}
+.phrow{display:flex;gap:11px;font-size:12.5px;padding:6px 0;align-items:flex-start}
+.phrow .num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;font-size:12px;display:grid;place-items:center}
+.phrow>div{display:flex;flex-direction:column}
+.phrow b{color:var(--ink)}
 .phrow span{color:var(--muted)}
 .asset{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:8px}
 .asset .ahead{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
@@ -335,6 +338,48 @@ svg.defs{position:absolute;width:0;height:0}
 .scrim{display:block;position:fixed;inset:0;background:rgba(15,18,34,.45);z-index:65;opacity:0;pointer-events:none;transition:opacity .25s}
 .app.nav-open .scrim{opacity:1;pointer-events:auto}
 .main{min-height:100vh}
+</style>
+<style>
+/* hierarchy restyle: solid blocks + full-post mockups */
+.tchip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:var(--ink);border-radius:5px;padding:3px 9px;flex:none}
+.tchip.t-camp{background:var(--violet)}.tchip.t-mini{background:#0891b2}
+.plat,.goalp{background:var(--ink);color:#fff;border-radius:10px;padding:13px 16px;font-size:13.5px;line-height:1.55;max-width:72ch}
+.goalp b{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--cyan);margin-bottom:4px}
+.minilab{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin:12px 0 5px}
+.plainul{margin:0;padding-left:18px;font-size:13px;color:var(--muted)}
+.plainul li{margin:3px 0}
+.acard{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);margin-bottom:14px}
+.acard.st-approved{border-color:var(--green)}
+.acard.st-revise{border-color:var(--amber)}
+.ahead2{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ahead2 b{font-size:13px}
+.schip{margin-left:auto;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border-radius:5px;padding:3px 9px;flex:none}
+.schip.approved{background:var(--green);color:#fff}
+.schip.revise{background:var(--amber);color:#fff}
+.schip.pending{background:var(--surface-2);color:var(--muted)}
+.amock{padding:14px;background:var(--surface-2)}
+.hash{color:var(--violet);font-weight:700}
+.likm,.igm,.emm{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;max-width:480px;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+.bav{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;font-weight:900;display:grid;place-items:center;flex:none;font-size:15px}
+.lih{display:flex;gap:10px;padding:12px 14px 8px;align-items:flex-start}
+.lih b{font-size:13px;display:block;color:var(--ink)}
+.lih span{font-size:11px;color:var(--faint);line-height:1.35;display:block}
+.licap{padding:4px 14px 12px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;color:var(--ink)}
+.lif{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:8px 6px;font-size:11px;color:var(--faint);font-weight:700}
+.pv{background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;padding:26px 22px;min-height:120px;display:flex;flex-direction:column;justify-content:center}
+.pveye{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;opacity:.8;margin-bottom:6px}
+.pvbig{font-size:19px;font-weight:800;line-height:1.25}
+.igh{display:flex;align-items:center;gap:9px;padding:10px 12px}
+.igh .bav{width:30px;height:30px;font-size:12px}
+.igh b{font-size:12.5px;color:var(--ink)}
+.igd{margin-left:auto;color:var(--faint);font-weight:900}
+.iga{display:flex;gap:14px;padding:9px 12px 4px;font-size:16px}
+.igc{padding:2px 12px 12px;font-size:12px;line-height:1.5;white-space:pre-wrap;color:var(--ink)}
+.emh{padding:12px 14px;border-bottom:1px solid var(--line)}
+.emh b{display:block;font-size:13px;color:var(--ink)}
+.emh span{font-size:11px;color:var(--faint)}
+.emb{padding:12px 14px;font-size:12.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink)}
+.emcta{margin:0 14px 14px;display:inline-block;background:var(--violet);color:#fff;font-weight:800;font-size:12px;border-radius:8px;padding:8px 14px}
 </style>
 </head>
 <body>
@@ -564,7 +609,7 @@ function miniCard(m){
   return `<div class="camp">
     <div class="chead" onclick="openMini=openMini==='${m.id}'?null:'${m.id}';renderHub()">
       <div class="cico" style="background:rgba(34,211,238,.14)">📱</div>
-      <div class="ct2"><b>${esc(m.name)} <span class="prio" style="color:#0e7f95;background:rgba(34,211,238,.12)">Mini-series · ${esc(m.cadence)}</span></b>
+      <div class="ct2"><b>${esc(m.name)} <span class="prio" style="background:#0891b2">Mini-series · ${esc(m.cadence)}</span></b>
         <div class="csnip">${esc(m.premise)}</div>
         <div class="cmeta">${m.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}
           <span class="cdots"><em>${m.episodes.length} episodes</em></span></div>
@@ -639,21 +684,48 @@ function campCard(c){
     ${open?`<div class="cdetail">${campDetail(c)}</div>`:''}
   </div>`;
 }
+function hashify(t){ return esc(t).replace(/#(\w+)/g,'<span class="hash">#$1</span>'); }
+function brandHandle(){ return (B.name||'yourbrand').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function brandAvatar(sz){ return `<span class="bav">${esc((B.name||'T')[0].toUpperCase())}</span>`; }
+function mockVisual(c,a){ return `<div class="pv"><div class="pveye">${esc(c.name)}</div><div class="pvbig">${esc(a.title)}</div></div>`; }
+function assetMock(c,a){
+  const ch=(a.ch||'').toLowerCase();
+  if(ch.includes('linkedin')) return `<div class="likm">
+    <div class="lih">${brandAvatar()}<div><b>${esc(B.name||'Your brand')}</b><span>${esc(window.stripTags?stripTags(B.overview.oneLine).slice(0,70):'')}<br>1,208 followers · 1d · 🌐</span></div></div>
+    <div class="licap">${hashify(a.caption)}</div>
+    ${mockVisual(c,a)}
+    <div class="lif"><span>👍 Like</span><span>💬 Comment</span><span>↻ Repost</span><span>➤ Send</span></div></div>`;
+  if(ch.includes('instagram')||ch.includes('tiktok')) return `<div class="igm">
+    <div class="igh">${brandAvatar()}<b>${esc(brandHandle())}</b><span class="igd">···</span></div>
+    ${mockVisual(c,a)}
+    <div class="iga"><span>♡</span><span>💬</span><span>➤</span><span style="margin-left:auto">🔖</span></div>
+    <div class="igc"><b>${esc(brandHandle())}</b> ${hashify(a.caption)}</div></div>`;
+  if(ch.includes('email')||ch.includes('newsletter')) return `<div class="emm">
+    <div class="emh"><b>Subject: ${esc(a.title)}</b><span>From: ${esc(B.name||'Your brand')} &lt;hello@${esc(brandHandle())}.com&gt;</span></div>
+    <div class="emb">${hashify(a.caption)}</div>
+    <div class="emcta">Read the full story →</div></div>`;
+  return `<div class="likm"><div class="licap">${hashify(a.caption)}</div>${mockVisual(c,a)}</div>`;
+}
+function assetCard(c,a){
+  return `<div class="acard st-${a.status}">
+    <div class="ahead2"><span class="tchip">${esc(a.ch)}</span><b>${esc(a.title)}</b><span class="schip ${a.status}">${a.status==='approved'?'Approved':a.status==='revise'?'Changes requested':'Pending review'}</span></div>
+    <div class="amock">${assetMock(c,a)}</div>
+    <div class="arow" style="padding:10px 14px;border-top:1px solid var(--line)">
+      <button class="ab ok${a.status==='approved'?' on':''}" onclick="setAsset('${c.id}','${a.id}','approved')">✓ Approve</button>
+      <button class="ab rv${a.status==='revise'?' on':''}" onclick="setAsset('${c.id}','${a.id}','revise')">↻ Revise</button>
+      <input class="anote" placeholder="Notes for the revision…" value="${esc(a.notes||'')}" onchange="noteAsset('${c.id}','${a.id}',this)">
+      <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Revise this ${esc(a.ch)} asset for the ${esc(c.name).replace(/'/g,'’')} campaign: ${esc(a.title).replace(/'/g,'’')}')">Open in Create →</button>
+    </div></div>`;
+}
 function campDetail(c){
-  return `<div class="csec"><h5>Campaign platform</h5><p>${esc(c.platform)}</p></div>
-      <div class="csec"><h5>Strategy</h5><p><b>${esc(c.strategy.primary)}</b></p><ul>${c.strategy.supporting.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+  return `<div class="csec"><h5>Campaign platform</h5><div class="plat">${esc(c.platform)}</div></div>
+      <div class="csec"><h5>Strategy</h5><div class="goalp"><b>Primary goal</b>${esc(c.strategy.primary)}</div>
+        <div class="minilab">Supporting goals</div><ul class="plainul">${c.strategy.supporting.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
       <div class="csec"><h5>Message hierarchy</h5>
-        ${['emotional','educational','product','brand'].map(k=>`<div class="msgrow"><b>${k}</b><span>${esc(c.messages[k]||'')}</span></div>`).join('')}</div>
-      <div class="csec"><h5>Rollout</h5>${c.structure.map(pp=>`<div class="phrow"><b>${esc(pp.phase)}</b><span>${esc(pp.what)}</span></div>`).join('')}</div>
-      <div class="csec"><h5>Assets — review each one</h5>
-        ${c.assets.map(a=>`<div class="asset"><div class="ahead"><span class="chch">${esc(a.ch)}</span><b>${esc(a.title)}</b></div>
-          <div class="cap">${esc(a.caption)}</div>
-          <div class="arow">
-            <button class="ab ok${a.status==='approved'?' on':''}" onclick="setAsset('${c.id}','${a.id}','approved')">✓ Approve</button>
-            <button class="ab rv${a.status==='revise'?' on':''}" onclick="setAsset('${c.id}','${a.id}','revise')">↻ Revise</button>
-            <input class="anote" placeholder="Notes for the revision…" value="${esc(a.notes||'')}" onchange="noteAsset('${c.id}','${a.id}',this)">
-            <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Revise this ${esc(a.ch)} asset for the ${esc(c.name).replace(/'/g,'’')} campaign: ${esc(a.title).replace(/'/g,'’')}')">Open in Create →</button>
-          </div></div>`).join('')}
+        ${['emotional','educational','product','brand'].map(k=>`<div class="msgrow${k==='emotional'?' emo':''}"><b>${k}</b><span>${esc(c.messages[k]||'')}</span></div>`).join('')}</div>
+      <div class="csec"><h5>Rollout</h5>${c.structure.map((pp,i)=>`<div class="phrow"><span class="num">${i+1}</span><div><b>${esc(pp.phase)}</b><span>${esc(pp.what)}</span></div></div>`).join('')}</div>
+      <div class="csec"><h5>Drafted assets · ${c.assets.length}</h5>
+        ${c.assets.map(a=>assetCard(c,a)).join('')}
       </div>`;
 }
 function ideaRow(i){
@@ -680,11 +752,11 @@ function railItem(x){
   const o=x.o, on=hubSel===o.id?' active':'';
   if(x.type==='camp'){ const done=o.assets.filter(a=>a.status==='approved').length;
     return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
-      <div class="rmeta"><span class="chch">🎯 Campaign</span><em>${done}/${o.assets.length}</em><span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div></button>`; }
+      <div class="rmeta"><span class="tchip t-camp">Campaign</span><em>${done}/${o.assets.length}</em><span class="rdots">${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div></button>`; }
   if(x.type==='mini') return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.name)}</b>
-      <div class="rmeta"><span class="chch">📱 Series</span><em>${o.episodes.length} episodes · ${esc(o.cadence)}</em></div></button>`;
+      <div class="rmeta"><span class="tchip t-mini">Series</span><em>${o.episodes.length} episodes · ${esc(o.cadence)}</em></div></button>`;
   return `<button class="ritem${on}" onclick="hubSel='${o.id}';renderHub()"><b>${esc(o.t)}</b>
-      <div class="rmeta"><span class="chch">💡 Post</span><em>${esc(o.pillar||'')}</em></div></button>`;
+      <div class="rmeta"><span class="tchip">Post</span><em>${esc(o.pillar||'')}</em></div></button>`;
 }
 function mdDetail(x){
   const o=x.o;
