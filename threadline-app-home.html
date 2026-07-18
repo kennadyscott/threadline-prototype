@@ -152,6 +152,24 @@ input,textarea,select{font-family:inherit}
 .fchip.on i{background:rgba(255,255,255,.22)}
 .kpick{display:flex;gap:7px;flex-wrap:wrap}
 .gate{margin-top:10px;background:rgba(245,165,36,.09);border:1px solid rgba(245,165,36,.4);color:#8a5a05;font-size:12px;font-weight:700;border-radius:8px;padding:8px 12px}
+.secnav{position:sticky;top:0;z-index:6;background:var(--surface);border-bottom:1px solid var(--line);display:flex;gap:2px;overflow-x:auto;padding:8px 16px;scrollbar-width:thin}
+.secnav button{flex:none;background:none;border:0;color:var(--muted);font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;border-radius:7px;white-space:nowrap;font-family:inherit}
+.secnav button:hover{color:var(--ink);background:var(--surface-2)}
+.mddetail .csec{padding:20px 0;border-bottom:1px solid var(--line);scroll-margin-top:52px}
+.mddetail .csec:last-child{border-bottom:0}
+.csech{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.notebtn{border:0;background:none;color:var(--faint);font-weight:800;font-size:11.5px;cursor:pointer;font-family:inherit;flex:none}
+.notebtn:hover{color:var(--ink)}
+.notebtn.has{color:var(--violet)}
+.secnote{display:none;margin:8px 0 4px}
+.secnote.open{display:block}
+.secnote textarea{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:9px 12px;font-size:12.5px;min-height:52px;resize:vertical;outline:none;background:var(--surface);color:var(--ink);font-family:inherit}
+.secnote textarea:focus{border-color:var(--violet)}
+.platp{font-size:13.5px;line-height:1.65;max-width:76ch;color:var(--ink)}
+.plainul li::marker{color:var(--violet)}
+.audgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;max-width:760px}
+.aud{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.aud b{display:block;font-size:13px;margin-bottom:4px;color:var(--ink)}
 .lockb{background:var(--surface-2);border:1.5px dashed var(--line-2);border-radius:12px;padding:14px 16px}
 .lockb b{font-size:13px}
 .lockb .plainul{margin-top:6px}
@@ -523,6 +541,11 @@ function hubSeed(){
       platform: povT+' This campaign stakes out that position publicly — one coordinated push that makes '+(B.name||'the brand')+' the voice people associate with it.',
       strategy:{ primary:'Own “'+(window.stripTags?stripTags(B.positioning.knownFor):'the point of view').replace(/\.$/,'')+'” as '+(B.name||'the brand')+' territory — and convert that authority into conversations.',
         supporting:['Educate the audience on what most advice gets wrong','Create a saveable, shareable framework that carries the message','Turn engagement into replies and booked calls'] },
+      audiences:[
+        {who:B.audience.primary||'Your primary audience',why:'The people this campaign must move first — it speaks their language on purpose.'},
+        {who:'Warm network & past clients',why:'Fastest proof and shares; they already trust you and repost first.'},
+        {who:'Lurkers deciding quietly',why:'They never comment — but this is who the authority argument converts.'}
+      ],
       messages:{ emotional:(window.stripTags?stripTags(B.messaging.primary):B.messaging.primary),
         educational:povT,
         product:B.overview.promise,
@@ -546,7 +569,9 @@ let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r){ const h=J
     (h.ideas||[]).forEach(i=>{ if(!i.kind) i.kind='Post'; if(i.status==='ready'){ i.status='approval'; i.appr=i.appr||'awaiting'; } });
     (h.minis||[]).forEach(m=>{ if(m.status==='ready'){ m.status='approval'; m.appr=m.appr||'awaiting'; } });
     (h.campaigns||[]).forEach(c=>{ if(c.status==='ready') c.status='approval';
-      if(!c.stretch) c.stretch={theme:'Stretch: take the winning angle wider',what:['Double down on the top-performing channel','Repurpose the best asset into a new format','Extend 4 more weeks with a fresh proof story'],locked:true}; });
+      if(!c.stretch) c.stretch={theme:'Stretch: take the winning angle wider',what:['Double down on the top-performing channel','Repurpose the best asset into a new format','Extend 4 more weeks with a fresh proof story'],locked:true};
+      if(!c.audiences) c.audiences=[{who:(B.audience&&B.audience.primary)||'Your primary audience',why:'The people this campaign must move first.'},{who:'Warm network & past clients',why:'Fastest proof and shares — they already trust you.'}];
+      if(!c.secNotes) c.secNotes={}; });
     return h; } }catch(e){} return hubSeed(); })();
 function hubSave(){ try{ localStorage.setItem(HUBKEY,JSON.stringify(HUB)); }catch(e){} }
 let hubTab='ideas', openCamp=null;
@@ -654,22 +679,24 @@ function miniDetail(m){
 }
 
 /* ---- campaigns ---- */
-const CAMP_SCHEMA={type:'object',properties:{platform:{type:'string'},strategy:{type:'object',properties:{primary:{type:'string'},supporting:{type:'array',items:{type:'string'}}},required:['primary','supporting'],additionalProperties:false},messages:{type:'object',properties:{emotional:{type:'string'},educational:{type:'string'},product:{type:'string'},brand:{type:'string'}},required:['emotional','educational','product','brand'],additionalProperties:false},structure:{type:'array',items:{type:'object',properties:{phase:{type:'string'},what:{type:'string'}},required:['phase','what'],additionalProperties:false}},stretch:{type:'object',properties:{theme:{type:'string'},what:{type:'array',items:{type:'string'}}},required:['theme','what'],additionalProperties:false},assets:{type:'array',items:{type:'object',properties:{ch:{type:'string'},title:{type:'string'},caption:{type:'string'}},required:['ch','title','caption'],additionalProperties:false}}},required:['platform','strategy','messages','structure','stretch','assets'],additionalProperties:false};
+const CAMP_SCHEMA={type:'object',properties:{platform:{type:'string'},strategy:{type:'object',properties:{primary:{type:'string'},supporting:{type:'array',items:{type:'string'}}},required:['primary','supporting'],additionalProperties:false},audiences:{type:'array',items:{type:'object',properties:{who:{type:'string'},why:{type:'string'}},required:['who','why'],additionalProperties:false}},messages:{type:'object',properties:{emotional:{type:'string'},educational:{type:'string'},product:{type:'string'},brand:{type:'string'}},required:['emotional','educational','product','brand'],additionalProperties:false},structure:{type:'array',items:{type:'object',properties:{phase:{type:'string'},what:{type:'string'}},required:['phase','what'],additionalProperties:false}},stretch:{type:'object',properties:{theme:{type:'string'},what:{type:'array',items:{type:'string'}}},required:['theme','what'],additionalProperties:false},assets:{type:'array',items:{type:'object',properties:{ch:{type:'string'},title:{type:'string'},caption:{type:'string'}},required:['ch','title','caption'],additionalProperties:false}}},required:['platform','strategy','audiences','messages','structure','stretch','assets'],additionalProperties:false};
 function openCampModal(){ $('#campOverlay').classList.add('on'); setTimeout(()=>$('#cp-name').focus(),60); }
 function closeCamp(){ $('#campOverlay').classList.remove('on'); }
 async function createCampaign(seedName,seedGoal){
   const name=seedName||$('#cp-name').value.trim(); const goal=seedGoal||$('#cp-goal').value.trim();
   if(!name){ $('#cp-name').focus(); return; }
   const go=$('#cp-go'); if(go){go.disabled=true;go.textContent='✦ Building…';}
-  let c=await hubAI('You are a campaign strategist. Build a complete content campaign for this brand: platform = a 3-4 sentence campaign thesis in the brand voice; strategy.primary = the one-sentence objective; strategy.supporting = 3 supporting moves; messages = the hierarchy (emotional, educational, product, brand — one sentence each); structure = a SIX-WEEK rollout arc as 4 phases {phase: name including week numbers e.g. "Launch (Week 1)", "Build (Weeks 2\u20133)", "Deepen (Weeks 4\u20135)", "Convert (Week 6)", what}; stretch = a follow-on stretch campaign {theme: one-line concept for extending the winning angle into weeks 7-10, what: 3 concrete moves} \u2014 it stays locked until metrics are in; assets = 4 drafted assets {ch (LinkedIn/Instagram/Reel/Email), title, caption written in the brand voice, 40-120 words}.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nVoice: '+B.voice.traits.join(', ')+'\nAudience: '+B.audience.primary+'\n\nCampaign name: '+name+'\nGoal / big idea: '+(goal||'own our point of view'), CAMP_SCHEMA, 1600);
+  let c=await hubAI('You are a campaign strategist. Build a complete content campaign for this brand: platform = a 3-4 sentence campaign thesis in the brand voice; strategy.primary = the one-sentence objective; strategy.supporting = 3 supporting moves; audiences = 2-3 primary audiences {who, why: one line on why they matter to THIS campaign}; messages = the hierarchy (emotional, educational, product, brand — one sentence each); structure = a SIX-WEEK rollout arc as 4 phases {phase: name including week numbers e.g. "Launch (Week 1)", "Build (Weeks 2\u20133)", "Deepen (Weeks 4\u20135)", "Convert (Week 6)", what}; stretch = a follow-on stretch campaign {theme: one-line concept for extending the winning angle into weeks 7-10, what: 3 concrete moves} \u2014 it stays locked until metrics are in; assets = 4 drafted assets {ch (LinkedIn/Instagram/Reel/Email), title, caption written in the brand voice, 40-120 words}.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nVoice: '+B.voice.traits.join(', ')+'\nAudience: '+B.audience.primary+'\n\nCampaign name: '+name+'\nGoal / big idea: '+(goal||'own our point of view'), CAMP_SCHEMA, 1600);
   if(!c) c={ platform:(goal||'One coordinated push that makes '+(B.name||'the brand')+' impossible to ignore.')+' Built in your voice: '+B.voice.traits.join(', ').toLowerCase()+'.',
     strategy:{primary:'Make “'+name+'” the thing people remember this month.',supporting:['Educate on the core idea','Show proof from real moments','Convert attention into one clear next step']},
+    audiences:[{who:B.audience.primary||'Primary audience',why:'The people this campaign must move first.'},{who:'Warm network',why:'They already trust you — fastest shares and proof.'}],
     messages:{emotional:(window.stripTags?stripTags(B.messaging.primary):''),educational:(window.stripTags?stripTags(B.messaging.pov):''),product:B.overview.promise,brand:(B.name||'')+' — '+(B.tagline||'')},
     structure:[{phase:'Launch (Week 1)',what:'Anchor post + supporting posts across channels.'},{phase:'Build (Weeks 2–3)',what:'Framework + proof content; engage every reply.'},{phase:'Deepen (Weeks 4–5)',what:'Handle objections; second proof story.'},{phase:'Convert (Week 6)',what:'Direct CTA across channels.'}],
     stretch:{theme:'Stretch: take “'+name+'” wider',what:['Double down on the winning channel','Repurpose the best asset into a new format','Extend 4 more weeks with fresh proof'],locked:true},
     assets:[{ch:'LinkedIn',title:'Launch post',caption:(B.preview&&B.preview.post)||''},{ch:'Instagram',title:'Feed post',caption:(B.voice&&B.voice.caption)||''},{ch:'Reel',title:'Reel script',caption:(B.voice&&B.voice.headline)||''},{ch:'Email',title:'Email anchor',caption:(B.preview&&B.preview.email)||''}] };
   const camp={id:uid(),name:name,prio:'Campaign',channels:[...new Set((c.assets||[]).map(a=>a.ch))].slice(0,4),status:'idea',
     stretch:c.stretch?{theme:c.stretch.theme,what:(c.stretch.what||[]).slice(0,4),locked:true}:null,
+    audiences:(c.audiences||[]).slice(0,3), secNotes:{},
     platform:c.platform,strategy:c.strategy,messages:c.messages,structure:(c.structure||[]).slice(0,6),
     assets:(c.assets||[]).slice(0,6).map(a=>({id:uid(),ch:a.ch,title:a.title,caption:a.caption,status:'pending',notes:''}))};
   HUB.campaigns.unshift(camp); hubSave(); closeCamp();
@@ -744,15 +771,28 @@ function assetCard(c,a){
       <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Revise this ${esc(a.ch)} asset for the ${esc(c.name).replace(/'/g,'’')} campaign: ${esc(a.title).replace(/'/g,'’')}')">Open in Create →</button>
     </div></div>`;
 }
+function toggleSecNote(cid,key){ const el=document.getElementById('sn-'+cid+'-'+key); if(el) el.classList.toggle('open'); }
+function noteSec(cid,key,el){ const c=HUB.campaigns.find(x=>x.id===cid); if(!c) return; c.secNotes=c.secNotes||{}; c.secNotes[key]=el.value; hubSave(); }
+function secHead(c,key,label){
+  const n=(c.secNotes&&c.secNotes[key])||'';
+  return `<div class="csech"><h5>${label}</h5><button class="notebtn${n.trim()?' has':''}" onclick="toggleSecNote('${c.id}','${key}')">${n.trim()?'✎ Notes added':'+ Note'}</button></div>
+    <div class="secnote${n.trim()?' open':''}" id="sn-${c.id}-${key}"><textarea placeholder="Feedback on this section…" onchange="noteSec('${c.id}','${key}',this)">${esc(n)}</textarea></div>`;
+}
+function secNav(c){
+  const S=[['platform','Platform'],['strategy','Strategy'],['messages','Messages'],['structure','Structure'],['stretch','Stretch'],['assets','Assets']].filter(([k])=>k!=='stretch'||c.stretch);
+  return `<div class="secnav">${S.map(([k,l])=>`<button onclick="document.getElementById('sec-${c.id}-${k}').scrollIntoView({behavior:'smooth',block:'start'})">${l}</button>`).join('')}</div>`;
+}
 function campDetail(c){
-  return `<div class="csec"><h5>Campaign platform</h5><div class="plat">${esc(c.platform)}</div></div>
-      <div class="csec"><h5>Strategy</h5><div class="goalp"><b>Primary goal</b>${esc(c.strategy.primary)}</div>
-        <div class="minilab">Supporting goals</div><ul class="plainul">${c.strategy.supporting.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
-      <div class="csec"><h5>Message hierarchy</h5>
+  return `<div class="csec" id="sec-${c.id}-platform">${secHead(c,'platform','Campaign platform')}<p class="platp">${esc(c.platform)}</p></div>
+      <div class="csec" id="sec-${c.id}-strategy">${secHead(c,'strategy','The campaign strategy')}
+        <div class="goalp"><b>Primary goal</b>${esc(c.strategy.primary)}</div>
+        <div class="minilab">Supporting goals</div><ul class="plainul">${c.strategy.supporting.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+        <div class="minilab">Primary audiences</div><div class="audgrid">${(c.audiences||[]).map(a=>`<div class="aud"><b>${esc(a.who)}</b>${esc(a.why)}</div>`).join('')}</div></div>
+      <div class="csec" id="sec-${c.id}-messages">${secHead(c,'messages','Campaign message hierarchy')}
         ${['emotional','educational','product','brand'].map(k=>`<div class="msgrow${k==='emotional'?' emo':''}"><b>${k}</b><span>${esc(c.messages[k]||'')}</span></div>`).join('')}</div>
-      <div class="csec"><h5>Rollout — 6-week structure</h5>${c.structure.map((pp,i)=>`<div class="phrow"><span class="num">${i+1}</span><div><b>${esc(pp.phase)}</b><span>${esc(pp.what)}</span></div></div>`).join('')}</div>
-      ${c.stretch?`<div class="csec"><h5>Stretch campaign 🔒</h5><div class="lockb"><b>${esc(c.stretch.theme)}</b><ul class="plainul">${(c.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Locked — holds until the 6-week metrics are evaluated. Extend only if the campaign earns it.</span></div></div>`:''}
-      <div class="csec"><h5>Drafted assets · ${c.assets.length}</h5>
+      <div class="csec" id="sec-${c.id}-structure">${secHead(c,'structure','Campaign structure — the 6-week arc')}${c.structure.map((pp,i)=>`<div class="phrow"><span class="num">${i+1}</span><div><b>${esc(pp.phase)}</b><span>${esc(pp.what)}</span></div></div>`).join('')}</div>
+      ${c.stretch?`<div class="csec" id="sec-${c.id}-stretch">${secHead(c,'stretch','Stretch campaign 🔒')}<div class="lockb"><b>${esc(c.stretch.theme)}</b><ul class="plainul">${(c.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Locked — holds until the 6-week metrics are evaluated. Extend only if the campaign earns it.</span></div></div>`:''}
+      <div class="csec" id="sec-${c.id}-assets">${secHead(c,'assets','Drafted assets · '+c.assets.length)}
         ${c.assets.map(a=>assetCard(c,a)).join('')}
       </div>`;
 }
@@ -828,7 +868,7 @@ function mdDetail(x){
     const gate=inAppr&&stg!=='approved'?`<div class="gate">${stg==='feedback'?'↻ Changes requested — revise the flagged assets below, then approve each one to unlock scheduling.':'Review each asset below — approve all '+o.assets.length+' to unlock auto-scheduling.'}</div>`:'';
     return `<div class="mdhead"><div class="eyebrow">Full campaign · ${esc(o.prio)}${inAppr?' · In approval':''}</div><h2>${esc(o.name)}</h2>
       <div class="cmeta">${o.channels.map(ch=>`<span class="chch">${esc(ch)}</span>`).join('')}<span class="cdots" style="margin-left:0"><em>${done}/${o.assets.length} approved</em>${o.assets.map(a=>`<i class="${a.status}"></i>`).join('')}</span></div>
-      <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${gate}</div>
+      <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${gate}</div>${secNav(o)}
       <div class="mdbody">${campDetail(o)}</div>`; }
   if(x.type==='mini'){ const stg=apprOf(x);
     const acts=inAppr
