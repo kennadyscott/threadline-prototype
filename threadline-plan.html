@@ -101,7 +101,16 @@ input,textarea,select{font-family:inherit}
 
 /* ============ PLANNER TABLE ============ */
 /* Idea Bank (merged Idea Bank) */
-.ibank{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:16px 18px;margin-top:16px;transition:box-shadow .3s}
+.ibank{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:16px 18px;margin-top:22px;transition:box-shadow .3s}
+.ibcol{display:flex;align-items:center;gap:12px;margin:-4px -6px;flex-wrap:wrap}
+.ibcolbtn{border:none;background:none;font-family:inherit;font-weight:800;font-size:14px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.ibcolbtn i{font-style:normal;color:var(--faint);font-size:11px}
+.ibcolsub{font-size:12px;color:var(--faint);flex:1;min-width:200px}
+.ibpicklist{max-height:340px;overflow-y:auto;margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.ibpickrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:9px 12px}
+.ibpickrow .ibpt{flex:1;min-width:0}
+.ibpickrow .ibpt b{display:block;font-size:13px;line-height:1.35}
+.ibpickrow .ibpt span{font-size:11px;color:var(--faint)}
 .ibank.flash{box-shadow:0 0 0 2.5px var(--violet)}
 .ibhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .ibhead h3{font-size:16px;display:flex;align-items:center;gap:8px}
@@ -350,7 +359,6 @@ svg.defs{position:absolute;width:0;height:0}
       <div class="colmain">
         <div class="greet"><h1>Plan <span style="font-size:20px">📅</span></h1><p>Organize your content system by rhythm, status, and schedule.</p></div>
         <div id="welcome"></div>
-        <div class="ibank" id="ibank"></div>
         <div class="views" id="views"></div>
         <div class="cbar">
           <button class="csel" onclick="toast('Search within Plan')">🔍 Search</button>
@@ -370,6 +378,7 @@ svg.defs{position:absolute;width:0;height:0}
           <button class="x" onclick="checks.clear();render()">✕</button>
         </div>
         <div id="view"></div>
+        <div class="ibank" id="ibank"></div>
       </div>
       <div class="rail" id="rail"></div>
     </div>
@@ -513,7 +522,7 @@ function openRow(x){
     <td>${statusPill('Planned').replace('Planned','Open slot')}</td>
     <td colspan="4"><div class="oactions">
       <button class="ob" onclick="event.stopPropagation();fillSlot(${x.id},'reserve')">Use next reserve idea</button>
-      <button class="ob" onclick="event.stopPropagation();ibSpot()">Choose from Idea Bank</button>
+      <button class="ob" onclick="event.stopPropagation();ibSpot(${x.id})">Choose from Idea Bank</button>
       <button class="ob" onclick="event.stopPropagation();location.href='threadline-build-page.html?mode=planner'">Ask Threadline</button>
       <button class="ob" onclick="event.stopPropagation();skipSlot(${x.id})">Skip</button>
     </div></td><td></td></tr>`;
@@ -787,6 +796,8 @@ let IDEAS=[
 ];
 IDEAS.forEach((x,i)=>{ x.id=1000+i; x.posted=0; });
 let ibPillar='all', ibOpen=false;
+let ibCollapsed=(function(){ try{ return localStorage.getItem('threadline.ibExpanded')!=='1'; }catch(e){ return true; } })();
+function ibToggle(){ ibCollapsed=!ibCollapsed; try{ localStorage.setItem('threadline.ibExpanded',ibCollapsed?'0':'1'); }catch(e){} renderIdeaBank(); }
 function ibPick(ci){ ibPillar=['all'].concat(IBP)[ci]||'all'; renderIdeaBank(); }
 function ibFiltered(){ return IDEAS.filter(i=>!i.posted&&(ibPillar==='all'||i.pillar===ibPillar)); }
 function ibCard(i){ const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
@@ -798,10 +809,17 @@ function ibCard(i){ const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
     <span class="ibrbtns"><button class="ibb pri" onclick="ibBuild(${i.id})">Build \u2192</button><button class="ibb" onclick="ibSchedule(${i.id})">Schedule</button></span></div>`; }
 function renderIdeaBank(){
   const list=ibFiltered(); const total=IDEAS.filter(i=>!i.posted).length; const shown=ibOpen?list:list.slice(0,4);
+  if(ibCollapsed){
+    $('#ibank').innerHTML=`<div class="ibcol">
+      <button class="ibcolbtn" onclick="ibToggle()">Idea Bank <span class="ibn">${total}</span> <i>\u25B8</i></button>
+      <span class="ibcolsub">Unscheduled ideas \u2014 they re-enter through open slots in the planner.</span>
+      <button class="ibadd" onclick="addIdea()">\uFF0B Add idea</button></div>`;
+    return;
+  }
   $('#ibank').innerHTML=`
     <div class="ibhead">
-      <div><h3>\u{1F4A1} Idea Bank <span class="ibn">${total}</span></h3><p>Sparks and ideas that aren\u2019t scheduled yet \u2014 build one out, or give it a date below.</p></div>
-      <button class="ibadd" onclick="addIdea()">\uFF0B Add idea</button>
+      <div><h3>Idea Bank <span class="ibn">${total}</span></h3><p>Unscheduled ideas \u2014 schedule them into open slots in the planner above.</p></div>
+      <div style="display:flex;gap:8px;align-items:center"><button class="ibadd" onclick="addIdea()">\uFF0B Add idea</button><button class="ibadd" style="background:none;color:var(--muted)" onclick="ibToggle()">Collapse \u25B4</button></div>
     </div>
     <div class="ibchips">${['all'].concat(IBP).map((pn,ci)=>`<button class="ibchip${ibPillar===pn?' on':''}" onclick="ibPick(${ci})">${pn==='all'?'All pillars':esc(pn)}</button>`).join('')}</div>
     ${ibOpen?`<div class="ibfilters"><button class="csel" onclick="toast('Filter by type \u2014 Idea, Question, Client Story, Observation, Trend\u2026')">\u2726 Type</button><button class="csel" onclick="toast('Filter by source \u2014 notes, voice, conversations, Threadline')">\u{1F4CE} Source</button><button class="csel" onclick="toast('Sort \u2014 newest, strongest thread, best fit for open slots')">\u2195 Sort</button><button class="csel" onclick="toast('1 archived idea \u2014 seasonal, parked until relevant')">\u{1F5C2} Archived</button></div>`:''}
@@ -813,7 +831,31 @@ function ibSchedule(id){ const i=IDEAS.find(x=>x.id===id); if(!i) return;
   const slot=ITEMS.find(x=>x.open&&!x.arch);
   if(slot){ slot.open=0; slot.t=i.t; slot.status='Planned'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your open '+slot.ser+' slot on '+slot.w); }
   else { ITEMS.push({id:NEXT_ID(),t:i.t,m:8,d:26,w:'Wed, Aug 26',status:'Planned',fmt:i.fmt||'Carousel',ser:S0,ch:['in'],asset:'\u2726',note:'From Idea Bank.'}); i.posted=1; render(); toast('Scheduled for Wed, Aug 26 \u2014 drag it anywhere in Plan'); } }
-function ibSpot(){ const b=document.getElementById('ibank'); b.scrollIntoView({behavior:'smooth',block:'center'}); b.classList.add('flash'); setTimeout(()=>b.classList.remove('flash'),1400); }
+function ibSpot(slotId){
+  let ov=document.getElementById('ibPickOverlay');
+  if(ov) ov.remove();
+  const slot=slotId?ITEMS.find(x=>x.id===slotId):null;
+  const list=IDEAS.filter(i=>!i.posted);
+  ov=document.createElement('div'); ov.id='ibPickOverlay'; ov.className='overlay on';
+  ov.innerHTML=`<div class="modal" style="max-width:560px">
+    <h3>Choose from Idea Bank</h3>
+    <p class="msub" style="margin-top:4px">${slot?'Filling the open <b>'+esc(slot.ser)+'</b> slot \u2014 '+esc(slot.w)+'.':'Pick an idea \u2014 it takes the first open slot in your plan.'}</p>
+    <div class="ibpicklist">${list.map(i=>{const tm=TYPEMETA[i.type]||TYPEMETA['Idea'];
+      return `<div class="ibpickrow"><span class="ibdot" style="background:${tm.c}" title="${esc(i.type)}"></span>
+        <div class="ibpt"><b>${esc(i.t)}</b><span>${esc(i.pillar||'Needs a home')}${i.when?' \u00B7 '+i.when:''}</span></div>
+        <button class="ibb pri" onclick="pickFromBank(${slotId||0},${i.id})">Schedule \u2192</button></div>`;}).join('')||'<div class="ibempty">Nothing unscheduled \u2014 add ideas from Home or a New Spark.</div>'}</div>
+    <div class="macts"><button class="mbtn ghost" onclick="document.getElementById('ibPickOverlay').remove()">Cancel</button><div class="grow"></div><button class="mbtn ghost" onclick="document.getElementById('ibPickOverlay').remove();ibCollapsed=false;renderIdeaBank();document.getElementById('ibank').scrollIntoView({behavior:'smooth',block:'center'})">Open the full bank</button></div>
+  </div>`;
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
+function pickFromBank(slotId,ideaId){
+  const i=IDEAS.find(x=>x.id===ideaId); if(!i) return;
+  const ov=document.getElementById('ibPickOverlay'); if(ov) ov.remove();
+  const slot=slotId?ITEMS.find(x=>x.id===slotId&&x.open&&!x.arch):null;
+  if(slot){ slot.open=0; slot.t=i.t; slot.status='Planned'; slot.fmt=i.fmt||'Carousel'; slot.ch=['in','ig']; slot.asset='\u2726'; slot.note='From Idea Bank.'; i.posted=1; render(); toast('Scheduled \u2014 it filled your '+slot.ser+' slot on '+slot.w); }
+  else ibSchedule(ideaId);
+}
 
 /* ---------- first week (arrival from the brand reveal) ---------- */
 const FWKEY='threadline.firstWeekDone';
@@ -830,7 +872,7 @@ function renderFirstWeek(){
       <span><b>3</b>&nbsp; Hit <b>Build</b> on your favorite — Threadline writes it with you</span>
     </div>
     <div class="wacts">
-      <button class="wbtn" onclick="ibSpot()">Start with an idea ↓</button>
+      <button class="wbtn" onclick="ibSpot()">Pick an idea</button>
       <button class="wbtn" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Turn my point of view into my first post: '+(window.stripTags?stripTags(B.messaging.pov):'my point of view'))">Create my first piece →</button>
     </div>
   </div>`;
