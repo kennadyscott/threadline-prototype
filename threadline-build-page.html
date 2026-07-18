@@ -246,7 +246,8 @@ input,textarea,select{font-family:inherit}
 /* plan drawer */
 .scrim{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:70;display:none}
 .scrim.on{display:block}
-.drawer{position:fixed;top:0;right:-420px;bottom:0;width:400px;max-width:92vw;background:var(--surface);z-index:75;box-shadow:-16px 0 50px rgba(20,20,60,.18);transition:right .3s ease;padding:24px;overflow-y:auto}
+.drawer{position:fixed;top:0;right:-420px;bottom:0;width:400px;max-width:92vw;background:var(--surface);z-index:75;box-shadow:-16px 0 50px rgba(20,20,60,.18);transition:right .3s ease;padding:24px;overflow-y:auto;visibility:hidden}
+.drawer.on{visibility:visible}
 .drawer.on{right:0}
 .drawer h3{font-size:17px;margin-bottom:4px}
 .drawer .dsub{color:var(--muted);font-size:13px;margin-bottom:18px}
@@ -367,6 +368,16 @@ svg.defs{position:absolute;width:0;height:0}
 .mixchip{font-size:11.5px;font-weight:700;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:4px 11px;margin-right:4px}
 .mixchip b{color:var(--ink)}
 </style>
+<style>
+/* Trends & Production: two-bucket spine */
+.buck{margin-top:26px;border:1px solid var(--line);border-radius:20px;padding:20px;background:color-mix(in srgb, var(--surface) 70%, transparent)}
+.buckhead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.buckhead .psub{max-width:560px}
+.subh{margin:20px 0 10px;font-size:14px;font-weight:800;color:var(--ink);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.subnote{font-size:11.5px;font-weight:600;color:var(--faint)}
+.statechip{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#b57708;background:rgba(245,165,36,.12);border-radius:999px;padding:4px 11px}
+.statechip.live{color:#178a5a;background:rgba(32,184,120,.12);text-transform:none;letter-spacing:0}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -486,21 +497,28 @@ svg.defs{position:absolute;width:0;height:0}
           <div id="trendsView" style="display:none">
             <div style="margin-top:4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><button class="back" onclick="showTrends(false)">← Back to Create</button><h3 style="font-size:17px;margin:0">Trends &amp; Production</h3></div>
             <p class="psub">Research and filming support, kept out of the way so Create stays calm.</p>
-            <div style="margin-top:18px"><h3 style="font-size:15.5px">Viral hooks for Reels</h3><p class="psub">Proven opening lines — pick one and Threadline writes the reel with you.</p></div>
-            <div class="panel">
-              <div class="hooktabs" id="hooktabs"></div>
-              <div id="hooklist"></div>
-              <div class="broll">
-                <div class="bh"><b>B-roll to film this week</b><span>Batch 10–15 second vertical clips in natural light — no talking needed. One filming session covers a month of reels.</span></div>
-                <div class="brgrid" id="brgrid"></div>
-                <div style="margin-top:11px"><button class="use" onclick="toast('B-roll shot list saved to Idea Bank — check it off as you film')">Save shot list to Idea Bank</button></div>
+            <div class="buck">
+              <div class="buckhead"><div><div class="eyeb2">Research</div><h3 class="bigh">What's working</h3>
+                <p class="psub">Proven patterns for your kind of content. These aren't live charts — hit <b>Research my niche</b> and Threadline studies your category; live platform data joins when you connect accounts in Analytics.</p></div>
+                <button class="trbtn" id="trbtn" onclick="refreshTrends()">Research my niche</button></div>
+              <div class="panel">
+                <div class="trhead"><span class="who" id="trwho"></span><span class="statechip" id="trstate">Starting patterns — proven, not live</span></div>
+                <div class="trgrid" id="trgrid"></div>
+              </div>
+              <div class="subh">Hooks that open reels <span class="subnote">pre-filled from your brand — anything left in [brackets] is yours to swap</span></div>
+              <div class="panel">
+                <div class="hooktabs" id="hooktabs"></div>
+                <div id="hooklist"></div>
               </div>
             </div>
-            <div style="margin-top:24px"><h3 style="font-size:15.5px">Trending in your category</h3><p class="psub" id="trendsub">Market research for your niche — what\u2019s working on Instagram Reels &amp; TikTok right now.</p></div>
-            <div class="panel">
-              <div class="trhead"><span class="who" id="trwho"></span><button class="trbtn" id="trbtn" onclick="refreshTrends()">Research my niche</button></div>
-              <div class="trgrid" id="trgrid"></div>
-              <p class="trnote">Threadline researches content patterns for your category. Live platform trend data — audio charts, specific sounds — unlocks when you connect your accounts in Analytics.</p>
+
+            <div class="buck">
+              <div class="buckhead"><div><div class="eyeb2">Production</div><h3 class="bigh">What to film</h3>
+                <p class="psub">Batch 10–15 second vertical clips in natural light — no talking needed. One session covers a month of reels.</p></div>
+                <button class="trbtn" onclick="toast('B-roll shot list saved to Idea Bank — check it off as you film')">Save shot list</button></div>
+              <div class="panel">
+                <div class="brgrid" id="brgrid"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -678,9 +696,22 @@ const HOOKS={
 };
 let hookTab=Object.keys(HOOKS)[0];
 function useHook(h){ startSession({mode:'free',seed:'Help me write a short reel script that opens with this hook: \u201c'+h+'\u201d \u2014 fill in the brackets for my brand and audience, then give me the beats: hook, tension, payoff, CTA.',title:'Reel: '+h.slice(0,40)}); }
+function hookFill(t){
+  const strip=x=>(x||'').replace(/<[^>]*>/g,'');
+  const pillar=((B.pillars&&B.pillars[0]&&B.pillars[0][0])||'your craft').toLowerCase();
+  const pain=(strip(B.audience&&B.audience.pains)||'spinning your wheels').split(/[,;.]/)[0].toLowerCase().trim();
+  const aud=((B.audience&&B.audience.primary)||'founders').split(/[,;]/)[0].toLowerCase().trim();
+  const map=[['your topic',pillar],['industry',pillar],['your role',aud],['niche',aud],['problem',pain],
+    ['clients/customers','clients'],['common advice','the usual advice'],['popular belief','the popular advice'],
+    ['popular tactic','the go-to tactic'],['advice','the standard advice'],['small win your audience wants','the win they\u2019ve been chasing'],
+    ['starting the thing','starting out'],['workspace/plan/inbox','plan'],['habit/experiment','the experiment'],
+    ['result','got here'],['timeframe','90 days'],['process/template/checklist','process'],['tools/habits','habits'],['work/create/sell','work']];
+  return t.replace(/\[([^\]]+)\]/g,(m,k)=>{ const kk=k.toLowerCase(); for(const [key,val] of map){ if(kk.includes(key)) return val; } return m; });
+}
 function renderHooks(){
   $('#hooktabs').innerHTML=Object.keys(HOOKS).map(k=>`<button class="htab${k===hookTab?' on':''}" onclick="hookTab='${k}';renderHooks()">${k}</button>`).join('');
-  $('#hooklist').innerHTML=HOOKS[hookTab].map(h=>`<div class="hookrow"><div class="ht2">${esc(h)}</div><button class="use" onclick='useHook(${JSON.stringify(h)})'>Use \u2192</button></div>`).join('');
+  $('#hooklist').innerHTML=HOOKS[hookTab].map(h=>{ const f=hookFill(h);
+    return `<div class="hookrow"><div class="ht2">${esc(f)}</div><button class="use" onclick='useHook(${JSON.stringify(f)})'>Use \u2192</button></div>`; }).join('');
 }
 const BROLL=[
  ['\u2328\uFE0F','Hands typing','Over-the-shoulder at your laptop \u2014 the classic \u201cwork happening\u201d shot'],
@@ -699,12 +730,12 @@ let TRENDS={
  topics:[
   {t:'\u201cWhat I\u2019d do differently\u201d retrospectives',m:'\u2191 Rising',p:'Honest look-backs outperform polished tips \u2014 audiences trust scars more than wins.'},
   {t:'Anti-hustle, pro-systems takes',m:'\u2191 Rising',p:'\u201cDo less, decide better\u201d angles are beating productivity-hack content in most B2B niches.'},
-  {t:'Real client moments (with numbers)',m:'\u2192 Steady',p:'Specific before\u2192after beats generic testimonials. One number in the first line.'},
+  {t:'Real client moments (with numbers)',m:'\u2192 Steady',p:'A specific before-and-after beats a generic testimonial. Put one number in the first line.'},
   {t:'\u201cWatch me work\u201d process content',m:'\u2191 Rising',p:'Unedited process builds more trust than the finished result \u2014 especially for services.'}],
  formats:[
   {t:'Silent b-roll + text overlay',p:'Your b-roll shots + a hook as on-screen text + trending audio underneath. Lowest lift, highest consistency.'},
-  {t:'Green-screen point-at-screenshot',p:'React to a stat, comment, or your own result. The screenshot does the credibility work.'},
-  {t:'Talking head with jump cuts every 2\u20133s',p:'One take, tight cuts, caption every word. Works when the hook is strong enough to carry it.'}],
+  {t:'Green-screen screenshot reaction',p:'React to a stat, a comment, or your own result. The screenshot does the credibility work.'},
+  {t:'Talking head with tight jump cuts',p:'One take, a cut every two to three seconds, caption every word. Works when the hook can carry it.'}],
  audio:[
   {t:'Slowed acoustic + spoken voiceover',p:'For story and \u201chonest take\u201d reels \u2014 calm audio signals substance.'},
   {t:'Upbeat instrumental, beat-matched cuts',p:'For listicle and tips content \u2014 cut your b-roll on the beat.'},
@@ -732,7 +763,9 @@ async function refreshTrends(){
     txt=txt.replace(/^```(json)?/i,'').replace(/```$/,'').trim();
     const j=JSON.parse(txt);
     if(!j.topics||!j.formats||!j.audio) throw new Error('shape');
-    TRENDS=j; renderTrends(); toast('Fresh research for your niche \u2014 tap any trend to build from it');
+    TRENDS=j; renderTrends();
+    const st=$('#trstate'); if(st){ st.textContent='Researched for your niche \u00b7 just now'; st.classList.add('live'); }
+    toast('Fresh research for your niche \u2014 tap any trend to build from it');
   }catch(e){ toast('Live AI research runs in the real app \u2014 showing curated patterns for now'); }
   btn.disabled=false; btn.textContent=orig;
 }
