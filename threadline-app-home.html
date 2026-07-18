@@ -430,6 +430,7 @@ svg.defs{position:absolute;width:0;height:0}
 .nitem.sub.on{border-left-color:var(--violet)}
 .nitem.sub b{font-size:13px}
 </style>
+<style>.ncaret{cursor:pointer;padding:4px 6px}</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -532,7 +533,7 @@ function renderNav(){
   $('#nav').innerHTML=
     it('home','🏠','Home','Your content command center','threadline-app-home.html')+
     it('plan','📅','Plan','Plan, create, and publish','threadline-plan.html')+
-    `<button class="nitem parent" onclick="NAVOPEN=!NAVOPEN;renderNav()"><b><span class="ic">✎</span>Create</b><span>Think, make, and package</span><i class="ncaret">${NAVOPEN?'▾':'▸'}</i></button>`+
+    `<button class="nitem parent" onclick="location.href='threadline-build-page.html?view=create'"><b><span class="ic">✎</span>Create</b><span>Think, make, and package</span><i class="ncaret" onclick="event.stopPropagation();NAVOPEN=!NAVOPEN;renderNav()">${NAVOPEN?'▾':'▸'}</i></button>`+
     (NAVOPEN?kid('studio','Thinking Studio','Think it through, build it out','threadline-build-page.html')
       +kid('trends','Trends & Production','What\u2019s working right now','threadline-build-page.html?view=trends')
       +kid('series','Series','Create recurring impact','threadline-series.html'):'')+

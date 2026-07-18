@@ -331,6 +331,15 @@ svg.defs{position:absolute;width:0;height:0}
 .bigopt b{display:block;font-size:14.5px;color:var(--ink);margin-bottom:4px}
 .bigopt span{font-size:12.5px;color:var(--muted);line-height:1.45;display:block}
 </style>
+<style>
+.ncaret{cursor:pointer;padding:4px 6px}
+.crgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:20px}
+.crcard{text-align:left;border:1.5px solid var(--line);border-radius:18px;padding:22px 20px;background:var(--surface);cursor:pointer;font-family:inherit;transition:.15s;display:flex;flex-direction:column;gap:8px}
+.crcard:hover{border-color:var(--violet);transform:translateY(-2px);box-shadow:0 10px 28px rgba(20,20,60,.08)}
+.crcard b{font-size:16.5px;color:var(--ink)}
+.crcard span{font-size:13px;color:var(--muted);line-height:1.5;flex:1}
+.crcard i{font-style:normal;font-weight:800;font-size:12.5px;color:var(--violet)}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -421,6 +430,15 @@ svg.defs{position:absolute;width:0;height:0}
             <div class="tworow">
               <button class="bigopt" onclick="location.href='threadline-series.html'"><b>Create a recurring series</b><span>Build a signature series your audience looks forward to.</span></button>
               <button class="bigopt" onclick="showTrends(true)"><b>Trends &amp; Production</b><span>What's working right now — hooks, formats, and your filming list.</span></button>
+            </div>
+          </div>
+
+          <div id="createLanding" style="display:none">
+            <div style="margin-top:6px"><h1 style="font-size:26px">Create</h1><p class="psub" style="margin-top:4px">Three ways in — pick the door that fits what you're holding.</p></div>
+            <div class="crgrid">
+              <button class="crcard" onclick="showView('studio')"><b>Thinking Studio</b><span>Talk it through with your thought partner, spin one idea into six pieces, sharpen your angle.</span><i>Open the studio →</i></button>
+              <button class="crcard" onclick="location.href='threadline-series.html'"><b>Series Generator</b><span>Build a signature recurring series your audience looks forward to.</span><i>Generate a series →</i></button>
+              <button class="crcard" onclick="showView('trends')"><b>Trends &amp; Production</b><span>What's working right now — hooks, formats, and your filming list.</span><i>See what's working →</i></button>
             </div>
           </div>
 
@@ -525,8 +543,8 @@ const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars
 const SLOT_SERIES=B.series[0]?B.series[0][0]:'your series';
 
 /* ---------- nav ---------- */
-const TRENDS_START=new URLSearchParams(location.search).get('view')==='trends';
-let NAV_ACTIVE=TRENDS_START?'trends':'studio';
+const VIEW_START=(function(){ const v=new URLSearchParams(location.search).get('view'); return v==='trends'||v==='create'?v:null; })();
+let NAV_ACTIVE=VIEW_START==='trends'?'trends':VIEW_START==='create'?'create':'studio';
 let NAVOPEN=true;
 function renderNav(){
   const it=(key,ic,l,d,href)=>`<button class="nitem${NAV_ACTIVE===key?' on':''}" onclick="${NAV_ACTIVE===key?'':`location.href='${href}'`}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`;
@@ -534,9 +552,9 @@ function renderNav(){
   $('#nav').innerHTML=
     it('home','🏠','Home','Your content command center','threadline-app-home.html')+
     it('plan','📅','Plan','Plan, create, and publish','threadline-plan.html')+
-    `<button class="nitem parent" onclick="NAVOPEN=!NAVOPEN;renderNav()"><b><span class="ic">✎</span>Create</b><span>Think, make, and package</span><i class="ncaret">${NAVOPEN?'▾':'▸'}</i></button>`+
-    (NAVOPEN?kid('studio','Thinking Studio','Think it through, build it out','showTrends(false)')
-      +kid('trends','Trends & Production','What\u2019s working right now','showTrends(true)')
+    `<button class="nitem parent${NAV_ACTIVE==='create'?' on':''}" onclick="showView('create')"><b><span class="ic">✎</span>Create</b><span>Think, make, and package</span><i class="ncaret" onclick="event.stopPropagation();NAVOPEN=!NAVOPEN;renderNav()">${NAVOPEN?'▾':'▸'}</i></button>`+
+    (NAVOPEN?kid('studio','Thinking Studio','Think it through, build it out',"showView('studio')")
+      +kid('trends','Trends & Production','What\u2019s working right now',"showView('trends')")
       +kid('series','Series','Create recurring impact',`location.href='threadline-series.html'`):'')+
     it('analytics','📊','Analytics','Measure what matters','threadline-analytics.html');
 }
@@ -555,17 +573,19 @@ function spokeExisting(){ const t=$('#spokeIdea');
   t.focus(); toast('Grabbed your strongest recent piece \u2014 or paste any old post over it'); }
 function startSharpen(){ const v=($('#sharpenIdea')&&$('#sharpenIdea').value.trim())||'';
   startSession(v?{mode:'sharpen',seed:v,title:'Sharpen: '+v.slice(0,40)}:{mode:'sharpen'}); }
-function showTrends(on){
-  ['tpPanel','createCore'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=on?'none':''; });
-  const hero=document.querySelector('.hero'); if(hero) hero.style.display=on?'none':'';
-  const rail=document.querySelector('#landingView .rail'); if(rail) rail.style.display=on?'none':'';
-  document.getElementById('trendsView').style.display=on?'':'none';
-  try{ history.replaceState(null,'',on?'?view=trends':location.pathname); }catch(e){}
-  NAV_ACTIVE=on?'trends':'studio';
+function showView(name){
+  const studio=name==='studio';
+  ['tpPanel','createCore'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=studio?'':'none'; });
+  const hero=document.querySelector('.hero'); if(hero) hero.style.display=studio?'':'none';
+  document.getElementById('trendsView').style.display=name==='trends'?'':'none';
+  document.getElementById('createLanding').style.display=name==='create'?'':'none';
+  try{ history.replaceState(null,'',studio?location.pathname:'?view='+name); }catch(e){}
+  NAV_ACTIVE=studio?'studio':name;
   if(typeof renderNav==='function') renderNav();
   window.scrollTo({top:0,behavior:'instant'});
 }
-if(TRENDS_START) showTrends(true);
+function showTrends(on){ showView(on?'trends':'studio'); }
+if(VIEW_START) showView(VIEW_START);
 
 const RECENT=[
   {ic:'💬',bg:'rgba(128,61,255,.1)',t:'Overcoming objections in sales conversations',w:'Today at 9:41 AM'},
