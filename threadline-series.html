@@ -314,7 +314,7 @@ const EDU_PILLAR=B.pillars[0][0];
 const AUD_SHORT=strip(B.audience.primary).split(',')[0].replace(/\.$/,'');
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',0,'threadline-build-page.html'],['🧵','Series','Create recurring impact',1,''],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',0,'threadline-build-page.html'],['📈','Trends & Production','What’s working right now',0,'threadline-build-page.html?view=trends'],['🧵','Series','Create recurring impact',1,''],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
 $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
 
 /* ---------- data ---------- */

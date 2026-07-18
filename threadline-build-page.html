@@ -490,8 +490,16 @@ const PROOF_PILLAR=(B.pillars.find(p=>/proof|result|win/i.test(p[0]))||B.pillars
 const SLOT_SERIES=B.series[0]?B.series[0][0]:'your series';
 
 /* ---------- nav ---------- */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',1,''],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
-$('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:(on?'':`toast('${l} — coming in the next prototype')`)}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
+const TRENDS_START=new URLSearchParams(location.search).get('view')==='trends';
+const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',TRENDS_START?0:1,TRENDS_START?'javascript:showTrends(false)':''],['📈','Trends & Production','What’s working right now',TRENDS_START?1:0,TRENDS_START?'':'javascript:showTrends(true)'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
+function renderNav(trendsOn){
+  $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>{
+    let act=on; if(l==='Create') act=trendsOn?0:1; if(l==='Trends & Production') act=trendsOn?1:0;
+    const click=l==='Create'?'showTrends(false)':l==='Trends & Production'?'showTrends(true)':href&&!/^javascript:/.test(href)?`location.href='${href}'`:`toast('${l} — coming in the next prototype')`;
+    return `<button class="nitem${act?' on':''}" onclick="${click}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`;
+  }).join('');
+}
+renderNav(TRENDS_START);
 
 /* ---------- landing content ---------- */
 const STARTERS=['I want to talk about...','A recent client win',"An idea I'm stuck on",'What my audience is struggling with','A launch or promotion','A belief I want to share'];
@@ -516,8 +524,11 @@ function showTrends(on){
   const hero=document.querySelector('.hero'); if(hero) hero.style.display=on?'none':'';
   const rail=document.querySelector('#landingView .rail'); if(rail) rail.style.display=on?'none':'';
   document.getElementById('trendsView').style.display=on?'':'none';
+  try{ history.replaceState(null,'',on?'?view=trends':location.pathname); }catch(e){}
+  if(typeof renderNav==='function') renderNav(on);
   window.scrollTo({top:0,behavior:'instant'});
 }
+if(TRENDS_START) showTrends(true);
 
 const RECENT=[
   {ic:'💬',bg:'rgba(128,61,255,.1)',t:'Overcoming objections in sales conversations',w:'Today at 9:41 AM'},
