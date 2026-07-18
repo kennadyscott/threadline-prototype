@@ -338,6 +338,12 @@ tr.ghead .gn{color:var(--faint);font-weight:800;font-size:11px;background:var(--
 .addinline{border:none;background:none;color:var(--faint);font-weight:800;font-size:12.5px;cursor:pointer;padding:6px 2px;font-family:inherit}
 .addinline:hover{color:var(--violet)}
 .addinp{width:100%;box-sizing:border-box;border:1.5px solid var(--violet);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;outline:none;background:var(--surface);color:var(--ink)}
+.tnote{position:relative;padding-right:28px}
+.rowdel{position:absolute;right:6px;top:50%;transform:translateY(-50%);opacity:0;border:none;background:none;color:var(--faint);font-weight:800;cursor:pointer;font-size:12px;padding:4px;transition:opacity .15s;font-family:inherit}
+tr.item:hover .rowdel{opacity:1}
+.rowdel:hover{color:#e05575}
+.bulk .danger{color:#e05575}
+.bulk .danger:hover{background:rgba(251,113,133,.1)}
 .ribr{display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;border-bottom:1px dashed var(--line-2)}
 .ribr:last-of-type{border-bottom:none}
 .ribr .ibdot{margin-top:4px;flex:none}
@@ -427,6 +433,7 @@ svg.defs{position:absolute;width:0;height:0}
           <button onclick="bulkStatus('Scheduled')">Schedule</button>
           <button onclick="toast('Move due window — pick a week')">Move</button>
           <button onclick="bulkArchive()">Archive</button>
+          <button class="danger" onclick="bulkDelete()">Delete</button>
           <button class="x" onclick="checks.clear();render()">✕</button>
         </div>
         <div id="view"></div>
@@ -716,7 +723,7 @@ function itemRow(x){
     <td>${belongsPill(x)}</td>
     <td>${chanIcons(x.ch)}</td>
     <td><span class="assetbox${x.asset?' has':''}" style="cursor:pointer" title="${x.asset?'Asset attached — click to view':'Upload or create asset'}" onclick="event.stopPropagation();openAsset(${x.id})">${x.asset?'✓':'＋'}</span></td>
-    <td class="tnote">${esc(x.note||'')}</td>
+    <td class="tnote">${esc(x.note||'')}<button class="rowdel" title="Delete this row" onclick="event.stopPropagation();delRow(${x.id})">✕</button></td>
   </tr>`;
 }
 function openRow(x){
@@ -738,6 +745,12 @@ function addIdea(){ const t=prompt('New content idea:'); if(!t) return;
   IDEAS.unshift({id:1000+IDEAS.length,t,type:'Idea',pillar:IBP[0]||null,sum:'Added manually — develop it in Build when you\u2019re ready.',when:'Just now',posted:0}); renderIdeaBank(); toast('Added to your Idea Bank'); }
 function toggleCheck(id){ checks.has(id)?checks.delete(id):checks.add(id); render(); }
 function bulkStatus(st){ [...checks].forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.status=st; }); const n=checks.size; checks.clear(); render(); toast(n+' items → '+st); }
+function delRow(id){ const idx=ITEMS.findIndex(i=>i.id===id); if(idx<0) return; const x=ITEMS[idx];
+  ITEMS.splice(idx,1); checks.delete(id); render();
+  toastUndo('Deleted — “'+x.t.slice(0,32)+(x.t.length>32?'…':'')+'”',()=>{ ITEMS.splice(Math.min(idx,ITEMS.length),0,x); render(); }); }
+function bulkDelete(){ const n=checks.size; if(!n) return; const gone=ITEMS.filter(x=>checks.has(x.id));
+  ITEMS=ITEMS.filter(x=>!checks.has(x.id)); checks.clear(); render();
+  toastUndo(n+' row'+(n>1?'s':'')+' deleted',()=>{ ITEMS.push(...gone); render(); }); }
 function bulkArchive(){ const ids=[...checks]; ids.forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.arch=1; }); checks.clear(); render(); toastUndo(ids.length+' items archived',()=>{ ids.forEach(id=>{ const x=ITEMS.find(i=>i.id===id); if(x) x.arch=0; }); render(); }); }
 
 /* ---------- KANBAN ---------- */
