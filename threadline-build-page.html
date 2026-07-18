@@ -431,7 +431,7 @@ svg.defs{position:absolute;width:0;height:0}
               <div class="ph2">
                 <div><div class="eyeb2">Content multiplier</div><h3 class="bigh">One idea. A whole content ecosystem.</h3>
                 <p class="psub" style="margin-top:4px">Start with the thought worth sharing. Threadline helps you find every way it can travel.</p></div>
-                <button class="quiet2" onclick="toast('Past spins — every spoke you\u2019ve run, with all its pieces')">View past spins →</button>
+                <button class="quiet2" onclick="toast('Past spokes — every idea you\u2019ve multiplied, with all its pieces')">View past spokes →</button>
               </div>
               <div class="spcanvas" id="spcanvas">
                 <svg id="splines"></svg>
@@ -440,7 +440,7 @@ svg.defs{position:absolute;width:0;height:0}
                   <div class="spcore">
                     <div class="corelab">The core idea</div>
                     <textarea id="spokeIdea" placeholder="Teachers struggle to protect their boundaries…"></textarea>
-                    <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin this idea ✦</button>
+                    <button class="spgo" id="spokeGo" onclick="spinSpokes()">Multiply this idea ✦</button>
                   </div>
                   <div class="spbot" id="spB"></div>
                 </div>
@@ -753,7 +753,7 @@ function spokeFallback(idea){
 }
 async function spinSpokes(){
   const idea=($('#spokeIdea').value||'').trim(); if(!idea){ $('#spokeIdea').focus(); return; }
-  const go=$('#spokeGo'); go.disabled=true; go.textContent='Spinning\u2026';
+  const go=$('#spokeGo'); go.disabled=true; go.textContent='Multiplying\u2026';
   let pieces=null;
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
@@ -764,7 +764,7 @@ async function spinSpokes(){
   }catch(e){}
   if(!pieces){ pieces=spokeFallback(idea); toast('Live drafting runs in the real app \u2014 showing the template spin for now'); }
   SPOKES=pieces; spokeSel=0; renderSpokes();
-  go.disabled=false; go.textContent=SPOKES?'Spin again \u2726':'Spin this idea \u2726';
+  go.disabled=false; go.textContent=SPOKES?'Multiply again \u2726':'Multiply this idea \u2726';
 }
 const SPFMT={
  'Instagram post':{c:'#dd2a7b',meta:'caption-led · feed'},
@@ -794,7 +794,7 @@ function renderSpokes(){
   SPOKES.forEach(p=>{ const f=p.format; if(f==='Reel')cats.Video++; else if(f==='Email series')cats.Email++; else if(f==='Article')cats.Written++; else cats.Social++; });
   $('#spmix').innerHTML=Object.entries(cats).filter(([k,v])=>v).map(([k,v])=>`<span class="mixchip">${k} <b>${v}</b></span>`).join('');
   $('#spbar').style.display='flex';
-  $('#spokeGo').textContent='Spin again ✦';
+  $('#spokeGo').textContent='Multiply again ✦';
   requestAnimationFrame(drawSpokeLines);
 }
 function drawSpokeLines(){
