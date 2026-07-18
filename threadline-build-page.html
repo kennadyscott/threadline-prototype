@@ -310,6 +310,14 @@ svg.defs{position:absolute;width:0;height:0}
 .mode b{font-size:13.5px}
 .mode .mi{display:none}
 </style>
+<style>
+/* Create group: dropdown children */
+.nitem.parent{cursor:pointer;position:relative}
+.ncaret{position:absolute;right:12px;top:13px;font-style:normal;color:var(--faint);font-size:11px}
+.nitem.sub{margin-left:16px;width:calc(100% - 16px);border-left:2.5px solid var(--line-2);border-radius:0 12px 12px 0}
+.nitem.sub.on{border-left-color:var(--violet)}
+.nitem.sub b{font-size:13px}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -491,15 +499,21 @@ const SLOT_SERIES=B.series[0]?B.series[0][0]:'your series';
 
 /* ---------- nav ---------- */
 const TRENDS_START=new URLSearchParams(location.search).get('view')==='trends';
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',TRENDS_START?0:1,TRENDS_START?'javascript:showTrends(false)':''],['📈','Trends & Production','What’s working right now',TRENDS_START?1:0,TRENDS_START?'':'javascript:showTrends(true)'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',0,'threadline-analytics.html']];
-function renderNav(trendsOn){
-  $('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>{
-    let act=on; if(l==='Create') act=trendsOn?0:1; if(l==='Trends & Production') act=trendsOn?1:0;
-    const click=l==='Create'?'showTrends(false)':l==='Trends & Production'?'showTrends(true)':href&&!/^javascript:/.test(href)?`location.href='${href}'`:`toast('${l} — coming in the next prototype')`;
-    return `<button class="nitem${act?' on':''}" onclick="${click}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`;
-  }).join('');
+let NAV_ACTIVE=TRENDS_START?'trends':'studio';
+let NAVOPEN=true;
+function renderNav(){
+  const it=(key,ic,l,d,href)=>`<button class="nitem${NAV_ACTIVE===key?' on':''}" onclick="${NAV_ACTIVE===key?'':`location.href='${href}'`}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`;
+  const kid=(key,l,d,click)=>`<button class="nitem sub${NAV_ACTIVE===key?' on':''}" onclick="${click}"><b>${l}</b><span>${d}</span></button>`;
+  $('#nav').innerHTML=
+    it('home','🏠','Home','Your content command center','threadline-app-home.html')+
+    it('plan','📅','Plan','Plan, create, and publish','threadline-plan.html')+
+    `<button class="nitem parent" onclick="NAVOPEN=!NAVOPEN;renderNav()"><b><span class="ic">✎</span>Create</b><span>Think, make, and package</span><i class="ncaret">${NAVOPEN?'▾':'▸'}</i></button>`+
+    (NAVOPEN?kid('studio','Thinking Studio','Think it through, build it out','showTrends(false)')
+      +kid('trends','Trends & Production','What\u2019s working right now','showTrends(true)')
+      +kid('series','Series','Create recurring impact',`location.href='threadline-series.html'`):'')+
+    it('analytics','📊','Analytics','Measure what matters','threadline-analytics.html');
 }
-renderNav(TRENDS_START);
+renderNav();
 
 /* ---------- landing content ---------- */
 const STARTERS=['I want to talk about...','A recent client win',"An idea I'm stuck on",'What my audience is struggling with','A launch or promotion','A belief I want to share'];
@@ -525,7 +539,8 @@ function showTrends(on){
   const rail=document.querySelector('#landingView .rail'); if(rail) rail.style.display=on?'none':'';
   document.getElementById('trendsView').style.display=on?'':'none';
   try{ history.replaceState(null,'',on?'?view=trends':location.pathname); }catch(e){}
-  if(typeof renderNav==='function') renderNav(on);
+  NAV_ACTIVE=on?'trends':'studio';
+  if(typeof renderNav==='function') renderNav();
   window.scrollTo({top:0,behavior:'instant'});
 }
 if(TRENDS_START) showTrends(true);

@@ -289,6 +289,14 @@ svg.defs{position:absolute;width:0;height:0}
 .app.nav-open .scrim{opacity:1;pointer-events:auto}
 .main{min-height:100vh}
 </style>
+<style>
+/* Create group: dropdown children */
+.nitem.parent{cursor:pointer;position:relative}
+.ncaret{position:absolute;right:12px;top:13px;font-style:normal;color:var(--faint);font-size:11px}
+.nitem.sub{margin-left:16px;width:calc(100% - 16px);border-left:2.5px solid var(--line-2);border-radius:0 12px 12px 0}
+.nitem.sub.on{border-left-color:var(--violet)}
+.nitem.sub b{font-size:13px}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -443,8 +451,21 @@ const SCOLOR=['#803dff','#3b82f6','#22d3ee','#fb7185','#f5a524'];
 const SNAME=B.series.map(s=>s[0]);
 
 /* nav */
-const NAV=[['🏠','Home','Your content command center',0,'threadline-app-home.html'],['📅','Plan','Plan, create, and publish',0,'threadline-plan.html'],['✎','Create','Think it through, build it out',0,'threadline-build-page.html'],['📈','Trends & Production','What’s working right now',0,'threadline-build-page.html?view=trends'],['🧵','Series','Create recurring impact',0,'threadline-series.html'],['📊','Analytics','Measure what matters',1,'']];
-$('#nav').innerHTML=NAV.map(([ic,l,d,on,href])=>`<button class="nitem${on?' on':''}" onclick="${href?`location.href='${href}'`:''}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`).join('');
+const NAV_ACTIVE='analytics';
+let NAVOPEN=['studio','trends','series'].indexOf(NAV_ACTIVE)>=0;
+function renderNav(){
+  const it=(key,ic,l,d,href)=>`<button class="nitem${NAV_ACTIVE===key?' on':''}" onclick="${NAV_ACTIVE===key?'':`location.href='${href}'`}"><b><span class="ic">${ic}</span>${l}</b><span>${d}</span></button>`;
+  const kid=(key,l,d,href)=>`<button class="nitem sub${NAV_ACTIVE===key?' on':''}" onclick="${NAV_ACTIVE===key?'':`location.href='${href}'`}"><b>${l}</b><span>${d}</span></button>`;
+  $('#nav').innerHTML=
+    it('home','🏠','Home','Your content command center','threadline-app-home.html')+
+    it('plan','📅','Plan','Plan, create, and publish','threadline-plan.html')+
+    `<button class="nitem parent" onclick="NAVOPEN=!NAVOPEN;renderNav()"><b><span class="ic">✎</span>Create</b><span>Think, make, and package</span><i class="ncaret">${NAVOPEN?'▾':'▸'}</i></button>`+
+    (NAVOPEN?kid('studio','Thinking Studio','Think it through, build it out','threadline-build-page.html')
+      +kid('trends','Trends & Production','What\u2019s working right now','threadline-build-page.html?view=trends')
+      +kid('series','Series','Create recurring impact','threadline-series.html'):'')+
+    it('analytics','📊','Analytics','Measure what matters','threadline-analytics.html');
+}
+renderNav();
 
 /* ---------- connections ---------- */
 const CKEY='threadline.connections';
