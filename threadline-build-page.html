@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Threadline — Create</title>
+<title>Threadline — Thinking Studio</title>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
 <style>
@@ -318,6 +318,19 @@ svg.defs{position:absolute;width:0;height:0}
 .nitem.sub.on{border-left-color:var(--violet)}
 .nitem.sub b{font-size:13px}
 </style>
+<style>
+/* Thinking Studio highlights */
+.panel.hl{border:1.5px solid color-mix(in srgb, var(--violet) 22%, var(--line))}
+.sptools{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.sptools .tool{border:1.5px dashed var(--line);cursor:pointer;background:var(--surface)}
+.sptools .tool:hover{border-color:var(--violet);color:var(--violet)}
+.tworow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+@media(max-width:760px){.tworow{grid-template-columns:1fr}}
+.bigopt{text-align:left;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;background:var(--surface);cursor:pointer;font-family:inherit;transition:.15s}
+.bigopt:hover{border-color:var(--violet);transform:translateY(-1px)}
+.bigopt b{display:block;font-size:14.5px;color:var(--ink);margin-bottom:4px}
+.bigopt span{font-size:12.5px;color:var(--muted);line-height:1.45;display:block}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -345,7 +358,7 @@ svg.defs{position:absolute;width:0;height:0}
         <div class="colmain">
           <div class="hero">
             <div>
-              <h1>Create with Threadline</h1>
+              <h1>Thinking Studio</h1>
               <p>Your thought partner for content that connects.<br>Tell Threadline what you're working on, and we'll help you uncover ideas, shape angles, and build content that fits your strategy.</p>
             </div>
             <svg class="doodle" viewBox="0 0 220 130" fill="none">
@@ -378,21 +391,37 @@ svg.defs{position:absolute;width:0;height:0}
           </div>
 
           <div id="createCore">
-            <div style="margin-top:26px"><h3 style="font-size:17px">Other ways to create</h3><p class="psub">Different starting points — the session above is the main path.</p></div>
-            <div class="modes" id="modes"></div>
-            <div class="panel" id="spokepanel" style="margin-top:14px;display:none">
-              <div class="ph"><h3>The spoke model</h3><span class="rec" style="background:rgba(128,61,255,.1);color:var(--violet)">One idea → five pieces</span></div>
-              <p class="psub">Put one idea in the middle. Threadline spins it into five ready-to-shape pieces — a post, a caption, a script, an email, and the long-form version.</p>
+            <div class="panel hl" id="spokepanel" style="margin-top:18px">
+              <div class="ph"><h3>The spoke model</h3><span class="rec" style="background:rgba(128,61,255,.1);color:var(--violet)">One idea → six pieces</span></div>
+              <p class="psub">Put one idea in the middle — or hand Threadline something you've already made. It spins the whole set: an Instagram post, a carousel, a reel, a 3-part email series, a blog/LinkedIn article, and an X/Threads callout.</p>
               <div class="spokein">
-                <textarea id="spokeIdea" placeholder="The idea in the middle — one sentence is enough"></textarea>
+                <textarea id="spokeIdea" placeholder="The idea in the middle — a sentence, or paste a piece you've already made"></textarea>
                 <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin it →</button>
+              </div>
+              <div class="sptools">
+                <button class="tool" onclick="spokeUpload()">Upload a file — image, PDF, deck, or article</button>
+                <button class="tool" onclick="spokeExisting()">Grab a piece you've already made</button>
+                <input type="file" id="spokeFile" style="display:none" onchange="spokeFilePicked(this)">
               </div>
               <div class="spwrap" id="spwrap" style="display:none">
                 <div class="sprail" id="sprail"></div>
                 <div class="spdetail" id="spdetail"></div>
               </div>
             </div>
-            <div style="margin-top:20px"><button class="quiet2" onclick="showTrends(true)">Trends &amp; Production →</button></div>
+
+            <div class="panel hl" style="margin-top:16px">
+              <div class="ph"><h3>Angle &amp; message sharpening</h3><span class="rec" style="background:rgba(32,184,120,.1);color:#178a5a">Find it, then sharpen it</span></div>
+              <p class="psub">Bring a topic or a rough point of view. Threadline finds the strongest angle on it, then works the message with you until it cuts.</p>
+              <div class="spokein">
+                <textarea id="sharpenIdea" placeholder="A topic, a draft line, or the point you're trying to make"></textarea>
+                <button class="spgo" onclick="startSharpen()">Sharpen it →</button>
+              </div>
+            </div>
+
+            <div class="tworow">
+              <button class="bigopt" onclick="location.href='threadline-series.html'"><b>Create a recurring series</b><span>Build a signature series your audience looks forward to.</span></button>
+              <button class="bigopt" onclick="showTrends(true)"><b>Trends &amp; Production</b><span>What's working right now — hooks, formats, and your filming list.</span></button>
+            </div>
           </div>
 
           <div id="trendsView" style="display:none">
@@ -417,9 +446,7 @@ svg.defs{position:absolute;width:0;height:0}
           </div>
         </div>
 
-        <div class="rail">
-          <div class="seriescard"><b>Create a recurring series</b><p>Build a signature series your audience will look forward to.</p><button onclick="location.href='threadline-series.html'">Go to Series Generator →</button></div>
-        </div>
+
       </div>
     </div>
 
@@ -519,20 +546,15 @@ renderNav();
 const STARTERS=['I want to talk about...','A recent client win',"An idea I'm stuck on",'What my audience is struggling with','A launch or promotion','A belief I want to share'];
 $('#starters').innerHTML=STARTERS.map(s=>`<button class="chip" onclick="document.getElementById('mainInput').value=${JSON.stringify(s==='I want to talk about...'?'I want to talk about ':s+': ')};document.getElementById('mainInput').focus()">${s}</button>`).join('');
 
-const MODES=[
-  {k:'idea',ic:'💡',bg:'rgba(128,61,255,.1)',t:'Idea Generator',d:'Fresh ideas from your brand & goals.'},
-  {k:'angle',ic:'🖼️',bg:'rgba(32,184,120,.1)',t:'Angle Explorer',d:'Find the strongest angle on a topic.'},
-  {k:'sharpen',ic:'🎯',bg:'rgba(251,113,133,.12)',t:'Message Sharpening',d:'Make your point of view stronger.'},
-  {k:'repurpose',ic:'📄',bg:'rgba(245,165,36,.14)',t:'Content Repurposer',d:'One piece \u2192 many formats.'},
-];
-$('#modes').innerHTML=`<div class="mode" onclick="toggleSpoke()"><b>The spoke model</b><p>One idea \u2192 five pieces: post, caption, script, email, long-form.</p></div>`
- +MODES.map(m=>`<div class="mode" onclick="startSession({mode:'${m.k}'})"><b>${m.t}</b><p>${m.d}</p></div>`).join('')
- +`<div class="mode ctx" onclick="openCtx()"><b>From your content</b><p>Upload a file, video, or transcript \u2014 or paste an idea.</p></div>`;
-function toggleSpoke(){
-  const p=$('#spokepanel'); const show=p.style.display==='none';
-  p.style.display=show?'':'none';
-  if(show){ p.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>$('#spokeIdea').focus(),350); }
-}
+function spokeUpload(){ $('#spokeFile').click(); }
+function spokeFilePicked(inp){ const f=inp.files&&inp.files[0]; if(!f) return;
+  $('#spokeIdea').value='Core idea from \u201c'+f.name+'\u201d \u2014 Threadline read it; sharpen this line if it missed the point.';
+  $('#spokeIdea').focus(); toast('Read \u201c'+f.name+'\u201d \u2014 pulled the core idea into the middle'); }
+function spokeExisting(){ const t=$('#spokeIdea');
+  t.value='My best recent piece: \u201c'+(((B.preview&&B.preview.post)||'paste any old post here')+'').replace(/<[^>]*>/g,'').slice(0,140)+'\u2026\u201d \u2014 spin the system from this.';
+  t.focus(); toast('Grabbed your strongest recent piece \u2014 or paste any old post over it'); }
+function startSharpen(){ const v=($('#sharpenIdea')&&$('#sharpenIdea').value.trim())||'';
+  startSession(v?{mode:'sharpen',seed:v,title:'Sharpen: '+v.slice(0,40)}:{mode:'sharpen'}); }
 function showTrends(on){
   ['tpPanel','createCore'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=on?'none':''; });
   const hero=document.querySelector('.hero'); if(hero) hero.style.display=on?'none':'';
@@ -660,11 +682,12 @@ const SPOKE_SCHEMA={type:'object',properties:{pieces:{type:'array',items:{type:'
 let SPOKES=null, spokeSel=0;
 function spokeFallback(idea){
   return [
-   {format:'LinkedIn post',title:idea.slice(0,60),body:idea+'\n\nHere\u2019s the part nobody says out loud: this is a choice, not a given.\n\nWe\u2019ve watched it play out with real clients \u2014 the ones who move on this early are the ones who win.\n\nIf this is you right now: pick the smallest version of the fix and start today.'},
-   {format:'Instagram caption',title:'The honest version',body:idea+'\n\nRead that again.\n\nSave this for the next time you doubt it. \u2192 Agree or pushback? Tell me below.'},
-   {format:'Reel script',title:'Say it to camera',body:'HOOK: '+idea+'\nBEAT 1: Why everyone gets this wrong.\nBEAT 2: What we see instead \u2014 one real example.\nBEAT 3: The simple reframe.\nCTA: Follow for the honest version of this, weekly.'},
-   {format:'Email',title:idea.slice(0,48),body:'Subject: '+idea.slice(0,48)+'\n\nHey \u2014\n\n'+idea+'\n\nThat\u2019s the whole note. One idea, honestly told.\n\nIf it lands, reply \u2014 I read every one.'},
-   {format:'Article outline',title:idea.slice(0,56)+' \u2014 the long version',body:'HEADLINE: '+idea+'\nDEK: The full argument, with receipts.\n\n1. The moment this clicked for us\n2. What everyone believes (and why it\u2019s sticky)\n3. The evidence it\u2019s wrong\n4. What to do instead \u2014 the playbook\n5. What changes when you commit'}
+   {format:'Instagram post',title:idea.slice(0,56),body:idea+'\n\nRead that again.\n\nThe brands you admire figured this out early \u2014 and it shows in everything they make.\n\nWhat\u2019s your take \u2014 agree or pushback?'},
+   {format:'Carousel',title:'The full argument, slide by slide',body:'Slide 1: '+idea+'\nSlide 2: Why everyone gets this wrong\nSlide 3: What we see instead \u2014 one real example\nSlide 4: The simple reframe\nSlide 5: What changes when you commit\nSlide 6: Save this for the next time you doubt it\n\nCAPTION: '+idea+' Save this one \u2014 you\u2019ll want it later.'},
+   {format:'Reel',title:'Say it to camera',body:'HOOK: '+idea+'\nBEAT 1: Why everyone gets this wrong.\nBEAT 2: What we see instead \u2014 one real example.\nBEAT 3: The simple reframe.\nCTA: Follow for the honest version, weekly.\n\nCAPTION: '+idea.slice(0,80)},
+   {format:'Email series',title:'The 3-part arc',body:'EMAIL 1 \u2014 Subject: '+idea.slice(0,44)+'\nThe idea, honestly told. One story, no pitch. End on the question your reader is already asking.\n\nEMAIL 2 \u2014 Subject: The part nobody says out loud\nThe objection, faced head-on. One client example that proves the reframe.\n\nEMAIL 3 \u2014 Subject: What to do about it this week\nThe playbook: three small moves. One clear CTA to reply or book.'},
+   {format:'Article',title:idea.slice(0,52)+' \u2014 the long version',body:'HEADLINE: '+idea+'\nDEK: The full argument, with receipts \u2014 for the blog or LinkedIn.\n\n1. The moment this clicked for us\n2. What everyone believes (and why it\u2019s sticky)\n3. The evidence it\u2019s wrong\n4. What to do instead \u2014 the playbook\n5. What changes when you commit'},
+   {format:'X post',title:'The callout',body:idea.replace(/[.?!]+$/,'')+'.\n\nThat\u2019s it. That\u2019s the post.'}
   ];
 }
 async function spinSpokes(){
@@ -673,10 +696,10 @@ async function spinSpokes(){
   let pieces=null;
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You turn ONE content idea into FIVE finished draft pieces in the brand voice \u2014 the hub-and-spoke model. Formats, exactly these five: "LinkedIn post" (full post: hook line, argument, close), "Instagram caption" (short lines, ends with a question), "Reel script" (HOOK / 3 BEATS / CTA lines), "Email" (Subject: line then a 100-130 word note), "Article outline" (HEADLINE, DEK, 5 numbered section beats). Each piece: format, title (under 10 words), body (the full draft). Keep every piece anchored to the ONE idea.',
+      system:'You turn ONE content idea (or an existing piece the user pasted) into SIX finished draft pieces in the brand voice \u2014 the hub-and-spoke model. Formats, exactly these six: "Instagram post" (caption-led: short lines, breathing room, ends with a question), "Carousel" (Slide 1..6 one line each, then CAPTION: 2-3 lines), "Reel" (HOOK / 3 BEATS / CTA, then CAPTION: one line), "Email series" (3 parts \u2014 Email 1/2/3, each Subject: + 60-90 words, one narrative arc), "Article" (HEADLINE, DEK, then 5 numbered sections \u2014 works for blog or LinkedIn), "X post" (a punchy callout under 280 characters, no hashtags). Each piece: format, title (under 10 words), body (the full draft). Keep every piece anchored to the ONE idea.',
       messages:[{role:'user',content:'Brand: '+(B.name||'')+' \u2014 '+((B.overview&&B.overview.oneLine)?B.overview.oneLine.replace(/<[^>]*>/g,''):'')+'\nVoice: '+((B.voice&&B.voice.traits)?B.voice.traits.join(', '):'clear, honest')+'\nAudience: '+((B.audience&&B.audience.primary)||'')+'\n\nThe idea in the middle: '+idea}],
-      max_tokens:2000, output_config:{format:{type:'json_schema',schema:SPOKE_SCHEMA}}})});
-    if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(t){ const j=JSON.parse(t); if(j.pieces&&j.pieces.length) pieces=j.pieces.slice(0,5); } }
+      max_tokens:2800, output_config:{format:{type:'json_schema',schema:SPOKE_SCHEMA}}})});
+    if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(t){ const j=JSON.parse(t); if(j.pieces&&j.pieces.length) pieces=j.pieces.slice(0,6); } }
   }catch(e){}
   if(!pieces){ pieces=spokeFallback(idea); toast('Live drafting runs in the real app \u2014 showing the template spin for now'); }
   SPOKES=pieces; spokeSel=0; renderSpokes();
@@ -765,7 +788,7 @@ function startSession(opts){
   opts=opts||{};
   show('session'); renderCtx();
   $('#sGoal').textContent='🎯 '+(GOALS[opts.mode]||GOALS.free);
-  $('#sTitle').textContent=opts.title||({idea:'Idea Generator',angle:'Angle Explorer',sharpen:'Message Sharpening',repurpose:'Content Repurposer',planner:'Planner Fill',ask:'Ask Threadline',offer:'Build around an offer',story:'Client story'})[opts.mode]||'Thought partner session';
+  $('#sTitle').textContent=opts.title||({idea:'Idea Generator',angle:'Angle Explorer',sharpen:'Angle & message sharpening',repurpose:'Content Repurposer',planner:'Planner Fill',ask:'Ask Threadline',offer:'Build around an offer',story:'Client story'})[opts.mode]||'Thought partner session';
   const m=opts.mode||'free';
   if(m==='free') runFree(opts.seed);
   else if(m==='planner') runPlanner();
