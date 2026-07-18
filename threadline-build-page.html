@@ -280,6 +280,29 @@ svg.defs{position:absolute;width:0;height:0}
 .app.nav-open .scrim{opacity:1;pointer-events:auto}
 .main{min-height:100vh}
 </style>
+<style>
+/* spoke model: one idea in, five pieces out */
+.spokein{display:flex;gap:10px;align-items:stretch;margin-top:4px}
+.spokein textarea{flex:1;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;min-height:56px;resize:vertical;outline:none;background:var(--surface);color:var(--ink)}
+.spokein textarea:focus{border-color:var(--violet)}
+.spgo{border:none;border-radius:12px;padding:0 22px;font-weight:800;font-size:14px;color:#fff;background:linear-gradient(120deg,var(--violet),var(--blue));cursor:pointer;font-family:inherit;flex:none}
+.spgo:disabled{opacity:.6}
+.spwrap{display:grid;grid-template-columns:250px 1fr;gap:14px;margin-top:16px;align-items:start}
+@media(max-width:860px){.spwrap{grid-template-columns:1fr}}
+.sprail{display:flex;flex-direction:column;gap:7px}
+.spitem{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:11px;padding:10px 12px;cursor:pointer;color:var(--ink);font-family:inherit}
+.spitem.active{border-color:var(--violet);border-left-color:var(--violet)}
+.spitem b{font-size:12.5px;line-height:1.35;display:block;margin-bottom:5px}
+.spchip{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fff;background:var(--ink);border-radius:4px;padding:2px 8px}
+.spdetail{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sphead{padding:14px 16px;border-bottom:1px solid var(--line)}
+.sphead .eyeb{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--violet);margin-bottom:4px}
+.sphead h4{font-size:15.5px;margin:0 0 9px}
+.sphead .row2{display:flex;gap:8px;flex-wrap:wrap}
+.spb{border:1.5px solid var(--line);border-radius:9px;padding:6px 13px;font-weight:800;font-size:12px;color:var(--muted);background:var(--surface);cursor:pointer;font-family:inherit}
+.spb.pri{border:none;color:#fff;background:linear-gradient(120deg,var(--violet),var(--blue))}
+.spbody{padding:14px 16px;font-size:13px;line-height:1.65;white-space:pre-wrap;color:var(--ink)}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -336,6 +359,19 @@ svg.defs{position:absolute;width:0;height:0}
                 <button class="tool sur" onclick="surprise()">Surprise me ✦</button>
                 <button class="send" onclick="submitMain()">→</button>
               </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:18px">
+            <div class="ph"><h3>The spoke model</h3><span class="rec" style="background:rgba(128,61,255,.1);color:var(--violet)">One idea → five pieces</span></div>
+            <p class="psub">Put one idea in the middle. Threadline spins it into five ready-to-shape pieces — a post, a caption, a script, an email, and the long-form version.</p>
+            <div class="spokein">
+              <textarea id="spokeIdea" placeholder="The idea in the middle — one sentence is enough"></textarea>
+              <button class="spgo" id="spokeGo" onclick="spinSpokes()">Spin it →</button>
+            </div>
+            <div class="spwrap" id="spwrap" style="display:none">
+              <div class="sprail" id="sprail"></div>
+              <div class="spdetail" id="spdetail"></div>
             </div>
           </div>
 
@@ -569,6 +605,44 @@ async function refreshTrends(){
   btn.disabled=false; btn.textContent=orig;
 }
 renderHooks(); renderBroll(); renderTrends();
+
+/* ================= SPOKE MODEL: one idea -> five pieces ================= */
+const SPOKE_SCHEMA={type:'object',properties:{pieces:{type:'array',items:{type:'object',properties:{format:{type:'string'},title:{type:'string'},body:{type:'string'}},required:['format','title','body'],additionalProperties:false}}},required:['pieces'],additionalProperties:false};
+let SPOKES=null, spokeSel=0;
+function spokeFallback(idea){
+  return [
+   {format:'LinkedIn post',title:idea.slice(0,60),body:idea+'\n\nHere\u2019s the part nobody says out loud: this is a choice, not a given.\n\nWe\u2019ve watched it play out with real clients \u2014 the ones who move on this early are the ones who win.\n\nIf this is you right now: pick the smallest version of the fix and start today.'},
+   {format:'Instagram caption',title:'The honest version',body:idea+'\n\nRead that again.\n\nSave this for the next time you doubt it. \u2192 Agree or pushback? Tell me below.'},
+   {format:'Reel script',title:'Say it to camera',body:'HOOK: '+idea+'\nBEAT 1: Why everyone gets this wrong.\nBEAT 2: What we see instead \u2014 one real example.\nBEAT 3: The simple reframe.\nCTA: Follow for the honest version of this, weekly.'},
+   {format:'Email',title:idea.slice(0,48),body:'Subject: '+idea.slice(0,48)+'\n\nHey \u2014\n\n'+idea+'\n\nThat\u2019s the whole note. One idea, honestly told.\n\nIf it lands, reply \u2014 I read every one.'},
+   {format:'Article outline',title:idea.slice(0,56)+' \u2014 the long version',body:'HEADLINE: '+idea+'\nDEK: The full argument, with receipts.\n\n1. The moment this clicked for us\n2. What everyone believes (and why it\u2019s sticky)\n3. The evidence it\u2019s wrong\n4. What to do instead \u2014 the playbook\n5. What changes when you commit'}
+  ];
+}
+async function spinSpokes(){
+  const idea=($('#spokeIdea').value||'').trim(); if(!idea){ $('#spokeIdea').focus(); return; }
+  const go=$('#spokeGo'); go.disabled=true; go.textContent='Spinning\u2026';
+  let pieces=null;
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You turn ONE content idea into FIVE finished draft pieces in the brand voice \u2014 the hub-and-spoke model. Formats, exactly these five: "LinkedIn post" (full post: hook line, argument, close), "Instagram caption" (short lines, ends with a question), "Reel script" (HOOK / 3 BEATS / CTA lines), "Email" (Subject: line then a 100-130 word note), "Article outline" (HEADLINE, DEK, 5 numbered section beats). Each piece: format, title (under 10 words), body (the full draft). Keep every piece anchored to the ONE idea.',
+      messages:[{role:'user',content:'Brand: '+(B.name||'')+' \u2014 '+((B.overview&&B.overview.oneLine)?B.overview.oneLine.replace(/<[^>]*>/g,''):'')+'\nVoice: '+((B.voice&&B.voice.traits)?B.voice.traits.join(', '):'clear, honest')+'\nAudience: '+((B.audience&&B.audience.primary)||'')+'\n\nThe idea in the middle: '+idea}],
+      max_tokens:2000, output_config:{format:{type:'json_schema',schema:SPOKE_SCHEMA}}})});
+    if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(t){ const j=JSON.parse(t); if(j.pieces&&j.pieces.length) pieces=j.pieces.slice(0,5); } }
+  }catch(e){}
+  if(!pieces){ pieces=spokeFallback(idea); toast('Live drafting runs in the real app \u2014 showing the template spin for now'); }
+  SPOKES=pieces; spokeSel=0; renderSpokes();
+  go.disabled=false; go.textContent='Spin it \u2192';
+}
+function renderSpokes(){
+  $('#spwrap').style.display='grid';
+  $('#sprail').innerHTML=SPOKES.map((pc,i)=>`<button class="spitem${i===spokeSel?' active':''}" onclick="spokeSel=${i};renderSpokes()"><b>${esc(pc.title)}</b><span class="spchip">${esc(pc.format)}</span></button>`).join('');
+  const pc=SPOKES[spokeSel];
+  $('#spdetail').innerHTML=`<div class="sphead"><div class="eyeb">${esc(pc.format)}</div><h4>${esc(pc.title)}</h4>
+    <div class="row2"><button class="spb pri" onclick="spokeRefine()">Refine in a session \u2192</button><button class="spb" onclick="spokeCopy()">Copy</button></div></div>
+    <div class="spbody">${esc(pc.body)}</div>`;
+}
+function spokeRefine(){ const pc=SPOKES[spokeSel]; startSession({mode:'free',seed:'Refine this '+pc.format+' draft with me \u2014 keep my voice, make it sharper:\n\n'+pc.body,title:'Spoke: '+pc.title.slice(0,40)}); }
+function spokeCopy(){ const pc=SPOKES[spokeSel]; try{ navigator.clipboard.writeText(pc.body); toast('Copied \u2014 paste it anywhere'); }catch(e){ toast('Select and copy from the preview'); } }
 
 /* =========================================================
    SESSION ENGINE

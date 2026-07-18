@@ -580,7 +580,7 @@ let HUB=(function(){ try{ const r=localStorage.getItem(HUBKEY); if(r){ const h=J
     return h; } }catch(e){} return hubSeed(); })();
 function hubSave(){ try{ localStorage.setItem(HUBKEY,JSON.stringify(HUB)); }catch(e){} }
 let hubTab='ideas', openCamp=null;
-const HUBTABS=[['ideas','💡','Ideas'],['progress','🛠','In progress'],['approval','✅','Approval'],['scheduled','🗓','Scheduled']];
+const HUBTABS=[['ideas','Ideas'],['progress','In progress'],['approval','Approval'],['scheduled','Scheduled']];
 function hubCount(st){ return HUB.ideas.filter(i=>i.status===st).length + HUB.minis.filter(m=>m.status===st).length + HUB.campaigns.filter(c=>c.status===st).length; }
 async function hubAI(system,user,schema,maxTok){
   try{
@@ -595,6 +595,23 @@ function uid(){ return 'h'+Math.random().toString(36).slice(2,9); }
 
 /* ---- capture actions ---- */
 function hubCapState(){ const ta=$('#hubdump'), g=$('#capturn'); if(ta&&g) g.classList.toggle('off',!ta.value.trim()); }
+function hubCaptureHTML(){
+  return `<div class="hubcap"><textarea id="hubdump" oninput="hubCapState()" placeholder="Dump an idea — a sentence or a whole braindump…"></textarea>
+      <div class="caprow">
+        <div class="capgroup">
+          <span class="caplab">Capture</span>
+          <button class="hb pri" onclick="hubAddIdea()">Add idea</button>
+          <button class="hb" id="hubGenBtn" onclick="hubGenerate()">Generate ideas</button>
+        </div>
+        <div class="capdiv"></div>
+        <div class="capgroup off" id="capturn">
+          <span class="caplab">…or turn what you wrote into</span>
+          <button class="hb" id="hubSplitBtn" onclick="hubSplit()">Multiple ideas</button>
+          <button class="hb" onclick="dumpToMini()">A mini-series</button>
+          <button class="hb" onclick="dumpToCampaign()">A campaign</button>
+        </div>
+      </div></div>`;
+}
 function dumpName(t,max){ const first=t.split('\n')[0].split(/(?<=[.?!])\s/)[0].replace(/[.?!,;:]+$/,'').trim(); return (first.length>max?first.slice(0,max).replace(/\s+\S*$/,''):first)||t.slice(0,max); }
 function dumpToMini(){ const ta=$('#hubdump'); const t=(ta&&ta.value.trim())||''; if(!t) return;
   const name=dumpName(t,48); if(ta) ta.value=''; hubCapState(); createMini(name,t); }
@@ -608,18 +625,18 @@ function hubAddIdea(){
 }
 async function hubSplit(){
   const ta=$('#hubdump'); const v=(ta?ta.value.trim():''); if(v.length<40){ toast('Paste a bigger chunk — a braindump, notes, a transcript'); ta&&ta.focus(); return; }
-  const btn=$('#hubSplitBtn'); if(btn){btn.disabled=true;btn.textContent='✂️ Splitting…';}
+  const btn=$('#hubSplitBtn'); if(btn){btn.disabled=true;btn.textContent='Splitting…';}
   let out=await hubAI('Split the founder\u2019s braindump into distinct, self-contained content ideas. Each: t = a sharp working title under 12 words, sum = one sentence on the angle. Only ideas actually present in the text.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\n\nBraindump:\n'+v, IDEAS_SCHEMA, 800);
   if(!(out&&out.ideas&&out.ideas.length)){
     const parts=v.split(/\n\s*\n|(?<=[.!?])\s+(?=[A-Z])/).map(x=>x.trim()).filter(x=>x.length>25).slice(0,6);
     out={ideas:parts.map(x=>({t:x.slice(0,70)+(x.length>70?'…':''),sum:x.slice(0,150)}))};
   }
   out.ideas.slice(0,8).forEach(i=>HUB.ideas.unshift({id:uid(),t:i.t,sum:i.sum,pillar:B.pillars[0][0],status:'idea'}));
-  ta.value=''; hubSave(); if(btn){btn.disabled=false;btn.textContent='✂️ Split into ideas';} renderHub();
+  ta.value=''; hubSave(); if(btn){btn.disabled=false;btn.textContent='Multiple ideas';} renderHub();
   toast('Split into '+Math.min(8,out.ideas.length)+' ideas');
 }
 async function hubGenerate(){
-  const btn=$('#hubGenBtn'); if(btn){btn.disabled=true;btn.textContent='✦ Generating…';}
+  const btn=$('#hubGenBtn'); if(btn){btn.disabled=true;btn.textContent='Generating…';}
   const steer=($('#hubdump')&&$('#hubdump').value.trim())||'';
   let out=await hubAI('Generate 4 fresh, specific content ideas for this brand — ideas only this brand would post, drawn from its audience and point of view. Each: t = working title under 12 words, sum = one sentence on the angle.', 'Brand: '+(B.name||'')+' — '+(window.stripTags?stripTags(B.overview.oneLine):'')+'\nAudience: '+B.audience.primary+'\nPOV: '+(window.stripTags?stripTags(B.messaging.pov):'')+'\nPillars: '+B.pillars.map(p=>p[0]).join(', ')+(steer?'\n\nRiff on this angle the user typed: '+steer:''), IDEAS_SCHEMA, 600);
   if(!(out&&out.ideas&&out.ideas.length)) out={ideas:[
@@ -628,7 +645,7 @@ async function hubGenerate(){
     {t:'Behind the decision we almost got wrong',sum:'Process story — builds trust fast.'},
     {t:'One belief we\u2019ll never compromise',sum:'From your brand foundation.'}]};
   out.ideas.slice(0,4).forEach(i=>HUB.ideas.unshift({id:uid(),t:i.t,sum:i.sum,pillar:B.pillars[0][0],status:'idea'}));
-  hubSave(); if(btn){btn.disabled=false;btn.textContent='✦ Generate ideas';} renderHub(); toast('4 fresh ideas added');
+  hubSave(); if(btn){btn.disabled=false;btn.textContent='Generate ideas';} renderHub(); toast('4 fresh ideas added');
 }
 
 /* ---- mini-series (the middle spoke) ---- */
@@ -803,7 +820,7 @@ function campDetail(c){
       <div class="csec" id="sec-${c.id}-messages">${secHead(c,'messages','Campaign message hierarchy')}
         ${['emotional','educational','product','brand'].map(k=>`<div class="msgrow${k==='emotional'?' emo':''}"><b>${k}</b><span>${esc(c.messages[k]||'')}</span></div>`).join('')}</div>
       <div class="csec" id="sec-${c.id}-structure">${secHead(c,'structure','Campaign structure — the 6-week arc')}${c.structure.map((pp,i)=>`<div class="phrow"><span class="num">${i+1}</span><div><b>${esc(pp.phase)}</b><span>${esc(pp.what)}</span></div></div>`).join('')}</div>
-      ${c.stretch?`<div class="csec" id="sec-${c.id}-stretch">${secHead(c,'stretch','Stretch campaign 🔒')}<div class="lockb"><b>${esc(c.stretch.theme)}</b><ul class="plainul">${(c.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Locked — holds until the 6-week metrics are evaluated. Extend only if the campaign earns it.</span></div></div>`:''}
+      ${c.stretch?`<div class="csec" id="sec-${c.id}-stretch">${secHead(c,'stretch','Stretch campaign — locked')}<div class="lockb"><b>${esc(c.stretch.theme)}</b><ul class="plainul">${(c.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Locked — holds until the 6-week metrics are evaluated. Extend only if the campaign earns it.</span></div></div>`:''}
       <div class="csec" id="sec-${c.id}-assets">${secHead(c,'assets','Drafted assets · '+c.assets.length)}
         ${c.assets.map(a=>assetCard(c,a)).join('')}
       </div>`;
@@ -872,9 +889,11 @@ function railItem(x){
 function mdDetail(x){
   const o=x.o, inAppr=o.status==='approval';
   if(x.type==='camp'){ const done=o.assets.filter(a=>a.status==='approved').length, stg=apprOf(x);
-    const acts=inAppr
+    const acts=o.status==='idea'
+      ?`<button class="hb pri" onclick="campStatus('${o.id}','progress')">Start building →</button><button class="hb" onclick="dropCamp('${o.id}')">Archive</button>`
+      :inAppr
       ?(stg==='approved'
-        ?`<button class="hb pri" onclick="scheduleCampaign('${o.id}')">🗓 Auto-schedule the 6-week structure</button><button class="hb" onclick="campStatus('${o.id}','progress')">← Back to build</button>`
+        ?`<button class="hb pri" onclick="scheduleCampaign('${o.id}')">Auto-schedule the 6-week structure</button><button class="hb" onclick="campStatus('${o.id}','progress')">← Back to build</button>`
         :`<button class="hb" onclick="campStatus('${o.id}','progress')">← Back to build</button><button class="hb" onclick="dropCamp('${o.id}')">Archive</button>`)
       :`<button class="hb pri" onclick="campStatus('${o.id}','approval')">Submit for approval →</button><button class="hb" onclick="campStatus('${o.id}','idea')">← Back to ideas</button><button class="hb" onclick="dropCamp('${o.id}')">Archive</button>`;
     const gate=inAppr&&stg!=='approved'?`<div class="gate">${stg==='feedback'?'↻ Changes requested — revise the flagged assets below, then approve each one to unlock scheduling.':'Review each asset below — approve all '+o.assets.length+' to unlock auto-scheduling.'}</div>`:'';
@@ -883,9 +902,11 @@ function mdDetail(x){
       <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${gate}</div>${secNav(o)}
       <div class="mdbody">${campDetail(o)}</div>`; }
   if(x.type==='mini'){ const stg=apprOf(x);
-    const acts=inAppr
+    const acts=o.status==='idea'
+      ?`<button class="hb pri" onclick="miniStatus('${o.id}','progress')">Start building →</button><button class="hb" onclick="dropMini('${o.id}')">Archive</button>`
+      :inAppr
       ?(stg==='approved'
-        ?`<button class="hb pri" onclick="scheduleMini('${o.id}')">🗓 Schedule — one episode per ${esc((o.cadence||'week').toLowerCase().replace(/ly$/,''))}</button><button class="hb" onclick="setAppr('mini','${o.id}','awaiting')">↩ Un-approve</button>`
+        ?`<button class="hb pri" onclick="scheduleMini('${o.id}')">Schedule — one episode per ${esc((o.cadence||'week').toLowerCase().replace(/ly$/,''))}</button><button class="hb" onclick="setAppr('mini','${o.id}','awaiting')">↩ Un-approve</button>`
         :`<button class="hb pri" onclick="setAppr('mini','${o.id}','approved')">✓ Approve</button><button class="hb" onclick="setAppr('mini','${o.id}','feedback')">↻ Request changes</button><button class="hb" onclick="miniStatus('${o.id}','progress')">← Back to build</button>`)
       :`<button class="hb pri" onclick="miniStatus('${o.id}','approval')">Submit for approval →</button><button class="hb" onclick="location.href='threadline-series.html'">Open in Series →</button><button class="hb" onclick="miniStatus('${o.id}','idea')">←</button>`;
     const fb=inAppr&&stg==='feedback'?`<input class="anote" style="margin-top:10px;width:100%" placeholder="What needs to change?" value="${esc(o.fnote||'')}" onchange="noteFb('mini','${o.id}',this)">`:'';
@@ -894,28 +915,31 @@ function mdDetail(x){
       <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${fb}</div>
       <div class="mdbody">${miniDetail(o)}</div>`; }
   const stg=apprOf(x);
-  const acts=inAppr
+  const acts=o.status==='idea'
+    ?`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(o.t).replace(/'/g,'’')}')">Build →</button><button class="hb" onclick="ideaStatus('${o.id}','progress');hubTab='progress';renderHub()">Start</button><button class="hb" onclick="ideaToMini('${o.id}')">Make it a series</button><button class="hb" onclick="ideaToCampaign('${o.id}')">Build a campaign</button><button class="hb" onclick="dropIdea('${o.id}')">Remove</button>`
+    :inAppr
     ?(stg==='approved'
-      ?`<button class="hb pri" onclick="scheduleIdea('${o.id}')">🗓 Schedule</button><button class="hb" onclick="setAppr('idea','${o.id}','awaiting')">↩ Un-approve</button>`
+      ?`<button class="hb pri" onclick="scheduleIdea('${o.id}')">Schedule</button><button class="hb" onclick="setAppr('idea','${o.id}','awaiting')">↩ Un-approve</button>`
       :`<button class="hb pri" onclick="setAppr('idea','${o.id}','approved')">✓ Approve</button><button class="hb" onclick="setAppr('idea','${o.id}','feedback')">↻ Request changes</button><button class="hb" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(o.t).replace(/'/g,'’')}')">Open in Create →</button><button class="hb" onclick="ideaStatus('${o.id}','progress');hubTab='progress';renderHub()">← Back to build</button>`)
-    :`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(o.t).replace(/'/g,'’')}')">Open in Create →</button><button class="hb" onclick="ideaStatus('${o.id}','approval');hubTab='approval';renderHub()">Submit for approval →</button><button class="hb" onclick="ideaToMini('${o.id}')">📱 Series</button><button class="hb" onclick="ideaToCampaign('${o.id}')">🎯 Campaign</button><button class="hb" onclick="ideaStatus('${o.id}','idea')">←</button>`;
+    :`<button class="hb pri" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('${esc(o.t).replace(/'/g,'’')}')">Open in Create →</button><button class="hb" onclick="ideaStatus('${o.id}','approval');hubTab='approval';renderHub()">Submit for approval →</button><button class="hb" onclick="ideaToMini('${o.id}')">Make it a series</button><button class="hb" onclick="ideaToCampaign('${o.id}')">Build a campaign</button><button class="hb" onclick="ideaStatus('${o.id}','idea')">←</button>`;
   const fb=inAppr&&stg==='feedback'?`<input class="anote" style="margin-top:10px;width:100%" placeholder="What needs to change?" value="${esc(o.fnote||'')}" onchange="noteFb('idea','${o.id}',this)">`:'';
   return `<div class="mdhead"><div class="eyebrow">${esc(o.kind||'Post')}${inAppr?' · In approval':''}</div><h2>${esc(o.t)}</h2>
       <div class="cmeta">${o.pillar?`<span class="chch">${esc(o.pillar)}</span>`:''}</div>
       <div class="cacts" style="border-top:0;padding:10px 0 0">${acts}</div>${fb}</div>
       <div class="mdbody"><div class="csec"><h5>The idea</h5><p>${esc(o.sum||o.t)}</p></div>
       <div class="csec"><h5>Category</h5><div class="kpick">${[...new Set(KIND_PRESETS.concat(o.kind||'Post'))].map(k=>`<button class="fchip${(o.kind||'Post')===k?' on':''}" onclick="setKind('${o.id}','${esc(k)}')">${esc(k)}</button>`).join('')}<button class="fchip" onclick="setKind('${o.id}','__new')">＋ New category</button></div></div>
-      ${inAppr?'':`<div class="csec"><h5>Spin it out</h5><p>This is a single ${esc((o.kind||'post').toLowerCase())} right now. If it has legs, promote it — 📱 turns it into a repeatable series, 🎯 builds a full campaign around it.</p></div>`}</div>`;
+      ${inAppr?'':`<div class="csec"><h5>Spin it out</h5><p>This is a single ${esc((o.kind||'post').toLowerCase())} right now. If it has legs, promote it — make it a repeatable series, or build a full campaign around it.</p></div>`}</div>`;
 }
 function renderHub(){
-  $('#hubtabs').innerHTML=HUBTABS.map(([k,ic,l])=>`<button class="hubtab${hubTab===k?' on':''}" onclick="hubTab='${k}';renderHub()">${ic} ${l} <i>${hubCount(k==='ideas'?'idea':k)}</i></button>`).join('');
+  $('#hubtabs').innerHTML=HUBTABS.map(([k,l])=>`<button class="hubtab${hubTab===k?' on':''}" onclick="hubTab='${k}';renderHub()">${l} <i>${hubCount(k==='ideas'?'idea':k)}</i></button>`).join('');
   const st=hubTab==='ideas'?'idea':hubTab;
   const camps=HUB.campaigns.filter(c=>c.status===st);
   const ideas=HUB.ideas.filter(i=>i.status===st);
-  if(hubTab==='progress'||hubTab==='approval'){
+  if(hubTab==='ideas'||hubTab==='progress'||hubTab==='approval'){
     const minisX=HUB.minis.filter(m=>m.status===st);
     const all=[...camps.map(c=>({type:'camp',o:c})),...minisX.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
-    if(!all.length){ $('#hubbody').innerHTML=`<div class="hubempty" style="margin-top:16px">${hubTab==='progress'?'Nothing in progress yet — hit <b>Start</b> on anything in the Ideas tab.':'Nothing waiting on approval — submit finished work from In progress.'}</div>`; return; }
+    const pre=hubTab==='ideas'?hubCaptureHTML():'';
+    if(!all.length){ $('#hubbody').innerHTML=pre+`<div class="hubempty" style="margin-top:16px">${hubTab==='ideas'?'Nothing captured yet — dump your first idea above.':hubTab==='progress'?'Nothing in progress yet — hit <b>Start</b> on anything in the Ideas tab.':'Nothing waiting on approval — submit finished work from In progress.'}</div>`; return; }
     let items=all, fbar='';
     if(hubTab==='progress'){
       const cats=[...new Set(all.map(itemCat))];
@@ -927,13 +951,13 @@ function renderHub(){
       const stages=[['all','All'],['awaiting','Awaiting approval'],['feedback','Feedback'],['approved','Approved']];
       items=apprFilter==='all'?all:all.filter(x=>apprOf(x)===apprFilter);
       fbar=`<div class="fbar">`+stages.map(([k,l])=>`<button class="fchip${apprFilter===k?' on':''}" onclick="apprFilter='${k}';renderHub()">${l} <i>${k==='all'?all.length:all.filter(x=>apprOf(x)===k).length}</i></button>`).join('')+`</div>`;
-      if(!items.length){ $('#hubbody').innerHTML=fbar+`<div class="hubempty" style="margin-top:14px">Nothing in this stage right now.</div>`; return; }
+      if(!items.length){ $('#hubbody').innerHTML=pre+fbar+`<div class="hubempty" style="margin-top:14px">Nothing in this stage right now.</div>`; return; }
     }
     if(!items.some(x=>x.o.id===hubSel)) hubSel=items[0].o.id;
     const sel=items.find(x=>x.o.id===hubSel);
     const group=(label,arr)=>arr.length?`<div class="rlabel">${label}</div>`+arr.map(railItem).join(''):'';
     const cats2=[...new Set(items.map(itemCat))];
-    $('#hubbody').innerHTML=fbar+`<div class="mdwrap">
+    $('#hubbody').innerHTML=pre+fbar+`<div class="mdwrap">
       <div class="mdrail">${cats2.map(c=>group(c,items.filter(x=>itemCat(x)===c))).join('')}</div>
       <div class="mddetail">${mdDetail(sel)}</div>
     </div>`;
@@ -942,42 +966,18 @@ function renderHub(){
   if(hubTab==='scheduled'){
     const minisX=HUB.minis.filter(m=>m.status===st);
     const items=[...camps.map(c=>({type:'camp',o:c})),...minisX.map(m=>({type:'mini',o:m})),...ideas.map(i=>({type:'idea',o:i}))];
-    if(!items.length){ $('#hubbody').innerHTML=`<div class="hubempty" style="margin-top:16px">Nothing scheduled yet — approve content in the ✅ Approval tab, then schedule it from there.</div>`; return; }
+    if(!items.length){ $('#hubbody').innerHTML=`<div class="hubempty" style="margin-top:16px">Nothing scheduled yet — approve content in the Approval tab, then schedule it from there.</div>`; return; }
     const rows=x=>(x.o.schedule||[]).map(sc=>`<div class="schrow"><span class="swk">W${sc.week}</span><b>${fmtD(new Date(sc.date))}</b><span class="tchip">${esc(sc.ch)}</span><span class="st2">${esc(sc.title)}</span></div>`).join('');
-    $('#hubbody').innerHTML=`<div class="spoke" style="margin-top:16px">🗓 <b>On the calendar.</b> Threadline placed everything by structure and cadence. Stretch campaigns stay locked until the metrics come back.</div>`+
+    $('#hubbody').innerHTML=`<div class="spoke" style="margin-top:16px"><b>On the calendar.</b> Threadline placed everything by structure and cadence. Stretch campaigns stay locked until the metrics come back.</div>`+
       items.map(x=>{ const o=x.o;
-        return `<div class="camp" style="margin-top:14px"><div class="chead" style="cursor:default"><div class="cico">${x.type==='camp'?'🎯':x.type==='mini'?'📱':'💡'}</div>
+        return `<div class="camp" style="margin-top:14px"><div class="chead" style="cursor:default">
           <div class="ct2"><b>${esc(o.name||o.t)} <span class="prio">${x.type==='camp'?'Campaign':x.type==='mini'?'Series':esc(o.kind||'Post')}</span></b>
           <div class="cmeta"><span class="chch">${(o.schedule||[]).length} slots</span><span class="chch">Starts ${o.schedule&&o.schedule[0]?fmtD(new Date(o.schedule[0].date)):'—'}</span></div></div></div>
           <div class="cdetail" style="display:block"><div class="csec"><h5>Timeline</h5>${rows(x)}</div>
-          ${x.type==='camp'&&o.stretch?`<div class="csec"><h5>Stretch campaign 🔒</h5><div class="lockb"><b>${esc(o.stretch.theme)}</b><ul class="plainul">${(o.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Holds until the 6-week metrics are evaluated — unlock it from Analytics when the numbers earn it.</span></div></div>`:''}</div>
+          ${x.type==='camp'&&o.stretch?`<div class="csec"><h5>Stretch campaign — locked</h5><div class="lockb"><b>${esc(o.stretch.theme)}</b><ul class="plainul">${(o.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Holds until the 6-week metrics are evaluated — unlock it from Analytics when the numbers earn it.</span></div></div>`:''}</div>
           <div class="cacts"><button class="hb pri" onclick="location.href='threadline-plan.html'">Open in Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
     return;
   }
-  let html='';
-  if(hubTab==='ideas'){
-    html+=`<div class="hubcap"><textarea id="hubdump" oninput="hubCapState()" placeholder="Dump an idea — a sentence or a whole braindump…"></textarea>
-      <div class="caprow">
-        <div class="capgroup">
-          <span class="caplab">Capture</span>
-          <button class="hb pri" onclick="hubAddIdea()">＋ Add idea</button>
-          <button class="hb" id="hubGenBtn" onclick="hubGenerate()">✦ Generate ideas</button>
-        </div>
-        <div class="capdiv"></div>
-        <div class="capgroup off" id="capturn">
-          <span class="caplab">…or turn what you wrote into</span>
-          <button class="hb" id="hubSplitBtn" onclick="hubSplit()">✂️ Multiple ideas</button>
-          <button class="hb" onclick="dumpToMini()">📱 A mini-series</button>
-          <button class="hb" onclick="dumpToCampaign()">🎯 A campaign</button>
-        </div>
-      </div></div>`;
-    html+=`<div class="spoke">🪄 <b>The spoke model:</b> capture an idea once, then spin it out — a quick <b>post</b>, a repeatable <b>📱 mini-series</b>, or a full <b>🎯 campaign</b>. One thought, many threads.</div>`;
-  }
-  const minis=HUB.minis.filter(m=>m.status===st);
-  html+=`<div class="hubsec"><h3>💡 Idea base</h3>${ideas.length?ideas.map(ideaRow).join(''):`<div class="hubempty">${hubTab==='ideas'?'Nothing captured yet — dump your first idea above.':'Nothing here yet.'}</div>`}</div>`;
-  html+=`<div class="hubsec"><h3>📱 Mini-series <span class="secnote">for socials</span></h3>${minis.length?minis.map(miniCard).join(''):`<div class="hubempty">${hubTab==='ideas'?'No series yet — hit <b>📱 Series</b> on any idea to spin one up.':'Nothing here yet.'}</div>`}</div>`;
-  html+=`<div class="hubsec"><h3>🎯 Full campaigns</h3>${camps.length?camps.map(campCard).join(''):`<div class="hubempty">${hubTab==='ideas'?'No campaigns yet — hit <b>🎯 Campaign</b> on an idea, or <b>🎯 New campaign</b> above.':'Nothing here yet.'}</div>`}</div>`;
-  $('#hubbody').innerHTML=html;
 }
 renderHub();
 
