@@ -345,6 +345,29 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
 .demobtn.primary{background:var(--grad,linear-gradient(135deg,#803DFF,#3B82F6,#22D3EE));color:#fff}
 .demobtn.ghost{background:none;color:var(--muted)}
 
+
+/* --- conversion pass --- */
+.founderbar{padding:18px 0;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.founderbar p{text-align:center;color:var(--muted);font-size:14.5px;font-weight:600}
+.founderbar b{color:var(--ink,#0f1222)}
+.paymodel{padding:34px 0 8px}
+.paysteps{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;max-width:880px;margin:0 auto}
+@media(max-width:720px){.paysteps{grid-template-columns:1fr}}
+.paystep{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
+.paystep .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--grad,linear-gradient(135deg,#803DFF,#3B82F6,#22D3EE));color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center}
+.paystep b{display:block;font-size:14.5px;margin-bottom:2px}
+.paystep span{color:var(--muted);font-size:13px;line-height:1.45}
+.paystep .free{color:#128a5a;font-weight:800}
+.notchat{max-width:760px;margin:34px auto 0;background:linear-gradient(135deg,rgba(128,61,255,.07),rgba(34,211,238,.08));border:1px solid rgba(128,61,255,.2);border-radius:16px;padding:16px 22px;display:flex;gap:14px;align-items:center}
+.notchat .q{flex:none;font-size:22px}
+.notchat p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0}
+.notchat b{color:var(--ink,#0f1222)}
+.micro{display:block;text-align:center;color:var(--faint);font-size:12.5px;font-weight:600;margin-top:10px}
+.midcta{text-align:center;margin-top:34px}
+.planinline{max-width:880px;margin:38px auto 0}
+.planinline .plab{text-align:center;font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--faint);text-transform:uppercase;margin-bottom:12px}
+.planinline .demoframe{cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -390,10 +413,17 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
   </div>
 </div></header>
 
-<div class="trust"><div class="wrap">
-  <p>Trusted by founders, creators, and marketing teams</p>
-  <div class="logos"><span>Kindred</span><span>Tiny Clothing Swap</span><span>SportPharm</span><span>TutorEd</span></div>
+<div class="founderbar"><div class="wrap">
+  <p>Built by a founder who ran <b>6 brands</b> and got tired of the blank calendar.</p>
 </div></div>
+
+<section class="paymodel"><div class="wrap">
+  <div class="paysteps">
+    <div class="paystep"><span class="n">1</span><div><b>Build your brand</b><span><span class="free">Free forever</span> — no card. Voice, positioning, pillars.</span></div></div>
+    <div class="paystep"><span class="n">2</span><div><b>Plan &amp; create</b><span><span class="free">Free for 30 days</span> — full planner, drafts, series.</span></div></div>
+    <div class="paystep"><span class="n">3</span><div><b>Keep building</b><span>From <b>$19/mo</b> — cancel anytime, your work stays yours.</span></div></div>
+  </div>
+</div></section>
 
 <section class="shift" id="shift"><div class="wrap">
   <div class="sec-head">
@@ -406,6 +436,7 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
     <div class="shiftcard hot"><div class="lab">With Threadline</div><h3>Someone to think with</h3><p>A partner that helps generate ideas with you — then carries them forward into a plan.</p></div>
     <div class="shiftcard"><div class="lab">After Threadline</div><h3>Content that's yours</h3><p>Connected series and campaigns that feel purposeful, consistent, and genuinely you.</p></div>
   </div>
+  <div class="notchat"><span class="q">💬</span><p><b>"How is this different from ChatGPT?"</b> It's a workflow, not a chat box. Threadline remembers your voice, pillars, and audience — and carries every idea from half-formed thought to drafted pieces on a scheduled calendar.</p></div>
 </div></section>
 
 <section id="pillars"><div class="wrap">
@@ -450,7 +481,11 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
       <button class="spc" data-c="#3b82f6" onclick="spokePrev(3)"><div class="spceye" style="color:#3b82f6">EMAIL SERIES</div><b>The 3-part arc: myth → reframe → system</b><span class="spm">3 emails · one story</span><span class="sppv">Read the draft →</span></button>
     </div>
   </div>
-  <div style="text-align:center;margin-top:24px"><a class="btn primary lg" href="threadline-onboarding.html">Thread your own idea free →</a></div>
+  <div class="planinline">
+    <div class="plab">…and it all lands on your Plan</div>
+    <div class="demoframe" onclick="openDemo();demoTo(1);" title="See the full demo"><div class="demobar"><i></i><i></i><i></i></div><img src="product-plan.png" alt="Threadline Plan — every piece scheduled by rhythm, status, and format" loading="lazy"></div>
+  </div>
+  <div class="midcta"><a class="btn primary lg" href="threadline-onboarding.html">Build my brand free →</a><span class="micro">No card · Free to build · Cancel anytime</span></div>
 </div></section>
 
 <section id="aud"><div class="wrap">
@@ -465,6 +500,7 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
     <div class="audcard"><div class="ic">🎬</div><h3>Creative studios</h3><p>Need repeatable content systems for multiple clients.</p></div>
     <div class="audcard"><div class="ic">🎓</div><h3>Experts &amp; educators</h3><p>Deep expertise that needs clearer packaging.</p></div>
   </div>
+  <div class="midcta"><a class="btn primary lg" href="threadline-onboarding.html">Build my brand free →</a><span class="micro">No card · Free to build · Cancel anytime</span></div>
 </div></section>
 
 <section class="quote"><div class="wrap">
@@ -482,14 +518,15 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
   <div class="tiers">
     <div class="tier"><div class="nm">Starter</div><div class="pr">$19<span>/mo</span></div><div class="desc">For entrepreneurs building a new brand.</div>
       <ul><li><span class="ck">✓</span> <b>1</b> brand</li><li><span class="ck">✓</span> <b>1</b> seat — built for solo</li><li><span class="ck">✓</span> <b>20</b> AI images / mo <span style="color:var(--faint);font-weight:600">(+$5 per 50)</span></li><li><span class="ck">✓</span> Unlimited ideas &amp; series</li><li><span class="ck">✓</span> Copy, post &amp; log results</li></ul>
-      <a class="btn" href="threadline-onboarding.html">Build my brand free</a></div>
+      <a class="btn" href="threadline-onboarding.html">Build my brand free →</a></div>
     <div class="tier pop"><div class="nm">Pro</div><div class="pr">$39<span>/mo</span></div><div class="desc">For active brands and small teams.</div>
       <ul><li><span class="ck">✓</span> <b>3</b> brands</li><li><span class="ck">✓</span> <b>4</b> team seats</li><li><span class="ck">✓</span> <b>120</b> AI images / mo</li><li><span class="ck">✓</span> Series auto-scheduling</li><li><span class="ck">✓</span> Auto-publish — <b>1</b> connected brand</li></ul>
-      <a class="btn primary" href="threadline-onboarding.html">Start with Pro →</a></div>
+      <a class="btn primary" href="threadline-onboarding.html">Build my brand free →</a></div>
     <div class="tier"><div class="nm">Studio</div><div class="pr">$99<span>/mo</span></div><div class="desc">For studios running many clients.</div>
       <ul><li><span class="ck">✓</span> <b>10</b> brands</li><li><span class="ck">✓</span> <b>10</b> team seats</li><li><span class="ck">✓</span> <b>400</b> AI images / mo</li><li><span class="ck">✓</span> Auto-publish — <b>3</b> connected brands</li><li><span class="ck">✓</span> Priority support</li></ul>
-      <a class="btn" href="threadline-onboarding.html">Start with Studio →</a></div>
+      <a class="btn" href="threadline-onboarding.html">Build my brand free →</a></div>
   </div>
+  <span class="micro" style="margin-top:18px">Every plan starts the same way: build free, try everything for 30 days, pick a plan only when you're ready. No card · Cancel anytime · Your work stays yours.</span>
   <div class="pricenote">Auto-publish &amp; scheduling is included on Pro (1 connected brand) and Studio (3) — each brand bundles all its platforms. Extra connected brands are $12/mo. Need more images? Add 50-image packs for $5 on any plan. Need teammates? Add seats for $9/mo each on Pro and Studio.</div>
 </div></section>
 
@@ -509,7 +546,8 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
 <div class="final"><div class="finalbox">
   <h2>Stop posting. Start building.</h2>
   <p>Bring an idea, an offer, or an unfinished thought. Threadline will help you take it somewhere.</p>
-  <a class="btn lg" href="threadline-onboarding.html">Start building together →</a>
+  <a class="btn lg" href="threadline-onboarding.html">Build my brand free →</a>
+  <span class="micro" style="color:rgba(255,255,255,.75)">No card · Free to build · Cancel anytime</span>
 </div></div>
 
 <footer><div class="wrap footin">
