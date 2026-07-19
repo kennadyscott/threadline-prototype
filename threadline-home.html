@@ -47,6 +47,18 @@ a{color:inherit;text-decoration:none}
 .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .chip{cursor:pointer;font-family:inherit;transition:.15s}
 .chip:hover{border-color:var(--violet);color:var(--violet)}
+.chip.on{background:var(--grad2);color:#fff;border-color:transparent}
+.flowhint{text-align:center;font-size:12.5px;color:var(--faint);font-weight:700;margin:14px 0 18px}
+.demoframe{max-width:1080px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px rgba(20,20,60,.20);background:var(--surface)}
+.demobar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:#f2f4f9;border-bottom:1px solid var(--line)}
+.demobar i{width:11px;height:11px;border-radius:50%;background:#d5d9e4}
+.demobar i:nth-child(1){background:#fb7185}.demobar i:nth-child(2){background:#f5a524}.demobar i:nth-child(3){background:#20b878}
+.demourl{margin-left:12px;font-size:12.5px;color:var(--muted);font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 14px}
+.demolive{margin-left:auto;font-size:11px;font-weight:800;color:#178a5a}
+.demoframe iframe{width:100%;height:620px;border:0;display:block;background:#fff}
+@media(max-width:720px){.demoframe iframe{height:520px}}
+.chip{cursor:pointer;font-family:inherit;transition:.15s}
+.chip:hover{border-color:var(--violet);color:var(--violet)}
 .flowhint{text-align:center;font-size:12px;color:var(--faint);font-weight:700;margin:14px 0 4px}
 .mockcap{text-align:center;font-size:13.5px;color:var(--muted);font-weight:700;padding:14px 20px 4px}
 .mockpanel{display:none}
@@ -279,69 +291,23 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
 
 <section class="how" id="how"><div class="wrap">
   <div class="sec-head">
-    <div class="kicker">The flow</div>
-    <h2>From a half-formed thought to a full plan.</h2>
-    <p>Start with what you're already thinking. Threadline threads it into a direction, then a series, then a scheduled plan.</p>
+    <div class="kicker">Try it live</div>
+    <h2>This is the actual product. Click around.</h2>
+    <p>No signup, no screenshots — the real Threadline is running right here. Switch pages and poke at anything.</p>
   </div>
-  <div class="flow">
-    <div class="step"><button class="chip on" onclick="flowTab(0,this)">Spark</button><span class="arrow">→</span></div>
-    <div class="step"><button class="chip" onclick="flowTab(1,this)">Thread</button><span class="arrow">→</span></div>
-    <div class="step"><button class="chip" onclick="flowTab(2,this)">Series</button><span class="arrow">→</span></div>
-    <div class="step"><button class="chip" onclick="flowTab(3,this)">Content</button><span class="arrow">→</span></div>
-    <div class="step"><button class="chip" onclick="flowTab(4,this)">Calendar</button></div>
+  <div class="flow" id="demotabs">
+    <div class="step"><button class="chip on" onclick="demoTab(this,'threadline-app-home.html','threadline.app/home')">Home</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="demoTab(this,'threadline-build-page.html','threadline.app/studio')">Thinking Studio</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="demoTab(this,'threadline-series.html','threadline.app/series')">Series</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="demoTab(this,'threadline-plan.html','threadline.app/plan')">Plan</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="demoTab(this,'threadline-analytics.html','threadline.app/insights')">Insights</button></div>
   </div>
-  <div class="flowhint">Click any step to preview it →</div>
-  <div class="mock">
-    <div class="mockbar"><i></i><i></i><i></i></div>
-    <div class="mockcap" id="flowcap">You bring a raw thought — Threadline captures every spark.</div>
-
-    <div class="mockpanel on"><div class="mockbody">
-      <div class="mcol"><div class="h">💬 A thought, half-formed</div>
-        <div class="bubble you">"I want to talk about why consistency beats going viral — but I don't know where to start."</div>
-        <div class="bubble ai">That's a point of view worth building. Let's find the angle →</div>
-      </div>
-      <div class="mcol"><div class="h">💡 Captured to your Idea Bank</div>
-        <div class="mline"><span class="mdot" style="background:#803dff"></span>Consistency beats going viral.</div>
-        <div class="mline"><span class="mdot" style="background:#3b82f6"></span>The behind-the-scenes builds trust.</div>
-        <div class="mline"><span class="mdot" style="background:#22d3ee"></span>People buy the "why," not the "what."</div>
-      </div>
-    </div></div>
-
-    <div class="mockpanel"><div class="mockbody">
-      <div class="mcol wide"><div class="h">🧵 Thread — "Why we do what we do"</div>
-        <p class="mp">Threadline shapes one spark into a clear angle, with the pillars it should hit.</p>
-        <div class="mline"><span class="mdot" style="background:#803dff"></span>Purpose &nbsp;·&nbsp; Values &nbsp;·&nbsp; Impact &nbsp;·&nbsp; Story</div>
-        <div class="mbtn">Build this into a series</div>
-      </div>
-    </div></div>
-
-    <div class="mockpanel"><div class="mockbody">
-      <div class="mcol wide"><div class="h">📱 Series — a repeatable weekly format</div>
-        <div class="mline"><span class="mdot" style="background:#803dff"></span>Post 1 · The belief we started with</div>
-        <div class="mline"><span class="mdot" style="background:#3b82f6"></span>Post 2 · A moment that tested it</div>
-        <div class="mline"><span class="mdot" style="background:#22d3ee"></span>Post 3 · What we'd never compromise</div>
-        <div class="mline"><span class="mdot" style="background:#fb7185"></span>Post 4 · Where we're headed next</div>
-      </div>
-    </div></div>
-
-    <div class="mockpanel"><div class="mockbody">
-      <div class="mcol wide"><div class="h">✍️ Content — drafted in your voice</div>
-        <div class="postprev">
-          <div class="pph">The belief we started with</div>
-          <p class="mp">Everyone told us to post more. We did the opposite — and it's the reason people actually remember us. Here's what we learned about consistency over volume…</p>
-          <div class="ppf"><span class="mtag" style="background:#803dff">Carousel</span><span class="mtag" style="background:#3b82f6">LinkedIn</span></div>
-        </div>
-      </div>
-    </div></div>
-
-    <div class="mockpanel"><div class="mockbody">
-      <div class="mcol wide"><div class="h">📅 Calendar — on a dated plan</div>
-        <div class="mline">Mon <span class="mtag" style="background:#803dff;margin-left:auto">Carousel</span></div>
-        <div class="mline">Wed <span class="mtag" style="background:#3b82f6;margin-left:auto">Reel</span></div>
-        <div class="mline">Fri <span class="mtag" style="background:#22d3ee;margin-left:auto;color:#083344">Story</span></div>
-      </div>
-    </div></div>
+  <div class="flowhint">↑ Click a page — it loads the real thing below. It's fully interactive.</div>
+  <div class="demoframe">
+    <div class="demobar"><i></i><i></i><i></i><span class="demourl" id="demourl">threadline.app/home</span><span class="demolive">● live demo</span></div>
+    <iframe id="demoframe-if" title="Live Threadline demo" src="https://kennadyscott.github.io/threadline-prototype/threadline-app-home.html" loading="lazy"></iframe>
   </div>
+  <div style="text-align:center;margin-top:16px"><a class="btn lg" href="https://kennadyscott.github.io/threadline-prototype/threadline-app-home.html" target="_blank" rel="noopener">Open the full demo in a new tab →</a></div>
 </div></section>
 
 <section id="aud"><div class="wrap">
@@ -411,17 +377,12 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
 </div></footer>
 
 <script>
-function flowTab(i,el){
-  var caps=["You bring a raw thought — Threadline captures every spark.",
-    "Threadline threads one spark into a clear angle.",
-    "It becomes a repeatable series you can run weekly.",
-    "Each post gets drafted in your brand voice.",
-    "Everything lands on a dated, scheduled plan."];
-  document.querySelectorAll('.flow .chip').forEach(function(c){c.classList.remove('on')});
-  if(el) el.classList.add('on');
-  var panels=document.querySelectorAll('.mockpanel');
-  panels.forEach(function(p,idx){ p.classList.toggle('on', idx===i); });
-  var cap=document.getElementById('flowcap'); if(cap) cap.textContent=caps[i]||caps[0];
+function demoTab(el,page,url){
+  document.querySelectorAll('#demotabs .chip').forEach(function(c){c.classList.remove('on')});
+  el.classList.add('on');
+  var base='https://kennadyscott.github.io/threadline-prototype/';
+  document.getElementById('demoframe-if').src=base+page;
+  document.getElementById('demourl').textContent=url;
 }
 </script>
 </body>
