@@ -231,7 +231,7 @@ a.logo{text-decoration:none;color:inherit;cursor:pointer}
       </div>
 
       <div class="panel">
-        <div class="ph"><h3>Connected accounts</h3><span class="sub">Powers Analytics and publishing.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
+        <div class="ph"><h3>Publishing &amp; results</h3><span class="sub">Copy, post, and log results — nothing to connect.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
         <div id="socialstatus"></div>
         <div id="conns"></div>
       </div>
@@ -356,24 +356,10 @@ async function portal(){
 loadBilling();
 
 /* ---------- live social connection status ---------- */
-async function loadSocial(){
-  const el=document.getElementById('socialstatus');
-  try{
-    const r=await fetch('/api/social',{credentials:'same-origin'});
-    const d=await r.json();
-    if(r.status===503){ el.innerHTML=`<div class="plnote">Publishing isn't connected yet — ${esc(d.setup||'add your Ayrshare key in Vercel')}</div>`; return; }
-    if(!r.ok) throw 0;
-    el.innerHTML=`<div class="plcur">Live publishing: <b style="color:#178a5a">connected</b> · ${(d.platforms||[]).map(pf=>`<span class="pfchip">${esc(pf)}</span>`).join('')||'no platforms linked yet'}
-      <button class="act" style="margin-left:10px" onclick="connectSocial()">Link accounts →</button></div>`;
-  }catch(e){ el.innerHTML=''; }
-}
-async function connectSocial(){
-  try{
-    const r=await fetch('/api/social',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({action:'connect'})});
-    const d=await r.json();
-    if(d.url) window.open(d.url,'_blank');
-    else toast(d.note||d.error||'Link accounts in the Ayrshare dashboard');
-  }catch(e){ toast('Account linking runs on the live app'); }
+function loadSocial(){
+  var el=document.getElementById('socialstatus');
+  if(!el) return;
+  el.innerHTML='<div class="plnote" style="line-height:1.6">Threadline drafts every piece and keeps your calendar — when something\u2019s ready, hit <b>Copy</b> or <b>Post it</b> to publish it yourself, then <b>log the results</b> so Analytics can tell you what\u2019s working.<br><br><b>Auto-publishing &amp; connected analytics</b> (post straight from Threadline, pull live numbers) are coming as a Studio add-on \u2014 they\u2019re optional so your plan stays lean.</div>';
 }
 loadSocial();
 </script>

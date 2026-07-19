@@ -186,6 +186,11 @@ input,textarea,select{font-family:inherit}
 .schrow .swk{flex:none;width:36px;height:24px;border-radius:6px;background:var(--ink);color:#fff;font-weight:800;font-size:11px;display:grid;place-items:center}
 .schrow b{flex:none;min-width:100px}
 .schrow .st2{color:var(--muted)}
+.postedchip{font-size:11.5px;font-weight:800;color:#178a5a;background:rgba(32,184,120,.12);border-radius:999px;padding:6px 12px;align-self:center}
+.resgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.resf label{display:block;font-size:11.5px;font-weight:800;color:var(--faint);margin-bottom:4px}
+.resf input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit;outline:none}
+.resf input:focus{border-color:var(--violet)}
 .hubsec{margin-top:20px}
 .hubsec h3{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .hubsec h3::after{content:'';flex:1;height:1px;background:var(--line-2)}
@@ -1119,37 +1124,46 @@ function renderHub(){
           <div class="cmeta"><span class="chch">${(o.schedule||[]).length} slots</span><span class="chch">Starts ${o.schedule&&o.schedule[0]?fmtD(new Date(o.schedule[0].date)):'—'}</span></div></div></div>
           <div class="cdetail" style="display:block"><div class="csec"><h5>Timeline</h5>${rows(x)}</div>
           ${x.type==='camp'&&o.stretch?`<div class="csec"><h5>Stretch campaign — locked</h5><div class="lockb"><b>${esc(o.stretch.theme)}</b><ul class="plainul">${(o.stretch.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="lockn">🔒 Holds until the 6-week metrics are evaluated — unlock it from Analytics when the numbers earn it.</span></div></div>`:''}</div>
-          <div class="cacts"><button class="hb pri" onclick="publishNow('${x.type}','${o.id}')">Publish now</button><button class="hb" onclick="location.href='threadline-plan.html'">Open in Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:x.type==='spoke'?`spokeStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:x.type==='spoke'?`dropSpoke('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
+          <div class="cacts">${o.posted?`<span class="postedchip">✓ Posted${o.results&&o.results.reach?' · '+fmtNum(o.results.reach)+' reach':''}</span><button class="hb" onclick="openResults('${x.type}','${o.id}')">Edit results</button>`:`<button class="hb pri" onclick="copyItem('${x.type}','${o.id}')">Copy caption</button><button class="hb" onclick="postIt('${x.type}','${o.id}')">Post it →</button><button class="hb" onclick="openResults('${x.type}','${o.id}')">✓ Mark posted</button>`}<button class="hb" onclick="location.href='threadline-plan.html'">Plan →</button><button class="hb" onclick="${x.type==='camp'?`campStatus('${o.id}','approval')`:x.type==='mini'?`miniStatus('${o.id}','approval')`:x.type==='spoke'?`spokeStatus('${o.id}','approval')`:`ideaStatus('${o.id}','approval');renderHub()`}">← Back to approval</button><button class="hb" onclick="${x.type==='camp'?`dropCamp('${o.id}')`:x.type==='mini'?`dropMini('${o.id}')`:x.type==='spoke'?`dropSpoke('${o.id}')`:`dropIdea('${o.id}')`}">✓ Done — archive</button></div></div>`; }).join('');
     return;
   }
 }
 renderHub();
 
 /* ---------- publish now (live app: /api/social; demo: explains itself) ---------- */
-function publishText(type,id){
-  if(type==='camp'){ const c=HUB.campaigns.find(x=>x.id===id); const a=c&&c.assets[0]; return a?a.caption:(c&&c.platform)||''; }
-  if(type==='mini'){ const m=HUB.minis.find(x=>x.id===id); const e=m&&m.episodes[0]; return e?(e.t+'\n\n'+e.hook):''; }
-  if(type==='spoke'){ const sp=HUB.spokes.find(x=>x.id===id); const pc=sp&&sp.pieces.find(z=>z.format==='Instagram post')||sp&&sp.pieces[0]; return pc?pc.body:''; }
-  const i=HUB.ideas.find(x=>x.id===id); return i?(i.t+(i.sum?'\n\n'+i.sum:'')):'';
+function fmtNum(n){ n=Number(n)||0; return n>=1000?(n/1000).toFixed(n>=10000?0:1)+'k':(''+n); }
+function itemFind(type,id){ return (type==='camp'?HUB.campaigns:type==='mini'?HUB.minis:type==='spoke'?HUB.spokes:HUB.ideas).find(x=>x.id===id); }
+function itemText(type,id){
+  if(type==='camp'){ const c=itemFind(type,id); const a=c&&c.assets[0]; return a?a.caption:(c&&c.platform)||''; }
+  if(type==='mini'){ const m=itemFind(type,id); const e=m&&m.episodes[0]; return e?(e.t+'\n\n'+e.hook):''; }
+  if(type==='spoke'){ const sp=itemFind(type,id); const pc=sp&&(sp.pieces.find(z=>z.format==='Instagram post')||sp.pieces[0]); return pc?(pc.caption||pc.body||pc.title):''; }
+  const i=itemFind(type,id); return i?(i.t+(i.sum?'\n\n'+i.sum:'')):'';
 }
-async function publishNow(type,id){
-  const text=(publishText(type,id)||'').trim();
-  if(!text){ toast('Nothing to publish on this item yet'); return; }
-  let st;
-  try{ st=await fetch('/api/social',{credentials:'same-origin'}); }
-  catch(e){ toast('Publishing runs on the live app — this is the local demo'); return; }
-  if(st.status===503){ const d=await st.json().catch(()=>({})); toast('Connect your socials first — Settings → Connected accounts'); return; }
-  if(!st.ok){ toast('Sign in to publish'); return; }
-  const info=await st.json();
-  const platforms=(info.platforms&&info.platforms.length)?info.platforms:null;
-  if(!platforms){ toast('No platforms linked yet — link accounts in Settings'); return; }
-  if(!confirm('Publish this to '+platforms.join(', ')+'?\n\nThis posts to your real accounts:\n\n'+text.slice(0,180)+(text.length>180?'…':''))) return;
-  try{
-    const r=await fetch('/api/social',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({action:'publish',post:text,platforms:platforms})});
-    const d=await r.json();
-    toast(r.ok?'Published — live on '+platforms.join(', ')+' ✓':'Publish failed: '+(d.error||d.message||'unknown'));
-  }catch(e){ toast('Publish failed — network error'); }
+function itemChannels(type,id){ const o=itemFind(type,id); if(!o) return []; if(o.channels) return o.channels; if(o.ch) return o.ch.map(c=>({in:'LinkedIn',ig:'Instagram',tt:'TikTok',fb:'Facebook',x:'X',bl:'Blog',em:'Email'}[c]||c)); return []; }
+const PLAT_URL={LinkedIn:'https://www.linkedin.com/feed/?shareActive=true',Instagram:'https://www.instagram.com/',X:'https://x.com/compose/post',TikTok:'https://www.tiktok.com/upload',Facebook:'https://www.facebook.com/'};
+function copyItem(type,id){ const t=(itemText(type,id)||'').trim(); if(!t){ toast('Nothing to copy yet'); return; }
+  try{ navigator.clipboard.writeText(t); toast('Caption copied — paste it into your post'); }catch(e){ toast('Select and copy the caption from the preview'); } }
+function postIt(type,id){ const t=(itemText(type,id)||'').trim(); try{ navigator.clipboard.writeText(t); }catch(e){}
+  const chans=itemChannels(type,id); const url=PLAT_URL[chans[0]]||'https://www.instagram.com/';
+  toast('Caption copied — opening '+(chans[0]||'the app')+' so you can paste it'); window.open(url,'_blank','noopener'); }
+let resTarget=null;
+function openResults(type,id){ resTarget={type,id}; const o=itemFind(type,id); const r=(o&&o.results)||{};
+  let ov=document.getElementById('resOverlay'); if(ov) ov.remove();
+  ov=document.createElement('div'); ov.id='resOverlay'; ov.className='overlay on';
+  ov.innerHTML=`<div class="modal" style="max-width:440px"><h3>Log this post’s results</h3>
+    <p class="msub" style="margin-top:4px">Enter what you saw — it powers your Analytics and the “what’s working” calls. All optional.</p>
+    <div class="resgrid">
+      ${[['reach','Reach / views'],['likes','Likes'],['saves','Saves'],['comments','Comments'],['clicks','Link clicks']].map(([k,l])=>`<div class="resf"><label>${l}</label><input id="res-${k}" type="number" min="0" inputmode="numeric" value="${r[k]!=null?r[k]:''}" placeholder="0"></div>`).join('')}
+    </div>
+    <div class="macts" style="margin-top:16px"><button class="mbtn ghost" onclick="document.getElementById('resOverlay').remove()">Cancel</button><div class="grow"></div><button class="mbtn pri" onclick="saveResults()">Save &amp; mark posted</button></div>
+  </div>`;
+  ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov); setTimeout(()=>{ const f=document.getElementById('res-reach'); if(f) f.focus(); },60);
 }
+function saveResults(){ if(!resTarget) return; const o=itemFind(resTarget.type,resTarget.id); if(!o) return;
+  const g=k=>{ const v=document.getElementById('res-'+k); const n=v&&v.value!==''?Math.max(0,parseInt(v.value,10)||0):null; return n; };
+  o.results={reach:g('reach'),likes:g('likes'),saves:g('saves'),comments:g('comments'),clicks:g('clicks'),loggedAt:Date.now()};
+  o.posted=1; hubSave(); const ov=document.getElementById('resOverlay'); if(ov) ov.remove(); renderHub(); toast('Logged — see it in Analytics'); }
 
 /* ---------- one-time "brand is active" popup (shows once, then gone) ---------- */
 const FIRST_KEY='threadline.homeWelcomed';
