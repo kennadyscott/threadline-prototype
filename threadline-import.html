@@ -183,8 +183,19 @@ const SNAP_SCHEMA={type:'object',properties:{
   voice:{type:'array',items:{type:'string'}},
   audience:{type:'string'},
   themes:{type:'array',items:{type:'string'}},
-  colors:{type:'array',items:{type:'string'}}
-},required:['summary','tagline','voice','audience','themes','colors'],additionalProperties:false};
+  colors:{type:'array',items:{type:'string'}},
+  knownFor:{type:'string'},
+  promise:{type:'string'},
+  believe:{type:'string'},
+  different:{type:'string'},
+  pov:{type:'string'},
+  feelNow:{type:'string'},
+  feelBecome:{type:'string'},
+  sampleHeadline:{type:'string'},
+  sampleCaption:{type:'string'},
+  soundsLike:{type:'array',items:{type:'string'}},
+  notLike:{type:'array',items:{type:'string'}}
+},required:['summary','tagline','voice','audience','themes','colors','knownFor','promise','believe','different','pov','feelNow','feelBecome','sampleHeadline','sampleCaption','soundsLike','notLike'],additionalProperties:false};
 async function realSnap(){
   const parts=[];
   parts.push('Brand name: '+state.name);
@@ -195,9 +206,9 @@ async function realSnap(){
   if(state.colors) parts.push('Brand colors they entered: '+state.colors);
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); tagline = a short fun tagline in the brand\'s own voice, max 7 words — playful if the brand is playful, never corporate filler; voice = 3-5 single-word traits; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
+      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); tagline = a short fun tagline in the brand\'s own voice, max 7 words — playful if the brand is playful, never corporate filler; voice = 3-5 single-word traits; knownFor = what this brand should be known for, one specific phrase in its own language (never "the clear choice"); promise = the core promise to the audience, one short sentence naming their world; believe = the brand\'s strongest belief as a punchy line in its voice; different = what genuinely sets it apart, one sentence with specifics; pov = a one-line point of view the brand would defend; feelNow = one word for how the audience feels today; feelBecome = one word for what the brand helps them become; sampleHeadline = a social post headline this brand would actually write; sampleCaption = a 2-sentence caption in its exact voice; soundsLike = 2 short quotes that sound exactly like this brand; notLike = 2 short quotes that would be off-brand for THIS specific brand; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
       messages:[{role:'user',content:parts.join('\n\n')}],
-      max_tokens:700, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
+      max_tokens:1400, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
     const ct=r.headers.get('content-type')||'';
     if(ct.indexOf('json')<0) return null;
     if(!r.ok){ try{const e=await r.json(); if(e&&e.error&&window.toast) toast('AI read hiccup — '+String(e.error).slice(0,120)); }catch(_e){} return null; }
@@ -209,6 +220,10 @@ async function realSnap(){
       name: state.name.trim()||'Your brand',
       summary: j.summary||'',
       tagline: j.tagline||'',
+      knownFor: j.knownFor||'', promise: j.promise||'', believe: j.believe||'', different: j.different||'',
+      pov: j.pov||'', feelNow: j.feelNow||'', feelBecome: j.feelBecome||'',
+      sampleHeadline: j.sampleHeadline||'', sampleCaption: j.sampleCaption||'',
+      soundsLike: (j.soundsLike||[]).slice(0,2), notLike: (j.notLike||[]).slice(0,2),
       voice: (j.voice||[]).slice(0,5),
       colors: userCols.length?userCols:(logoCols.length?logoCols:((j.colors||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5))),
       audience: j.audience||'',
@@ -391,7 +406,7 @@ function p2(){ renderProg();
     </div>`);
   renderProg();
   thinkThenRevealAsync($('#reveal'),'Threadline is reading your brand', async ()=>{
-    if(!snap || !snap.real || !snap.tagline){ const rs=await realSnap(); if(rs) snap=rs; else if(!snap) snap=buildSnap(); }
+    if(!snap || !snap.real || !snap.tagline || !snap.knownFor){ const rs=await realSnap(); if(rs) snap=rs; else if(!snap) snap=buildSnap(); }
     const c=el('div','snap');
     c.innerHTML=`
       <div class="sh"><div class="bn">${esc(snap.name)}</div><div class="bs">${esc(snap.summary)}</div></div>
@@ -492,6 +507,21 @@ function p3(){ renderProg();
 /* ---------- Completion ---------- */
 function done(){ step=3; renderProg(); try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromImport(state, snap);
     if(snap&&snap.tagline){ _b.tagline=snap.tagline; if(_b.taglineOptions&&_b.taglineOptions.length) _b.taglineOptions[0]=snap.tagline; }
+    if(snap&&snap.real){
+      try{
+        if(snap.knownFor) _b.positioning.knownFor=snap.knownFor;
+        if(snap.feelNow) _b.positioning.theyFeel=snap.feelNow;
+        if(snap.feelBecome) _b.positioning.theyBecome=snap.feelBecome;
+        if(snap.promise) _b.overview.promise=snap.promise;
+        if(snap.different) _b.overview.differentiator=snap.different;
+        if(snap.believe) _b.messaging.primary=snap.believe;
+        if(snap.pov) _b.messaging.pov=snap.pov;
+        if(snap.sampleHeadline) _b.voice.headline=snap.sampleHeadline;
+        if(snap.sampleCaption) _b.voice.caption=snap.sampleCaption;
+        if(snap.soundsLike&&snap.soundsLike.length) _b.voice.soundsLike=snap.soundsLike;
+        if(snap.notLike&&snap.notLike.length) _b.voice.notLike=snap.notLike;
+      }catch(e){}
+    }
     if(state.logoIcon){ _b.visual.logo=state.logoIcon; _b.visual.card=state.logoData||''; }
     else if(state.logoData) _b.visual.logo=state.logoData;
     if(state.logo) _b.visual.logoName=state.logo;
