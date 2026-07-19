@@ -360,14 +360,14 @@ loadBilling();
 var BTNP='background:linear-gradient(135deg,#803DFF,#3B82F6,#22D3EE);color:#fff;border:none;padding:9px 16px;border-radius:9px;font-weight:700;cursor:pointer;font-size:13px';
 var SUB2='color:var(--muted);font-size:12px';
 function schedEligible(){
-  return '<b>Auto-schedule &amp; publish</b> — rolling out to Pro &amp; Studio.<br>'+
-    'Connect a brand (all its platforms bundled into one) and post straight from your plan, with live numbers flowing back into Analytics.'+
-    '<br><br><button style="'+BTNP+'" onclick="joinEarly(this)">Join early access →</button> '+
-    '<span style="'+SUB2+'">We’ll switch it on for your account as we roll it out.</span>';
+  return '<b>Auto-publishing &amp; connected analytics</b> — rolling out to Pro &amp; Studio.<br>'+
+    'Connect a brand (all its platforms bundled into one) to post straight from your plan and pull live numbers automatically into Analytics.'+
+    '<br><br><button style="'+BTNP+'" onclick="joinEarly(this)">Join the waitlist →</button>'+
+    ' <span style="'+SUB2+'">We’ll switch it on for your account as we roll it out.</span>';
 }
 function schedOnList(){
-  return '<b>You’re on the early-access list ✓</b><br>'+
-    'We’ll let you know the moment auto-scheduling is live on your plan. Until then, <b>Copy</b> / <b>Post it</b> / log results keeps everything moving.';
+  return '<b>You’re on the waitlist ✓</b><br>'+
+    'We’ll let you know the moment auto-publishing &amp; connected analytics are live on your plan. Until then, <b>Copy</b> / <b>Post it</b> / log results keeps everything moving.';
 }
 function schedUpgrade(){
   return '<b>Auto-schedule &amp; publish</b> — included on <b>Pro</b> (1 brand) and <b>Studio</b> (3 brands). Extra brands +$12/mo.<br>'+
@@ -393,7 +393,7 @@ async function joinEarly(btn){
   btn.disabled=true; btn.textContent='Adding you…';
   try{ await fetch('/api/social',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'optin'})}); }catch(e){}
   document.getElementById('schedbox').innerHTML=schedOnList();
-  if(window.toast) toast('You’re on the early-access list ✓');
+  if(window.toast) toast('You’re on the waitlist ✓');
 }
 async function connectBrand(btn){
   btn.disabled=true; btn.textContent='Opening…';
