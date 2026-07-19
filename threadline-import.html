@@ -160,7 +160,7 @@ const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/s
 document.querySelector('.brand .mark').innerHTML=MARK;
 
 const state={ name:'', url:'', logo:'', logoData:'', voice:'', content:'', colors:'' };
-let snap=null, audit=null, analyzed=false;
+let snap=null, audit=null, analyzed=false, siteAnalysis=null;
 const PHASES=['Import','Snapshot','Audit'];
 let step=0; // 0 import,1 snapshot,2 audit,3 done
 
@@ -168,6 +168,51 @@ function renderProg(){ const p=$('#prog'); p.innerHTML='';
   PHASES.forEach((name,i)=>{ const cls='pstep'+(i===step?' on':'')+(i<step||step===3?' done':''); p.appendChild(el('div',cls,`<span>${name}</span><span class="b"></span>`)); });
 }
 function stage(inner){ const w=$('#wrap'); w.innerHTML=''; const s=el('div','stage on'); s.innerHTML=inner; w.appendChild(s); window.scrollTo({top:0,behavior:'smooth'}); return s; }
+async function thinkThenRevealAsync(container, label, promiseFn){
+  const t=el('div','thinking',`<span>${label}</span><span class="dots"><i></i><i></i><i></i></span>`);
+  container.appendChild(t);
+  const started=Date.now();
+  let card=null;
+  try{ card=await promiseFn(); }catch(e){ card=null; }
+  const wait=Math.max(0, 950-(Date.now()-started));
+  setTimeout(()=>{ t.remove(); if(card) container.appendChild(card); const nx=document.querySelector('.stage.on [data-next]'); if(nx)nx.style.display='inline-flex'; }, wait);
+}
+const SNAP_SCHEMA={type:'object',properties:{
+  summary:{type:'string',description:'One sentence describing this brand in its own energy, max 25 words'},
+  voice:{type:'array',items:{type:'string'},description:'3-5 single-word voice traits grounded in the provided material'},
+  audience:{type:'string',description:'One sentence: who this brand serves, grounded in the material'},
+  themes:{type:'array',items:{type:'string'},description:'3-5 short content themes drawn from the material'},
+  colors:{type:'array',items:{type:'string'},description:'Up to 5 hex colors; prefer ones the user provided'}
+},required:['summary','voice','audience','themes','colors']};
+async function realSnap(){
+  const parts=[];
+  parts.push('Brand name: '+state.name);
+  if(state.url) parts.push('Website: '+state.url);
+  if(siteAnalysis) parts.push('From their real website — summary: '+(siteAnalysis.summary||'')+' | audience: '+(siteAnalysis.audience||'')+' | themes: '+((siteAnalysis.themes||[]).join(', ')));
+  if(state.voice) parts.push('Their voice/guidelines/notes (their own words):\n'+state.voice);
+  if(state.content) parts.push('Recent posts they pasted:\n'+state.content);
+  if(state.colors) parts.push('Brand colors they entered: '+state.colors);
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand.',
+      messages:[{role:'user',content:parts.join('\n\n')}],
+      max_tokens:700, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
+    const ct=r.headers.get('content-type')||'';
+    if(!r.ok||ct.indexOf('json')<0) return null;
+    const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return null;
+    const j=JSON.parse(t);
+    const userCols=(state.colors||'').split(/[,\s]+/).map(c=>c.trim()).filter(c=>/^#?[0-9a-f]{3,8}$/i.test(c)).map(c=>c[0]==='#'?c:'#'+c);
+    return {
+      name: state.name.trim()||'Your brand',
+      summary: j.summary||'',
+      voice: (j.voice||[]).slice(0,5),
+      colors: userCols.length?userCols:((j.colors||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5)),
+      audience: j.audience||'',
+      themes: (j.themes||[]).slice(0,5),
+      fromSite: !!siteAnalysis, real:true
+    };
+  }catch(e){ return null; }
+}
 function thinkThenReveal(container, label, buildCard){
   const t=el('div','thinking',`<span>${label}</span><span class="dots"><i></i><i></i><i></i></span>`);
   container.appendChild(t);
@@ -217,19 +262,38 @@ function p1(){ renderProg();
     };
     rd.readAsDataURL(f);
   };
-  // analyze site (mocked reflect)
-  $('#analyze').onclick=()=>{
+  // analyze site — REAL on the live app (/api/analyze); demo hosts fall back to a sample fill
+  $('#analyze').onclick=async ()=>{
     const u=$('#url').value.trim(); if(!u){ $('#url').focus(); return; } state.url=u;
     const b=$('#analyze'); b.disabled=true; b.textContent='Reading…';
-    setTimeout(()=>{
-      analyzed=true;
-      if(!$('#voice').value.trim()) $('#voice').value='Warm, plain-spoken, and reassuring. We cut the jargon and the 10-step routines. Confident but never clinical.';
-      if(!$('#colors').value.trim()) $('#colors').value='#1B2A4A, #803DFF, #F4EFE9';
-      b.textContent='✓ Pulled from '+domain(u); b.style.borderColor='var(--green)'; b.style.color='var(--green)';
-      $('#analyzeHint').innerHTML='<b style="color:var(--green)">Done.</b> I pulled your voice and colors from '+esc(domain(u))+'. Add anything else, or organize what we’ve got.';
-    },1100);
+    let real=null, failMsg=null;
+    try{
+      const r=await fetch('/api/analyze',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({url:u})});
+      const ct=r.headers.get('content-type')||'';
+      if(ct.indexOf('json')>-1){ const d=await r.json(); if(r.ok&&d.analysis) real=d.analysis; else failMsg=d.error||null; }
+    }catch(e){}
+    if(real){
+      analyzed=true; siteAnalysis=real;
+      if(!$('#voice').value.trim()&&real.voiceDescription) $('#voice').value=real.voiceDescription;
+      if(!$('#colors').value.trim()&&real.colors&&real.colors.length) $('#colors').value=real.colors.slice(0,5).join(', ');
+      b.textContent='✓ Read '+domain(u); b.style.borderColor='var(--green)'; b.style.color='var(--green)';
+      $('#analyzeHint').innerHTML='<b style="color:var(--green)">Done.</b> I actually read '+esc(domain(u))+' — voice and colors are pulled from your real site. Trim anything that\'s off.';
+      b.disabled=false; return;
+    }
+    if(failMsg){
+      b.disabled=false; b.textContent='✦ Analyze my site';
+      $('#analyzeHint').innerHTML='<b style="color:var(--coral,#fb7185)">'+esc(failMsg)+'</b>';
+      return;
+    }
+    // demo host (no /api): sample fill so the flow stays walkable
+    analyzed=true;
+    if(!$('#voice').value.trim()) $('#voice').value='Warm, plain-spoken, and reassuring. We cut the jargon and the 10-step routines. Confident but never clinical.';
+    if(!$('#colors').value.trim()) $('#colors').value='#1B2A4A, #803DFF, #F4EFE9';
+    b.textContent='✓ Pulled from '+domain(u); b.style.borderColor='var(--green)'; b.style.color='var(--green)';
+    $('#analyzeHint').innerHTML='<b style="color:var(--green)">Done.</b> Sample pull for the demo — the live app reads your real site.';
+    b.disabled=false;
   };
-  $('#go1').onclick=()=>{ captureCurrent(); if(!state.name.trim()){ $('#name').focus(); return; } snap=buildSnap(); adv(1,p2); };
+  $('#go1').onclick=()=>{ captureCurrent(); if(!state.name.trim()){ $('#name').focus(); return; } snap=null; adv(1,p2); };
 }
 
 /* ---------- build the extracted snapshot (mocked, tailored) ---------- */
@@ -259,7 +323,8 @@ function p2(){ renderProg();
       <div class="grow"></div>
     </div>`);
   renderProg();
-  thinkThenReveal($('#reveal'),'Threadline is reading your brand', ()=>{
+  thinkThenRevealAsync($('#reveal'),'Threadline is reading your brand', async ()=>{
+    if(!snap || !snap.real){ const rs=await realSnap(); if(rs) snap=rs; else if(!snap) snap=buildSnap(); }
     const c=el('div','snap');
     c.innerHTML=`
       <div class="sh"><div class="bn">${esc(snap.name)}</div><div class="bs">${esc(snap.summary)}</div></div>
@@ -298,6 +363,32 @@ function buildAudit(){
     ]
   };
 }
+const AUDIT_SCHEMA={type:'object',properties:{
+  score:{type:'number',description:'Overall brand score 0-100, honest'},
+  headline:{type:'string',description:'Short verdict, max 8 words'},
+  sub:{type:'string',description:'1-2 sentences explaining the verdict, warm but honest'},
+  dims:{type:'array',items:{type:'object',properties:{n:{type:'string'},v:{type:'number'}},required:['n','v']},description:'Exactly these five, scored 0-100: Visual identity, Brand voice, Audience definition, Positioning clarity, Content system'},
+  strengths:{type:'array',items:{type:'string'},description:'2-3 genuine strengths grounded in their material'},
+  gaps:{type:'array',items:{type:'object',properties:{t:{type:'string'},d:{type:'string'},cta:{type:'string'},next:{type:'string'}},required:['t','d','cta','next']},description:'Exactly 2 gaps: t=short title, d=2 sentences grounded in their brand, cta=2-3 word button label, next=one-line suggested next move'}
+},required:['score','headline','sub','dims','strengths','gaps']};
+async function realAudit(){
+  if(!snap||!snap.real) return null;
+  try{
+    const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
+      system:'You are Threadline, auditing a founder\'s brand honestly. Score what the material supports; low scores where material is thin (that is normal and useful). Ground every strength and gap in their actual brand — name their specifics. Content system is usually the weakest for new imports.',
+      messages:[{role:'user',content:'Brand: '+snap.name+'\nSummary: '+snap.summary+'\nVoice: '+snap.voice.join(', ')+'\nAudience: '+snap.audience+'\nThemes: '+snap.themes.join(', ')+'\n\nRaw material they provided:\n'+(state.voice||'(none)')+'\n\nPosts:\n'+(state.content||'(none)')+'\nWebsite analyzed: '+(siteAnalysis?'yes':'no')+'\nLogo provided: '+(state.logoData?'yes':'no')+'\nColors provided: '+(state.colors||'(none)')}],
+      max_tokens:900, output_config:{format:{type:'json_schema',schema:AUDIT_SCHEMA}}})});
+    const ct=r.headers.get('content-type')||'';
+    if(!r.ok||ct.indexOf('json')<0) return null;
+    const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return null;
+    const j=JSON.parse(t);
+    const NAMES=['Visual identity','Brand voice','Audience definition','Positioning clarity','Content system'];
+    const col=v=> v>=70?'var(--green)':(v>=45?'var(--amber)':'var(--coral)');
+    const dims=NAMES.map((n,i)=>{ const m=(j.dims||[]).find(d2=>d2.n&&d2.n.toLowerCase().indexOf(n.split(' ')[0].toLowerCase())>-1)||(j.dims||[])[i]||{v:50}; const v=Math.max(0,Math.min(100,Math.round(m.v))); return {n:n,v:v,c:col(v)}; });
+    return { score:Math.max(0,Math.min(100,Math.round(j.score))), headline:j.headline||'Your brand, scored.', sub:j.sub||'', dims:dims,
+      strengths:(j.strengths||[]).slice(0,3), gaps:(j.gaps||[]).slice(0,2), real:true };
+  }catch(e){ return null; }
+}
 function p3(){ renderProg();
   stage(`
     <div class="kick">✦ Brand audit</div>
@@ -310,8 +401,8 @@ function p3(){ renderProg();
       <div class="grow"></div>
     </div>`);
   renderProg();
-  audit=buildAudit();
-  thinkThenReveal($('#reveal'),'Threadline is auditing your brand', ()=>{
+  thinkThenRevealAsync($('#reveal'),'Threadline is auditing your brand', async ()=>{
+    audit=(await realAudit())||buildAudit();
     const C=2*Math.PI*43; const off=C*(1-audit.score/100);
     const c=el('div','auditcard');
     c.innerHTML=`
