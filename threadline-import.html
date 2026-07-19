@@ -315,7 +315,7 @@ function p2(){ renderProg();
   stage(`
     <div class="kick">✦ Here's what I found</div>
     <h2 class="q">This is your brand, <span class="grad-text">organized.</span></h2>
-    <p class="lead">I read everything you gave me${snap.fromSite?' (plus your site)':''} and pulled it into one place. Trim anything that's off—then we'll pressure-test it.</p>
+    <p class="lead">I read everything you gave me${(snap&&snap.fromSite)||siteAnalysis||analyzed?' (plus your site)':''} and pulled it into one place. Trim anything that's off—then we'll pressure-test it.</p>
     <div id="reveal"></div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(0,p1)">← Back</button>
