@@ -440,6 +440,56 @@ svg.defs{position:absolute;width:0;height:0}
 .app.demo .scrim{display:none!important}
 a.logo{text-decoration:none;color:inherit;cursor:pointer}
 </style>
+<style>
+.mk{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.mk-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;font-weight:900;display:inline-grid;place-items:center;font-size:15px;flex:none}
+.mk-vis{background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;padding:30px 20px;min-height:140px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.mk-veye{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;opacity:.85;margin-bottom:7px}
+.mk-vbig{font-size:19px;font-weight:900;line-height:1.2}
+.mk-graphic{align-items:center;text-align:center;min-height:190px;gap:6px}
+.mk-g1,.mk-g2{font-size:17px;font-weight:900;line-height:1.15}
+.mk-gfoot{margin-top:14px;font-size:10px;font-weight:800;letter-spacing:.18em;opacity:.8}
+.mk-ig .mk-h{display:flex;align-items:center;gap:9px;padding:10px 12px}
+.mk-ig .mk-h b{font-size:13px}
+.mk-dots,.mk-slide{margin-left:auto;color:var(--faint);font-weight:800}
+.mk-slide{font-size:11.5px;background:rgba(0,0,0,.06);border-radius:999px;padding:2px 9px}
+.mk-dotrow{display:flex;gap:5px;justify-content:center;padding:8px 0 2px}
+.mk-dotrow i{width:6px;height:6px;border-radius:50%;background:var(--line)}.mk-dotrow i.on{background:var(--violet)}
+.mk-slides{padding:8px 13px 4px}
+.mk-slrow{display:flex;gap:9px;font-size:12px;line-height:1.45;color:var(--muted);padding:5px 0;border-bottom:1px dashed var(--line-2)}
+.mk-sln{flex:none;width:19px;height:19px;border-radius:6px;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:10.5px;display:grid;place-items:center}
+.mk-act{display:flex;gap:15px;padding:9px 13px 3px;font-size:17px}.mk-act .mk-save{margin-left:auto}
+.mk-cap{padding:2px 13px 13px;font-size:12.5px;line-height:1.5}
+.mk-reel{display:grid;grid-template-columns:180px 1fr;gap:14px;border:0;background:none}
+@media(max-width:600px){.mk-reel{grid-template-columns:1fr}}
+.mk-phone{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:9/16;box-shadow:0 12px 34px rgba(20,20,60,.2)}
+.mk-phone .mk-vis{height:100%;justify-content:flex-end;padding:18px 14px 54px}
+.mk-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:30px;opacity:.9}
+.mk-rail{position:absolute;right:9px;bottom:60px;display:flex;flex-direction:column;gap:12px;font-size:17px}
+.mk-audio{position:absolute;left:12px;bottom:14px;font-size:10.5px;font-weight:700;opacity:.9}
+.mk-script{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--surface)}
+.mk-script>b{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+.mk-scriptbody{font-size:12px;line-height:1.55;color:var(--ink);margin-top:6px}
+.mk-beat{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--ink);padding:4px 0}
+.mk-email{padding:6px}
+.mk-erow{border-bottom:1px solid var(--line);padding:11px 13px}.mk-erow.open{background:var(--surface-2)}
+.mk-etag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--violet);margin-bottom:3px}
+.mk-esub b{font-size:13px}
+.mk-eprevtxt{font-size:12px;color:var(--muted);margin:3px 0 8px}
+.mk-ebody{font-size:12px;line-height:1.6;color:var(--ink);border-top:1px solid var(--line);padding-top:9px}
+.mk-ecta{margin-top:9px;font-size:11.5px;font-weight:800;color:var(--violet)}
+.mk-article .mk-vis{min-height:110px}
+.mk-abody{padding:15px}.mk-abody h5{font-size:16px;margin-bottom:6px}
+.mk-dek{font-size:13px;color:var(--muted);margin-bottom:7px}
+.mk-ameta{font-size:11px;color:var(--faint);margin-bottom:11px}
+.mk-atext{font-size:12px;line-height:1.65;color:var(--muted)}
+.mk-x{padding:15px}.mk-xwrap{display:flex;flex-direction:column;gap:11px}
+.mk-xlabel{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+.mk-xh{display:flex;gap:10px;align-items:center;margin-top:6px}
+.mk-xh b{font-size:13.5px;display:block}.mk-xh span{font-size:12px;color:var(--faint)}
+.mk-xtext{font-size:14.5px;line-height:1.5;margin:11px 0;color:var(--ink)}
+.mk-xf{display:flex;gap:20px;font-size:12px;color:var(--faint);font-weight:700}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -749,11 +799,41 @@ function miniDetail(m){
       </div>`;
 }
 
+function spBrand(){ return (B.name||'your brand'); }
+function spBrandH(){ return spBrand().toLowerCase().replace(/[^a-z0-9]/g,''); }
+function spEscape(t){ return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function spAv(){ return '<span class="mk-av">'+spBrand().charAt(0).toUpperCase()+'</span>'; }
+function spBodyText(p){
+  if(p.body && !p.slides && !p.emails && !p.variants && !p.articleBody) return p.body;
+  var out=[];
+  if(p.graphicLine1||p.graphicLine2) out.push((p.graphicLine1||'')+' '+(p.graphicLine2||''));
+  if(p.slides&&p.slides.length) out.push(p.slides.map(function(sl,i){return 'Slide '+(i+1)+' — '+sl;}).join('\n'));
+  if(p.hook) out.push('HOOK: '+p.hook);
+  if(p.script) out.push('SCRIPT:\n'+p.script);
+  if(p.onscreen&&p.onscreen.length) out.push('ON-SCREEN:\n'+p.onscreen.map(function(t){return '• '+t;}).join('\n'));
+  if(p.emails&&p.emails.length) out.push(p.emails.map(function(e){return 'EMAIL '+e.tag+' — Subject: '+e.subject+'\n'+e.emailBody+'\n['+e.cta+']';}).join('\n\n'));
+  if(p.headline) out.push(p.headline+'\n'+(p.dek||'')+'\n\n'+(p.articleBody||''));
+  if(p.variants&&p.variants.length) out.push(p.variants.map(function(v){return v.label+':\n'+v.text;}).join('\n\n---\n\n'));
+  if(p.caption) out.push('CAPTION:\n'+p.caption);
+  return out.join('\n\n') || p.body || '';
+}
+function spMock(p){
+  var b=spBrandH(), nl=function(t){return spEscape(t).replace(/\n/g,'<br>');};
+  if(p.format==='Instagram post'&&(p.graphicLine1||p.graphicLine2)) return '<div class="mk mk-ig"><div class="mk-h">'+spAv()+'<b>'+b+'</b><span class="mk-dots">…</span></div><div class="mk-vis mk-graphic"><span class="mk-g1">'+spEscape(p.graphicLine1||'')+'</span><span class="mk-g2">'+spEscape(p.graphicLine2||'')+'</span><span class="mk-gfoot">'+spEscape(spBrand().toUpperCase())+'</span></div><div class="mk-act"><span>♡</span><span>💬</span><span>➤</span><span class="mk-save">🔖</span></div><div class="mk-cap"><b>'+b+'</b> '+nl(p.caption||'')+'</div></div>';
+  if(p.format==='Carousel'&&p.slides&&p.slides.length){var dots='';for(var d=0;d<p.slides.length;d++)dots+='<i'+(d===0?' class="on"':'')+'></i>';
+    var list=p.slides.map(function(sl,i){return '<div class="mk-slrow"><span class="mk-sln">'+(i+1)+'</span><span>'+spEscape(sl)+'</span></div>';}).join('');
+    return '<div class="mk mk-ig"><div class="mk-h">'+spAv()+'<b>'+b+'</b><span class="mk-slide">1/'+p.slides.length+'</span></div><div class="mk-vis"><span class="mk-veye">'+spEscape(p.coverLabel||'CAROUSEL')+'</span><span class="mk-vbig">'+spEscape(p.cover||p.slides[0])+'</span></div><div class="mk-dotrow">'+dots+'</div><div class="mk-slides">'+list+'</div><div class="mk-cap"><b>'+b+'</b> '+nl(p.caption||'')+'</div></div>';}
+  if(p.format==='Reel'&&(p.hook||p.script)) return '<div class="mk mk-reel"><div class="mk-phone"><div class="mk-vis"><span class="mk-veye">REEL</span><span class="mk-vbig">'+spEscape(p.hook||p.title)+'</span><span class="mk-play">▶</span><div class="mk-rail"><span>♡</span><span>💬</span><span>➤</span></div><div class="mk-audio">♪ '+spEscape(p.audio||'original audio')+'</div></div></div><div class="mk-script"><b>Script</b><div class="mk-scriptbody">'+nl(p.script||'')+'</div>'+((p.onscreen&&p.onscreen.length)?'<b style="margin-top:12px;display:block">On-screen text</b>'+p.onscreen.map(function(t,i){return '<div class="mk-beat"><span class="mk-sln">'+(i+1)+'</span>'+spEscape(t)+'</div>';}).join(''):'')+'</div></div>';
+  if(p.format==='Email series'&&p.emails&&p.emails.length) return '<div class="mk mk-email">'+p.emails.map(function(e,i){return '<div class="mk-erow'+(i===0?' open':'')+'"><div class="mk-etag">'+spEscape(e.tag)+'</div><div class="mk-esub"><b>'+spEscape(e.subject)+'</b></div><div class="mk-eprevtxt">'+spEscape(e.preview)+'</div>'+(i===0?'<div class="mk-ebody">'+nl(e.emailBody)+'</div>':'')+'<div class="mk-ecta">'+spEscape(e.cta)+'</div></div>';}).join('')+'</div>';
+  if(p.format==='Article'&&(p.headline||p.articleBody)) return '<div class="mk mk-article"><div class="mk-vis"><span class="mk-veye">ARTICLE</span><span class="mk-vbig">'+spEscape(p.headline||p.title)+'</span></div><div class="mk-abody"><h5>'+spEscape(p.headline||p.title)+'</h5><p class="mk-dek">'+spEscape(p.dek||'')+'</p><div class="mk-ameta">By '+spBrand()+' · '+spEscape(p.read||'blog or LinkedIn')+'</div><div class="mk-atext">'+nl(p.articleBody||'')+'</div></div></div>';
+  if(p.format==='X post'&&p.variants&&p.variants.length) return '<div class="mk-xwrap">'+p.variants.map(function(v){return '<div class="mk mk-x"><div class="mk-xlabel">'+spEscape(v.label)+'</div><div class="mk-xh">'+spAv()+'<div><b>'+spBrand()+'</b><span>@'+b+'</span></div></div><div class="mk-xtext">'+nl(v.text)+'</div><div class="mk-xf"><span>💬</span><span>🔁</span><span>♡</span></div></div>';}).join('')+'</div>';
+  return '<div class="likm" style="max-width:none"><div class="licap">'+spEscape(spBodyText(p))+'</div></div>';
+}
 function spokeDetail(o){
   return `<div class="csec"><h5>The core idea</h5><p class="platp">${esc(o.core||o.name)}</p></div>
       <div class="csec"><h5>The spoke — every way it travels</h5>
         ${o.pieces.map((pc,i)=>`<div class="acard"><div class="ahead2"><span class="tchip t-spoke">${esc(pc.format)}</span><b>${esc(pc.title)}</b></div>
-          <div class="amock"><div class="likm" style="max-width:none"><div class="licap">${esc(pc.body)}</div></div></div>
+          <div class="amock">${spMock(pc)}</div>
           <div class="arow" style="padding:10px 14px;border-top:1px solid var(--line)">
             <button class="ab" onclick="location.href='threadline-build-page.html?seed='+encodeURIComponent('Refine this ${esc(pc.format)} from my spoke: ${esc(pc.title).replace(/'/g,'’')}')">Build this piece →</button>
           </div></div>`).join('')}

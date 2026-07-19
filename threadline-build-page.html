@@ -387,6 +387,61 @@ svg.defs{position:absolute;width:0;height:0}
 .app.demo .scrim{display:none!important}
 a.logo{text-decoration:none;color:inherit;cursor:pointer}
 </style>
+<style>
+.mk{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 18px rgba(20,20,60,.06)}
+.mk-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;font-weight:900;display:inline-grid;place-items:center;font-size:15px;flex:none}
+.mk-vis{background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;padding:34px 22px;min-height:150px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.mk-veye{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;opacity:.85;margin-bottom:8px}
+.mk-vbig{font-size:22px;font-weight:900;line-height:1.2}
+.mk-graphic{align-items:center;text-align:center;min-height:210px;gap:6px}
+.mk-g1,.mk-g2{font-size:20px;font-weight:900;line-height:1.15}
+.mk-gfoot{margin-top:16px;font-size:11px;font-weight:800;letter-spacing:.18em;opacity:.8}
+.mk-ig .mk-h{display:flex;align-items:center;gap:9px;padding:11px 13px}
+.mk-ig .mk-h b{font-size:13.5px}
+.mk-dots,.mk-slide{margin-left:auto;color:var(--faint);font-weight:800}
+.mk-slide{font-size:12px;background:rgba(0,0,0,.06);border-radius:999px;padding:2px 9px}
+.mk-dotrow{display:flex;gap:5px;justify-content:center;padding:9px 0 2px}
+.mk-dotrow i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.mk-dotrow i.on{background:var(--violet)}
+.mk-slides{padding:10px 14px 4px}
+.mk-slrow{display:flex;gap:9px;font-size:12.5px;line-height:1.45;color:var(--muted);padding:5px 0;border-bottom:1px dashed var(--line-2)}
+.mk-sln{flex:none;width:20px;height:20px;border-radius:6px;background:var(--surface-2);color:var(--ink);font-weight:800;font-size:11px;display:grid;place-items:center}
+.mk-act{display:flex;gap:16px;padding:10px 14px 4px;font-size:18px}
+.mk-act .mk-save{margin-left:auto}
+.mk-cap{padding:2px 14px 14px;font-size:13px;line-height:1.5}
+.mk-reel{display:grid;grid-template-columns:200px 1fr;gap:16px;border:0;box-shadow:none;background:none}
+@media(max-width:560px){.mk-reel{grid-template-columns:1fr}}
+.mk-phone{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:9/16;box-shadow:0 14px 40px rgba(20,20,60,.2)}
+.mk-phone .mk-vis{height:100%;justify-content:flex-end;padding:20px 16px 60px}
+.mk-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:34px;opacity:.9}
+.mk-rail{position:absolute;right:10px;bottom:70px;display:flex;flex-direction:column;gap:14px;font-size:19px}
+.mk-audio{position:absolute;left:14px;bottom:16px;font-size:11px;font-weight:700;opacity:.9}
+.mk-script{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--surface)}
+.mk-script>b{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+.mk-scriptbody{font-size:12.5px;line-height:1.55;color:var(--ink);margin-top:6px}
+.mk-beat{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink);padding:5px 0}
+.mk-email{padding:6px}
+.mk-erow{border-bottom:1px solid var(--line);padding:12px 14px}
+.mk-erow.open{background:var(--surface-2)}
+.mk-etag{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--violet);margin-bottom:3px}
+.mk-esub b{font-size:13.5px}
+.mk-eprevtxt{font-size:12.5px;color:var(--muted);margin:3px 0 8px}
+.mk-ebody{font-size:12.5px;line-height:1.6;color:var(--ink);border-top:1px solid var(--line);padding-top:10px}
+.mk-ecta{margin-top:10px;font-size:12px;font-weight:800;color:var(--violet)}
+.mk-article .mk-vis{min-height:120px}
+.mk-abody{padding:16px}
+.mk-abody h5{font-size:18px;margin-bottom:6px}
+.mk-dek{font-size:13.5px;color:var(--muted);margin-bottom:8px}
+.mk-ameta{font-size:11.5px;color:var(--faint);margin-bottom:12px}
+.mk-atext{font-size:12.5px;line-height:1.65;color:var(--muted)}
+.mk-x{padding:16px}
+.mk-xwrap{display:flex;flex-direction:column;gap:12px}
+.mk-xlabel{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+.mk-xh{display:flex;gap:10px;align-items:center;margin-top:6px}
+.mk-xh b{font-size:14px;display:block}.mk-xh span{font-size:12.5px;color:var(--faint)}
+.mk-xtext{font-size:15px;line-height:1.5;margin:12px 0;color:var(--ink)}
+.mk-xf{display:flex;gap:22px;font-size:12.5px;color:var(--faint);font-weight:700}
+</style>
 </head>
 <body>
 <svg class="defs"><defs><linearGradient id="tl" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs></svg>
@@ -781,16 +836,35 @@ async function refreshTrends(){
 renderHooks(); renderBroll(); renderTrends();
 
 /* ================= SPOKE MODEL: one idea -> five pieces ================= */
-const SPOKE_SCHEMA={type:'object',properties:{pieces:{type:'array',items:{type:'object',properties:{format:{type:'string'},title:{type:'string'},body:{type:'string'}},required:['format','title','body'],additionalProperties:false}}},required:['pieces'],additionalProperties:false};
+const SPOKE_SCHEMA={type:'object',properties:{pieces:{type:'array',items:{type:'object',properties:{format:{type:'string'},title:{type:'string'},caption:{type:'string'},body:{type:'string'},graphicLine1:{type:'string'},graphicLine2:{type:'string'},cover:{type:'string'},coverLabel:{type:'string'},slides:{type:'array',items:{type:'string'}},hook:{type:'string'},script:{type:'string'},audio:{type:'string'},onscreen:{type:'array',items:{type:'string'}},headline:{type:'string'},dek:{type:'string'},articleBody:{type:'string'},read:{type:'string'},variants:{type:'array',items:{type:'object',properties:{label:{type:'string'},text:{type:'string'}},required:['label','text'],additionalProperties:false}},emails:{type:'array',items:{type:'object',properties:{tag:{type:'string'},subject:{type:'string'},preview:{type:'string'},emailBody:{type:'string'},cta:{type:'string'}},required:['tag','subject','preview','emailBody','cta'],additionalProperties:false}}},required:['format','title','body'],additionalProperties:false}}},required:['pieces'],additionalProperties:false};
 let SPOKES=null, spokeSel=0;
 function spokeFallback(idea){
+  var core=idea.replace(/[.?!]+$/,'');
   return [
-   {format:'Instagram post',title:idea.slice(0,56),body:idea+'\n\nRead that again.\n\nThe brands you admire figured this out early \u2014 and it shows in everything they make.\n\nWhat\u2019s your take \u2014 agree or pushback?'},
-   {format:'Carousel',title:'The full argument, slide by slide',body:'Slide 1: '+idea+'\nSlide 2: Why everyone gets this wrong\nSlide 3: What we see instead \u2014 one real example\nSlide 4: The simple reframe\nSlide 5: What changes when you commit\nSlide 6: Save this for the next time you doubt it\n\nCAPTION: '+idea+' Save this one \u2014 you\u2019ll want it later.'},
-   {format:'Reel',title:'Say it to camera',body:'HOOK: '+idea+'\nBEAT 1: Why everyone gets this wrong.\nBEAT 2: What we see instead \u2014 one real example.\nBEAT 3: The simple reframe.\nCTA: Follow for the honest version, weekly.\n\nCAPTION: '+idea.slice(0,80)},
-   {format:'Email series',title:'The 3-part arc',body:'EMAIL 1 \u2014 Subject: '+idea.slice(0,44)+'\nThe idea, honestly told. One story, no pitch. End on the question your reader is already asking.\n\nEMAIL 2 \u2014 Subject: The part nobody says out loud\nThe objection, faced head-on. One client example that proves the reframe.\n\nEMAIL 3 \u2014 Subject: What to do about it this week\nThe playbook: three small moves. One clear CTA to reply or book.'},
-   {format:'Article',title:idea.slice(0,52)+' \u2014 the long version',body:'HEADLINE: '+idea+'\nDEK: The full argument, with receipts \u2014 for the blog or LinkedIn.\n\n1. The moment this clicked for us\n2. What everyone believes (and why it\u2019s sticky)\n3. The evidence it\u2019s wrong\n4. What to do instead \u2014 the playbook\n5. What changes when you commit'},
-   {format:'X post',title:'The callout',body:idea.replace(/[.?!]+$/,'')+'.\n\nThat\u2019s it. That\u2019s the post.'}
+   {format:"Instagram post",title:core.slice(0,56),graphicLine1:core.toUpperCase().slice(0,42),graphicLine2:"HERE’S WHAT ACTUALLY MOVES THE NEEDLE.",
+    caption:core+".\n\nMost people stop at the surface. But the real work is in the part nobody posts about:\n• What you actually stand for\n• Who you’re really for\n• Why your way is different\n\nSay it once and it’s a post. Say it consistently and it becomes what you’re known for.",
+    body:core},
+   {format:"Carousel",title:"The full argument, slide by slide",cover:core+".",coverLabel:"THE LONG GAME →",
+    slides:[core+".","Here’s what most people believe — and why it’s incomplete.","What we see instead, with one real example.","Why the simple version outperforms the clever one.","The reframe that changes how you show up.","One idea can become five formats — same thread.","What people start to think when you repeat it.","This is how recognition actually gets built.","Don’t chase the moment. Build the message. → FIND THE THREAD"],
+    caption:core+".\n\nThe goal isn’t to say something new every time. It’s to keep returning to the ideas you want to own — from new angles, in new formats.\n\nDifferent content. Same strategic thread.",
+    body:core},
+   {format:"Reel",title:"Say it to camera",hook:core+".",audio:"original audio",
+    script:core+".\n\nAnd here’s the part most people miss.\n\nOne post can get attention. It can’t build the whole relationship.\n\nThat comes from returning to your strongest ideas — through education, opinion, story, proof and offer.\n\nDifferent content. Same strategic thread.",
+    onscreen:[core,"Attention is only the beginning","This isn’t about posting more","Education · Opinion · Story · Proof · Offer","Same strategic thread","Seen → Remembered → Trusted"],
+    caption:core+". Build content that helps people understand you before you worry about reaching everyone.",
+    body:core},
+   {format:"Email series",title:"The 3-part arc",
+    emails:[
+     {tag:"1 · The myth",subject:core.slice(0,46),preview:"The idea, honestly told.",emailBody:core+".\n\nMost advice stops here. But the interesting question is what happens next — and whether your content gives that attention anywhere to go.",cta:"Rethink it →"},
+     {tag:"2 · The reframe",subject:"The part nobody says out loud",preview:"What actually matters.",emailBody:"The common version of this advice is exhausting and usually unsustainable. The strategic version is quieter: consistently reinforce what you believe, who you help and why you’re different.",cta:"See the reframe →"},
+     {tag:"3 · The system",subject:"Turn one idea into five pieces",preview:"The practical part.",emailBody:"Take one core belief and express it as education, an opinion, a story, proof and an offer. Five pieces. One recognizable message. That’s consistency that compounds.",cta:"Build the system →"}],
+    body:core},
+   {format:"Article",title:core.slice(0,52)+" — the long version",headline:core+" — But Not for the Reason You Think",dek:"The full argument, with receipts — for the blog or LinkedIn.",read:"6 min read · blog or LinkedIn",
+    articleBody:core+".\n\nIt sounds simple. In practice, most businesses get the emphasis wrong.\n\nWHAT PEOPLE USUALLY BELIEVE\nThe common version of this advice treats visibility as the goal. But visibility and understanding are not the same thing.\n\nWHAT ACTUALLY BUILDS RECOGNITION\nRepetition — not copy-paste, but returning to the same ideas from new angles. An idea can become an explanation, an opinion, a story, an example, a video, a checklist, an email.\n\nWHY IT COMPOUNDS\nA connected post benefits from everything the audience has already seen from you. Each piece strengthens the next.\n\nFind the thread. Build the content system.",
+    body:core},
+   {format:"X post",title:"The callout — three ways",
+    variants:[{label:"Primary",text:core+".\n\nAnd that doesn’t mean posting every day. It means consistently reinforcing what you believe, who you help and why you’re different."},{label:"Shorter",text:core+".\n\nDon’t confuse staying active with becoming known for something."},{label:"Punchiest",text:"Attention is a moment.\nRecognition is an asset.\n\nBuild for the second one."}],
+    body:core}
   ];
 }
 async function spinSpokes(){
@@ -799,7 +873,7 @@ async function spinSpokes(){
   let pieces=null;
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You turn ONE content idea (or an existing piece the user pasted) into SIX finished draft pieces in the brand voice \u2014 the hub-and-spoke model. Formats, exactly these six: "Instagram post" (caption-led: short lines, breathing room, ends with a question), "Carousel" (Slide 1..6 one line each, then CAPTION: 2-3 lines), "Reel" (HOOK / 3 BEATS / CTA, then CAPTION: one line), "Email series" (3 parts \u2014 Email 1/2/3, each Subject: + 60-90 words, one narrative arc), "Article" (HEADLINE, DEK, then 5 numbered sections \u2014 works for blog or LinkedIn), "X post" (a punchy callout under 280 characters, no hashtags). Each piece: format, title (under 10 words), body (the full draft). Keep every piece anchored to the ONE idea.',
+      system:'You turn ONE content idea into SIX finished, DETAILED draft pieces in the brand voice \u2014 the hub-and-spoke model. Produce all six formats with these exact fields.\n\n1) "Instagram post" (a static graphic): graphicLine1 + graphicLine2 = the punchy two-line statement for the graphic (short, bold); caption = a full caption, 80-140 words, that can include a short bulleted list (use \u2022 for bullets), ending with a takeaway.\n2) "Carousel": cover = the cover-slide line; coverLabel = a 2-4 word label like "THE LONG GAME \u2192"; slides = 8-9 slide texts (each a full slide, first is the cover); caption = a full caption 80-140 words.\n3) "Reel": hook = the opening line; script = the full spoken script (5-8 short paragraphs); onscreen = 6 short on-screen text overlays; audio = a short audio note; caption = a full caption.\n4) "Email series": emails = exactly 3 objects {tag like "1 \u00b7 The myth", subject, preview (one line), emailBody (90-140 words), cta}. One narrative arc across the three.\n5) "Article": headline; dek (subtitle); articleBody = a full 700-1000 word article with SHORT ALL-CAPS section headers on their own lines; read like "6 min read \u00b7 blog or LinkedIn".\n6) "X post": variants = 3 objects {label: "Primary"|"Shorter"|"Punchiest", text (under 280 chars, no hashtags)}.\n\nEvery piece also needs: format (exact name above), title (under 10 words), and body = the complete draft rendered as plain text (used for copy/paste). Anchor every piece to the ONE idea and the brand.',
       messages:[{role:'user',content:'Brand: '+(B.name||'')+' \u2014 '+((B.overview&&B.overview.oneLine)?B.overview.oneLine.replace(/<[^>]*>/g,''):'')+'\nVoice: '+((B.voice&&B.voice.traits)?B.voice.traits.join(', '):'clear, honest')+'\nAudience: '+((B.audience&&B.audience.primary)||'')+'\n\nThe idea in the middle: '+idea}],
       max_tokens:2800, output_config:{format:{type:'json_schema',schema:SPOKE_SCHEMA}}})});
     if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(t){ const j=JSON.parse(t); if(j.pieces&&j.pieces.length) pieces=j.pieces.slice(0,6); } }
@@ -809,12 +883,12 @@ async function spinSpokes(){
   go.disabled=false; go.textContent=SPOKES?'Thread it again \u2726':'Thread it out \u2726';
 }
 const SPFMT={
- 'Instagram post':{c:'#dd2a7b',meta:'caption-led · feed'},
- 'Carousel':{c:'#f58529',meta:'6 slides · save-worthy'},
- 'Reel':{c:'#803dff',meta:'~35 sec · talking head'},
- 'Email series':{c:'#3b82f6',meta:'3 parts · one arc'},
- 'Article':{c:'#b57708',meta:'≈1,200 words · blog or LinkedIn'},
- 'X post':{c:'#0e7f95',meta:'under 280 chars · callout'}
+ 'Instagram post':{c:'#dd2a7b',meta:'static graphic · feed'},
+ 'Carousel':{c:'#f58529',meta:'9 slides · save-worthy'},
+ 'Reel':{c:'#803dff',meta:'talking head · ~45 sec'},
+ 'Email series':{c:'#3b82f6',meta:'3 emails · one story'},
+ 'Article':{c:'#b57708',meta:'long-form · blog or LinkedIn'},
+ 'X post':{c:'#0e7f95',meta:'3 variants · under 280'}
 };
 function spInfo(f){ return SPFMT[f]||{c:'#803dff',meta:''}; }
 function spCard(pc,i){ const inf=spInfo(pc.format);
@@ -872,17 +946,48 @@ function drawSpokeLines(){
   svg.innerHTML=d;
 }
 window.addEventListener('resize',()=>{ if(SPOKES) drawSpokeLines(); });
+function spBrand(){ return (B.name||'your brand'); }
+function spEscape(t){return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function spBodyText(p){
+  if(p.body && !p.slides && !p.emails && !p.variants && !p.articleBody) return p.body;
+  var out=[];
+  if(p.graphicLine1||p.graphicLine2) out.push((p.graphicLine1||'')+' '+(p.graphicLine2||''));
+  if(p.slides&&p.slides.length) out.push(p.slides.map(function(sl,i){return 'Slide '+(i+1)+' — '+sl;}).join('\n'));
+  if(p.hook) out.push('HOOK: '+p.hook);
+  if(p.script) out.push('SCRIPT:\n'+p.script);
+  if(p.onscreen&&p.onscreen.length) out.push('ON-SCREEN:\n'+p.onscreen.map(function(t){return '• '+t;}).join('\n'));
+  if(p.emails&&p.emails.length) out.push(p.emails.map(function(e){return 'EMAIL '+e.tag+' — Subject: '+e.subject+'\n'+e.emailBody+'\n['+e.cta+']';}).join('\n\n'));
+  if(p.headline) out.push(p.headline+'\n'+(p.dek||'')+'\n\n'+(p.articleBody||''));
+  if(p.variants&&p.variants.length) out.push(p.variants.map(function(v){return v.label+':\n'+v.text;}).join('\n\n---\n\n'));
+  if(p.caption) out.push('CAPTION:\n'+p.caption);
+  return out.join('\n\n') || p.body || '';
+}
+function spAv(){return '<span class="mk-av">'+spBrand().charAt(0).toUpperCase()+'</span>';}
+function spBrandH(){return spBrand().toLowerCase().replace(/[^a-z0-9]/g,'');}
+function spMock(p){
+  var b=spBrandH(), nl=function(t){return spEscape(t).replace(/\n/g,'<br>');};
+  if(p.format==='Instagram post'&&(p.graphicLine1||p.graphicLine2)) return '<div class="mk mk-ig"><div class="mk-h">'+spAv()+'<b>'+b+'</b><span class="mk-dots">…</span></div><div class="mk-vis mk-graphic"><span class="mk-g1">'+spEscape(p.graphicLine1||'')+'</span><span class="mk-g2">'+spEscape(p.graphicLine2||'')+'</span><span class="mk-gfoot">'+spEscape(spBrand().toUpperCase())+'</span></div><div class="mk-act"><span>♡</span><span>💬</span><span>➤</span><span class="mk-save">🔖</span></div><div class="mk-cap"><b>'+b+'</b> '+nl(p.caption||'')+'</div></div>';
+  if(p.format==='Carousel'&&p.slides&&p.slides.length){var dots='';for(var d=0;d<p.slides.length;d++)dots+='<i'+(d===0?' class="on"':'')+'></i>';
+    var list=p.slides.map(function(sl,i){return '<div class="mk-slrow"><span class="mk-sln">'+(i+1)+'</span><span>'+spEscape(sl)+'</span></div>';}).join('');
+    return '<div class="mk mk-ig"><div class="mk-h">'+spAv()+'<b>'+b+'</b><span class="mk-slide">1/'+p.slides.length+'</span></div><div class="mk-vis"><span class="mk-veye">'+spEscape(p.coverLabel||'CAROUSEL')+'</span><span class="mk-vbig">'+spEscape(p.cover||p.slides[0])+'</span></div><div class="mk-dotrow">'+dots+'</div><div class="mk-slides">'+list+'</div><div class="mk-cap"><b>'+b+'</b> '+nl(p.caption||'')+'</div></div>';}
+  if(p.format==='Reel'&&(p.hook||p.script)) return '<div class="mk mk-reel"><div class="mk-phone"><div class="mk-vis"><span class="mk-veye">REEL</span><span class="mk-vbig">'+spEscape(p.hook||p.title)+'</span><span class="mk-play">▶</span><div class="mk-rail"><span>♡</span><span>💬</span><span>➤</span></div><div class="mk-audio">♪ '+spEscape(p.audio||'original audio')+'</div></div></div><div class="mk-script"><b>Script</b><div class="mk-scriptbody">'+nl(p.script||'')+'</div>'+((p.onscreen&&p.onscreen.length)?'<b style="margin-top:12px;display:block">On-screen text</b>'+p.onscreen.map(function(t,i){return '<div class="mk-beat"><span class="mk-sln">'+(i+1)+'</span>'+spEscape(t)+'</div>';}).join(''):'')+'</div></div>';
+  if(p.format==='Email series'&&p.emails&&p.emails.length) return '<div class="mk mk-email">'+p.emails.map(function(e,i){return '<div class="mk-erow'+(i===0?' open':'')+'"><div class="mk-etag">'+spEscape(e.tag)+'</div><div class="mk-esub"><b>'+spEscape(e.subject)+'</b></div><div class="mk-eprevtxt">'+spEscape(e.preview)+'</div>'+(i===0?'<div class="mk-ebody">'+nl(e.emailBody)+'</div>':'')+'<div class="mk-ecta">'+spEscape(e.cta)+'</div></div>';}).join('')+'</div>';
+  if(p.format==='Article'&&(p.headline||p.articleBody)) return '<div class="mk mk-article"><div class="mk-vis"><span class="mk-veye">ARTICLE</span><span class="mk-vbig">'+spEscape(p.headline||p.title)+'</span></div><div class="mk-abody"><h5>'+spEscape(p.headline||p.title)+'</h5><p class="mk-dek">'+spEscape(p.dek||'')+'</p><div class="mk-ameta">By '+spBrand()+' · '+spEscape(p.read||'blog or LinkedIn')+'</div><div class="mk-atext">'+nl(p.articleBody||'')+'</div></div></div>';
+  if(p.format==='X post'&&p.variants&&p.variants.length) return '<div class="mk-xwrap">'+p.variants.map(function(v){return '<div class="mk mk-x"><div class="mk-xlabel">'+spEscape(v.label)+'</div><div class="mk-xh">'+spAv()+'<div><b>'+spBrand()+'</b><span>@'+b+'</span></div></div><div class="mk-xtext">'+nl(v.text)+'</div><div class="mk-xf"><span>💬</span><span>🔁</span><span>♡</span></div></div>';}).join('')+'</div>';
+  return '<pre style="white-space:pre-wrap;font-family:inherit">'+spEscape(spBodyText(p))+'</pre>';
+}
 function spPreview(i){
-  spokeSel=i; const pc=SPOKES[i]; const inf=spInfo(pc.format);
-  let ov=document.getElementById('spPrev'); if(ov) ov.remove();
+  spokeSel=i; var pc=SPOKES[i]; var inf=spInfo(pc.format);
+  var ov=document.getElementById('spPrev'); if(ov) ov.remove();
   ov=document.createElement('div'); ov.id='spPrev'; ov.className='overlay on';
-  ov.innerHTML=`<div class="modal" style="max-width:560px;max-height:82vh;overflow-y:auto">
-    <div class="eyeb2" style="color:${inf.c}">${esc(pc.format)} · ${esc(inf.meta)}</div>
-    <h3 style="margin:2px 0 12px">${esc(pc.title)}</h3>
-    <div class="spbody" style="padding:0">${esc(pc.body)}</div>
-    <div class="macts" style="margin-top:16px"><button class="mbtn ghost" onclick="document.getElementById('spPrev').remove()">Close</button><div class="grow"></div><button class="mbtn ghost" onclick="spokeCopy()">Copy</button><button class="mbtn pri" onclick="document.getElementById('spPrev').remove();spokeRefine()">Refine in a session →</button></div>
-  </div>`;
-  ov.addEventListener('click',e=>{ if(e.target===ov) ov.remove(); });
+  ov.innerHTML='<div class="modal" style="max-width:580px;max-height:84vh;overflow-y:auto">'
+    +'<div class="eyeb2" style="color:'+inf.c+'">'+esc(pc.format)+' · '+esc(inf.meta)+'</div>'
+    +'<h3 style="margin:2px 0 12px">'+esc(pc.title)+'</h3>'
+    +'<div id="spMockWrap">'+spMock(pc)+'</div>'
+    +'<details style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px"><summary style="font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer">Full draft &amp; script</summary><pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;color:var(--muted);margin-top:10px">'+esc(spBodyText(pc))+'</pre></details>'
+    +'<div class="macts" style="margin-top:16px"><button class="mbtn ghost" onclick="document.getElementById(\'spPrev\').remove()">Close</button><div class="grow"></div><button class="mbtn ghost" onclick="spokeCopy()">Copy</button><button class="mbtn pri" onclick="document.getElementById(\'spPrev\').remove();spokeRefine()">Refine in a session →</button></div>'
+    +'</div>';
+  ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
   document.body.appendChild(ov);
 }
 function sendSpokesHome(){
@@ -893,13 +998,13 @@ function sendSpokesHome(){
   if(!hub) hub={ideas:[],minis:[],campaigns:[]};
   hub.spokes=hub.spokes||[];
   hub.spokes.unshift({id:'sp'+Math.random().toString(36).slice(2,9),name:name,core:idea,
-    pieces:SPOKES.map(p=>({format:p.format,title:p.title,body:p.body})),status:'idea',appr:'awaiting'});
+    pieces:SPOKES.map(p=>Object.assign({},p)),status:'idea',appr:'awaiting'});
   try{ localStorage.setItem('threadline.hub',JSON.stringify(hub)); }catch(e){}
   toast('Sent to Home — it\u2019s waiting under \u201cSpoked\u201d');
   setTimeout(()=>location.href='threadline-app-home.html',900);
 }
-function spokeRefine(){ const pc=SPOKES[spokeSel]; startSession({mode:'free',seed:'Refine this '+pc.format+' draft with me \u2014 keep my voice, make it sharper:\n\n'+pc.body,title:'Spoke: '+pc.title.slice(0,40)}); }
-function spokeCopy(){ const pc=SPOKES[spokeSel]; try{ navigator.clipboard.writeText(pc.body); toast('Copied \u2014 paste it anywhere'); }catch(e){ toast('Select and copy from the preview'); } }
+function spokeRefine(){ const pc=SPOKES[spokeSel]; startSession({mode:'free',seed:'Refine this '+pc.format+' draft with me \u2014 keep my voice, make it sharper:\n\n'+spBodyText(pc),title:'Spoke: '+pc.title.slice(0,40)}); }
+function spokeCopy(){ const pc=SPOKES[spokeSel]; try{ navigator.clipboard.writeText(spBodyText(pc)); toast('Copied \u2014 paste it anywhere'); }catch(e){ toast('Select and copy from the preview'); } }
 
 /* =========================================================
    SESSION ENGINE
