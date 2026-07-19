@@ -3,7 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Threadline — Think it through. Build it out.</title>
+<title>Threadline — AI Content Planning &amp; Thought Partner</title>
+<meta name="description" content="Threadline is your AI content thought partner. Uncover ideas, shape them into a clear plan, and move them onto your calendar — built for founders, small teams, and studios. Build your brand free; pay only to activate.">
+<link rel="canonical" href="https://www.threadlinebrandstudio.com/">
+<link rel="icon" href="/prototype/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#803dff">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Threadline">
+<meta property="og:title" content="Threadline — Think it through. Build it out.">
+<meta property="og:description" content="Your AI content thought partner. Uncover ideas, shape a plan, and move it to your calendar. Build your brand free; pay only to activate.">
+<meta property="og:url" content="https://www.threadlinebrandstudio.com/">
+<meta property="og:image" content="https://www.threadlinebrandstudio.com/prototype/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Threadline — Think it through. Build it out.">
+<meta name="twitter:description" content="Your AI content thought partner. Uncover ideas, shape a plan, and move it to your calendar.">
+<meta name="twitter:image" content="https://www.threadlinebrandstudio.com/prototype/og-image.png">
+<!-- Structured data -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Threadline","applicationCategory":"BusinessApplication","operatingSystem":"Web","description":"AI content thought partner that helps founders and teams uncover ideas, shape a content plan, and schedule it.","url":"https://www.threadlinebrandstudio.com/","offers":[{"@type":"Offer","name":"Builder","price":"14","priceCurrency":"USD","category":"month"},{"@type":"Offer","name":"Pro","price":"39","priceCurrency":"USD","category":"month"},{"@type":"Offer","name":"Agency","price":"99","priceCurrency":"USD","category":"month"}],"publisher":{"@type":"Organization","name":"Threadline","url":"https://www.threadlinebrandstudio.com/"}}
+</script>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
 <style>
@@ -23,6 +45,12 @@ h1,h2,h3{font-family:'Satoshi';font-weight:900;letter-spacing:-.025em;line-heigh
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.whatis{font-size:13.5px;font-weight:800;letter-spacing:.02em;color:var(--violet);text-transform:uppercase;margin-bottom:6px}
+.faq{padding:64px 0;background:var(--surface)}
+.faqgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px 40px;max-width:960px;margin:0 auto}
+@media(max-width:720px){.faqgrid{grid-template-columns:1fr}}
+.faqi h3{font-size:16px;margin-bottom:7px}
+.faqi p{color:var(--muted);font-size:14px;line-height:1.6}
 
 /* mark */
 .mark{width:34px;height:34px;flex-shrink:0}
@@ -165,17 +193,18 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
 
 <nav><div class="wrap navin">
   <div class="brand"><span class="mark"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tl" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tl)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg></span>Threadline</div>
-  <div class="navlinks"><a href="#">Product</a><a href="#pillars">Solutions</a><a href="#pricing">Pricing</a><a href="#">Resources</a></div>
-  <div class="navr"><a class="btn ghost" href="threadline-app-home.html">Log in</a><a class="btn primary" href="threadline-onboarding.html">Start free</a></div>
+  <div class="navlinks"><a href="#how">Product</a><a href="#pillars">Solutions</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
+  <div class="navr"><a class="btn ghost" href="threadline-app-home.html">Log in</a><a class="btn primary" href="threadline-onboarding.html">Build free</a></div>
 </div></nav>
 
 <header class="hero"><div class="wrap hero-grid">
   <div>
     <span class="eyebrow">✦ Your content thought partner</span>
     <h1>You don't need more pressure to post. You need someone to <span class="grad-text">think with.</span></h1>
+    <p class="whatis">An AI content-planning studio for people building a brand.</p>
     <p class="lede">Threadline helps you uncover ideas, shape them into a clear direction, and turn them into content that's ready to move.</p>
     <div class="cta">
-      <a class="btn primary lg" href="threadline-onboarding.html">Start your free trial →</a>
+      <a class="btn primary lg" href="threadline-onboarding.html">Build my brand free →</a>
       <a class="btn lg" href="#how">See how it works</a>
     </div>
     <div class="assure"><span>✓ Build your brand free</span><span>✓ Pay only to activate</span><span>✓ Cancel anytime</span></div>
@@ -311,12 +340,25 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
       <a class="btn" href="threadline-onboarding.html">Build my brand free</a></div>
     <div class="tier pop"><div class="nm">Pro</div><div class="pr">$39<span>/mo</span></div><div class="desc">For active brands and small teams.</div>
       <ul><li><span class="ck">✓</span> <b>3</b> brands</li><li><span class="ck">✓</span> <b>4</b> team seats</li><li><span class="ck">✓</span> <b>120</b> AI images / mo</li><li><span class="ck">✓</span> Series auto-scheduling</li></ul>
-      <a class="btn primary" href="threadline-onboarding.html">Start free trial</a></div>
+      <a class="btn primary" href="threadline-onboarding.html">Start with Pro →</a></div>
     <div class="tier"><div class="nm">Agency</div><div class="pr">$99<span>/mo</span></div><div class="desc">For studios running many clients.</div>
       <ul><li><span class="ck">✓</span> <b>10</b> brands</li><li><span class="ck">✓</span> <b>10</b> team seats</li><li><span class="ck">✓</span> <b>400</b> AI images / mo</li><li><span class="ck">✓</span> Priority support</li></ul>
-      <a class="btn" href="threadline-onboarding.html">Start free trial</a></div>
+      <a class="btn" href="threadline-onboarding.html">Start with Agency →</a></div>
   </div>
   <div class="pricenote">Need more images? Add 50-image packs for $5 on any plan — no upgrade required. Need teammates? Add seats for $9/mo each on Pro and Agency.</div>
+</div></section>
+
+<section class="faq" id="faq"><div class="wrap">
+  <h2 style="font-size:30px;text-align:center;margin-bottom:8px">Questions, answered</h2>
+  <p style="text-align:center;color:var(--muted);margin-bottom:30px">The things people ask before they start.</p>
+  <div class="faqgrid">
+    <div class="faqi"><h3>How is this different from ChatGPT?</h3><p>ChatGPT gives you an answer when you ask. Threadline is built around your brand — it remembers your voice, pillars, and audience, then carries an idea all the way from a half-formed thought to drafted pieces on a scheduled calendar. It's a workflow, not a chat box.</p></div>
+    <div class="faqi"><h3>Is my content and data mine?</h3><p>Yes. Everything you create is yours. Your brand, ideas, and drafts belong to you and can be exported or deleted at any time. We don't sell your data or train public models on it.</p></div>
+    <div class="faqi"><h3>What does "build free, pay to activate" mean?</h3><p>You can build your entire brand foundation and plan your content for free — no card required. You only pay when you're ready to activate: unlock scheduling, publishing, and higher AI limits.</p></div>
+    <div class="faqi"><h3>What happens after the Founding 50 offer?</h3><p>Founding members keep <b>$9/mo locked for life</b> — it never goes up, even as we add features and raise prices for everyone else. Plus a direct line to the founder.</p></div>
+    <div class="faqi"><h3>Can I really cancel anytime?</h3><p>Anytime, in two clicks from Settings. No contracts, no cancellation calls. If you cancel, your account drops to the free build stage and your work stays intact.</p></div>
+    <div class="faqi"><h3>Does it publish to my social accounts?</h3><p>Yes — connect Instagram, LinkedIn, X, TikTok and more, and publish or schedule straight from your plan. Real post analytics flow back in so you can see what's working.</p></div>
+  </div>
 </div></section>
 
 <div class="final"><div class="finalbox">
@@ -329,7 +371,7 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
   <div class="brand"><span class="mark"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="url(#tl)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tl)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg></span>Threadline</div>
   <span style="color:var(--muted);font-weight:600">Think it through. Build it out.</span>
   <div class="grow"></div>
-  <span>© 2026 Threadline · <a href="#" style="color:var(--muted);font-weight:600">Privacy</a> · <a href="#" style="color:var(--muted);font-weight:600">Terms</a></span>
+  <span>© 2026 Threadline · <a href="threadline-privacy.html" style="color:var(--muted);font-weight:600">Privacy</a> · <a href="threadline-terms.html" style="color:var(--muted);font-weight:600">Terms</a></span>
 </div></footer>
 
 </body>
