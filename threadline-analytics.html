@@ -804,7 +804,7 @@ function previewPanel(id){ const p=document.getElementById(id); if(!p) return;
   p.classList.add('preview');
   if(!ov){ const o=el('div','prevov','<span class="pvbadge">👁 Sample preview</span>'); o.onclick=scrollToConnect; p.appendChild(o); } }
 function scrollToConnect(){ const c=document.getElementById('connectbar'); c.scrollIntoView({behavior:'smooth',block:'center'}); c.classList.add('flash'); setTimeout(()=>c.classList.remove('flash'),1500); }
-function renderBanner(){ $('#pvbanner').innerHTML=anyConn()?'':`<div class="pvb"><div><b>📊 You’re previewing Analytics with sample data</b><p>Everything below shows what your dashboard will look like — none of it is your real performance yet.</p></div><button class="lb pri" onclick="scrollToConnect()">Connect accounts for analytics</button></div>`; }
+function renderBanner(){ $('#pvbanner').innerHTML=anyConn()?'':`<div class="pvb"><div><b>📊 You’re previewing Analytics with sample data</b><p>Everything below shows what your dashboard will look like — none of it is your real performance yet.</p></div><button class="lb pri" onclick="joinWaitlist()">Join the waitlist for automatic analytics</button></div>`; }
 
 /* ---------- replicate modal ---------- */
 const REP_OPTS=['Topic','Hook pattern','Content structure','CTA style','All recommended elements'];
