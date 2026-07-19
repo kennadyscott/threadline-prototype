@@ -159,7 +159,7 @@ const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"
 const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
 document.querySelector('.brand .mark').innerHTML=MARK;
 
-const state={ name:'', url:'', logo:'', logoData:'', voice:'', content:'', colors:'' };
+const state={ name:'', url:'', logo:'', logoData:'', logoColors:[], voice:'', content:'', colors:'' };
 let snap=null, audit=null, analyzed=false, siteAnalysis=null;
 const PHASES=['Import','Snapshot','Audit'];
 let step=0; // 0 import,1 snapshot,2 audit,3 done
@@ -203,11 +203,12 @@ async function realSnap(){
     const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return null;
     const j=JSON.parse(t);
     const userCols=(state.colors||'').split(/[,\s]+/).map(c=>c.trim()).filter(c=>/^#?[0-9a-f]{3,8}$/i.test(c)).map(c=>c[0]==='#'?c:'#'+c);
+    const logoCols=(state.logoColors&&state.logoColors.length)?state.logoColors:[];
     return {
       name: state.name.trim()||'Your brand',
       summary: j.summary||'',
       voice: (j.voice||[]).slice(0,5),
-      colors: userCols.length?userCols:((j.colors||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5)),
+      colors: userCols.length?userCols:(logoCols.length?logoCols:((j.colors||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5))),
       audience: j.audience||'',
       themes: (j.themes||[]).slice(0,5),
       fromSite: !!siteAnalysis, real:true
@@ -247,11 +248,50 @@ function p1(){ renderProg();
       <button class="btn solid" id="go1">Organize my brand →</button>
     </div>`);
   renderProg();
+  // ---- palette extraction from the uploaded logo / brand card ----
+  function hex2rgb(h){ h=h.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+  function colorDist(a,b){ const pa=hex2rgb(a),pb=hex2rgb(b); return Math.abs(pa[0]-pb[0])+Math.abs(pa[1]-pb[1])+Math.abs(pa[2]-pb[2]); }
+  function extractColors(dataURL, cb){
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const c=document.createElement('canvas'); const w=c.width=72, h=c.height=Math.max(1,Math.round(72*img.height/img.width));
+        const x=c.getContext('2d'); x.drawImage(img,0,0,w,h);
+        const data=x.getImageData(0,0,w,h).data;
+        const buckets={};
+        for(let i=0;i<data.length;i+=4){
+          const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+          if(a<200) continue;
+          if(r>238&&g>238&&b>238) continue;
+          const key=Math.round(r/24)+','+Math.round(g/24)+','+Math.round(b/24);
+          buckets[key]=(buckets[key]||0)+1;
+        }
+        const top=Object.entries(buckets).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k])=>{
+          const [r,g,b]=k.split(',').map(n=>Math.min(255,+n*24));
+          return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+        });
+        const out=[]; for(const c1 of top){ if(!out.some(c2=>colorDist(c1,c2)<60)) out.push(c1); if(out.length>=5) break; }
+        cb(out);
+      }catch(e){ cb([]); }
+    };
+    img.onerror=()=>cb([]);
+    img.src=dataURL;
+  }
+  window._importExtractColors=extractColors;
+  // resume case: logo already on file but colors never pulled
+  if(state.logoData && !(state.logoColors&&state.logoColors.length)){
+    extractColors(state.logoData, cols=>{ state.logoColors=cols; if(cols.length && !$('#colors').value.trim()){ $('#colors').value=cols.join(', '); state.colors=$('#colors').value; } persist&&persist(); });
+  } else if(state.logoColors&&state.logoColors.length && !$('#colors').value.trim()){
+    $('#colors').value=state.logoColors.join(', ');
+  }
+
   // logo upload (real file picker; logo stays device-local — never synced as a blob)
   $('#drop').onclick=()=>{ $('#logoFile').click(); };
   $('#logoFile').onchange=e=>{
     const f=e.target.files&&e.target.files[0]; if(!f) return;
-    const finish=()=>{ const d=$('#drop'); d.classList.add('filled'); d.querySelector('.di').innerHTML=state.logoData?('<img src="'+state.logoData+'" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:6px">'):'✓'; $('#dropName').textContent=f.name+' added'; persist&&persist(); };
+    const finish=()=>{ const d=$('#drop'); d.classList.add('filled'); d.querySelector('.di').innerHTML=state.logoData?('<img src="'+state.logoData+'" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:6px">'):'✓'; $('#dropName').textContent=f.name+' added';
+      if(state.logoData){ extractColors(state.logoData, cols=>{ state.logoColors=cols; if(cols.length){ if(!$('#colors').value.trim()){ $('#colors').value=cols.join(', '); state.colors=$('#colors').value; } $('#dropName').textContent=f.name+' added · '+cols.length+' colors pulled'; } persist&&persist(); }); }
+      persist&&persist(); };
     state.logo=f.name;
     const rd=new FileReader();
     rd.onload=()=>{
@@ -331,7 +371,7 @@ function p2(){ renderProg();
       <div class="sh"><div class="bn">${esc(snap.name)}</div><div class="bs">${esc(snap.summary)}</div></div>
       <div class="sb">
         <div class="srow"><div class="sl">Brand voice</div><div class="tags" data-set="voice">${snap.voice.map(v=>tagHTML(v,snap.fromSite)).join('')}</div></div>
-        <div class="srow"><div class="sl">Colors</div><div class="swatches">${snap.colors.map(c=>`<div class="sw" style="background:${esc(c)}" title="${esc(c)}"></div>`).join('')}</div></div>
+        ${snap.colors&&snap.colors.length?`<div class="srow"><div class="sl">Colors</div><div class="swatches">${snap.colors.map(c=>`<div class="sw" style="background:${esc(c)}" title="${esc(c)}"></div>`).join('')}</div></div>`:''}
         <div class="srow"><div class="sl">Who it's for</div><div class="sv">${esc(snap.audience)}</div></div>
         <div class="srow"><div class="sl">Themes I noticed in your content</div><div class="tags" data-set="themes">${snap.themes.map(t=>tagHTML(t,true)).join('')}</div></div>
       </div>`;
