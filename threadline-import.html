@@ -208,12 +208,15 @@ async function realSnap(){
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
       system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); tagline = a short fun tagline in the brand\'s own voice, max 7 words — playful if the brand is playful, never corporate filler; voice = 3-5 single-word traits; knownFor = what this brand should be known for, one specific phrase in its own language (never "the clear choice"); promise = the core promise to the audience, one short sentence naming their world; believe = the brand\'s strongest belief as a punchy line in its voice; different = what genuinely sets it apart, one sentence with specifics; pov = a one-line point of view the brand would defend; feelNow = one word for how the audience feels today; feelBecome = one word for what the brand helps them become; sampleHeadline = a social post headline this brand would actually write; sampleCaption = a 2-sentence caption in its exact voice; soundsLike = 2 short quotes that sound exactly like this brand; notLike = 2 short quotes that would be off-brand for THIS specific brand; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
       messages:[{role:'user',content:parts.join('\n\n')}],
-      max_tokens:1400, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
+      max_tokens:2200, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
     const ct=r.headers.get('content-type')||'';
-    if(ct.indexOf('json')<0) return null;
-    if(!r.ok){ try{const e=await r.json(); if(e&&e.error&&window.toast) toast('AI read hiccup — '+String(e.error).slice(0,120)); }catch(_e){} return null; }
-    const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return null;
-    const j=JSON.parse(t);
+    if(ct.indexOf('json')<0){ window._snapErr='no API on this host'; return null; }
+    if(!r.ok){ let msg='HTTP '+r.status; try{const e=await r.json(); if(e&&e.error) msg=String(e.error).slice(0,140);}catch(_e){} window._snapErr=msg; return null; }
+    const d=await r.json();
+    if(d&&d.stop_reason==='max_tokens'){ window._snapErr='response ran long — try again'; return null; }
+    const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t){ window._snapErr='empty AI response'; return null; }
+    let j; try{ j=JSON.parse(t); }catch(pe){ window._snapErr='malformed AI response — try again'; return null; }
+    window._snapErr=null;
     const userCols=(state.colors||'').split(/[,\s]+/).map(c=>c.trim()).filter(c=>/^#?[0-9a-f]{3,8}$/i.test(c)).map(c=>c[0]==='#'?c:'#'+c);
     const logoCols=(state.logoColors&&state.logoColors.length)?state.logoColors:[];
     return {
@@ -230,7 +233,7 @@ async function realSnap(){
       themes: (j.themes||[]).slice(0,5),
       fromSite: !!siteAnalysis, real:true
     };
-  }catch(e){ return null; }
+  }catch(e){ window._snapErr='network error — '+String(e&&e.message||e).slice(0,80); return null; }
 }
 function thinkThenReveal(container, label, buildCard){
   const t=el('div','thinking',`<span>${label}</span><span class="dots"><i></i><i></i><i></i></span>`);
@@ -406,8 +409,15 @@ function p2(){ renderProg();
     </div>`);
   renderProg();
   thinkThenRevealAsync($('#reveal'),'Threadline is reading your brand', async ()=>{
-    if(!snap || !snap.real || !snap.tagline || !snap.knownFor){ const rs=await realSnap(); if(rs) snap=rs; else if(!snap) snap=buildSnap(); }
+    let aiFailed=false;
+    if(!snap || !snap.real || !snap.tagline || !snap.knownFor){ const rs=await realSnap(); if(rs) snap=rs; else { aiFailed=!!localStorage.getItem('threadline.owner'); if(!snap) snap=buildSnap(); } }
     const c=el('div','snap');
+    if(aiFailed){
+      const warn=el('div','');
+      warn.style.cssText='background:rgba(245,165,36,.1);border:1px solid rgba(245,165,36,.4);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:13.5px;color:#8a6210';
+      warn.innerHTML='⚠ <b>This is sample content</b> — the AI read didn’t complete'+(window._snapErr?' ('+window._snapErr+')':'')+'. <a style="color:var(--violet);font-weight:800;cursor:pointer" onclick="snap=null;adv(1,p2)">Try again →</a>';
+      c.appendChild(warn);
+    }
     c.innerHTML=`
       <div class="sh"><div class="bn">${esc(snap.name)}</div><div class="bs">${esc(snap.summary)}</div></div>
       <div class="sb">
