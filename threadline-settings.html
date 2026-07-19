@@ -180,8 +180,8 @@ a.logo{text-decoration:none;color:inherit;cursor:pointer}
     <a class="logo" href="threadline-app-home.html"><span class="mark" id="lmark"></span>Threadline</a>
     <nav class="nav" id="nav"></nav>
     <div class="sfoot">
-      <div class="wsrow" onclick="toast('Workspace switcher — prototype')"><div class="avv" id="wsav">TB</div><div class="wt"><b id="wsname">Workspace</b><span>Workspace</span></div></div>
-      <div class="wsrow" onclick="toast('Profile — prototype')"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="wt"><b>Kennady Scott</b><span>Admin</span></div></div>
+      <div class="wsrow" onclick="location.href='threadline-settings.html'"><div class="avv" id="wsav">TB</div><div class="wt"><b id="wsname">Workspace</b><span>Workspace</span></div></div>
+      <div class="wsrow" onclick="location.href='threadline-settings.html'"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)"><span class="pfav">👤</span></div><div class="wt"><b class="pfname">My profile</b><span>Account</span></div></div>
       <button class="setrow">⚙︎ Settings</button>
     </div>
   </aside>
@@ -205,14 +205,13 @@ a.logo{text-decoration:none;color:inherit;cursor:pointer}
 
       <div class="panel">
         <div class="ph"><h3>Team &amp; reviews</h3><span class="sub">Who's here — and how content gets approved.</span></div>
-        <div class="member"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)">K</div><div class="mt"><b>Kennady Scott</b><span>kennady.nickell@gmail.com · Owner</span></div><span class="rolepill r-admin">Admin · Reviewer</span></div>
-        <div class="member"><div class="avv round" style="background:linear-gradient(135deg,#3b82f6,#22d3ee)">J</div><div class="mt"><b>Jordan Lee</b><span>jordan@groundwork.co · invited</span></div><span class="rolepill r-member">Member · Creator</span></div>
-        <button class="invite" onclick="toast('Invite sent — 2 of 4 seats used on Pro')">＋ Invite teammate</button>
+        <div class="member"><div class="avv round" style="background:linear-gradient(135deg,#fb7185,#f5a524)"><span class="pfav">👤</span></div><div class="mt"><b class="pfname">You</b><span id="tmmail">Signed in · Owner</span></div><span class="rolepill r-admin">Admin · Reviewer</span></div>
+        <button class="invite" onclick="toast('Team invites are coming soon — your plan already includes seats for when they land')">＋ Invite teammate</button>
 
         <label class="ckrow" style="margin-top:16px"><input type="checkbox" id="s-required" onchange="toggleReviewSet()"><b>Require review before posts can be scheduled<span>Uncheck if you're a single person running your own account — you'll mark posts ready yourself, with no reviewer step.</span></b></label>
         <div class="reviewset" id="reviewset">
           <div class="frow">
-            <div class="df"><label>Who reviews</label><select id="s-reviewer"><option>Kennady Scott (Admin)</option><option>Any admin</option><option>Assigned per piece</option></select></div>
+            <div class="df"><label>Who reviews</label><select id="s-reviewer"><option>Me (Admin)</option><option>Any admin</option><option>Assigned per piece</option></select></div>
             <div class="df"><label>Who submits for review</label><select id="s-submit"><option>All members</option><option>Creators only</option></select></div>
           </div>
         </div>
@@ -278,7 +277,7 @@ renderNav();
 
 /* ---------- team review rules (same key Plan reads) ---------- */
 const RKEY='threadline.teamRules';
-function getRules(){ try{ return Object.assign({required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}, JSON.parse(localStorage.getItem(RKEY)||'{}')); }catch(e){ return {required:1,reviewer:'Kennady Scott (Admin)',submit:'All members'}; } }
+function getRules(){ try{ return Object.assign({required:1,reviewer:'Me (Admin)',submit:'All members'}, JSON.parse(localStorage.getItem(RKEY)||'{}')); }catch(e){ return {required:1,reviewer:'Me (Admin)',submit:'All members'}; } }
 function loadRules(){ const r=getRules(); $('#s-required').checked=!!r.required; $('#s-reviewer').value=r.reviewer; $('#s-submit').value=r.submit; toggleReviewSet(); }
 function toggleReviewSet(){ const on=$('#s-required').checked; $('#reviewset').classList.toggle('off',!on);
   $('#ruleState').textContent=on?'Team mode — reviews gate scheduling. Plan reflects this immediately.':'Solo mode — no reviewer step; you mark posts ready yourself.'; }
@@ -421,6 +420,17 @@ async function loadSocial(){
   }
 }
 loadSocial();
+
+/* ---------- real account into Team & profile ---------- */
+(async function(){
+  try{
+    var r=await fetch('/api/me',{credentials:'same-origin'});
+    if(!r.ok) return;
+    var d=await r.json();
+    var em=document.getElementById('tmmail');
+    if(em && d.email) em.textContent=d.email+' · Owner';
+  }catch(e){}
+})();
 </script>
 <script>
 /* mobile drawer nav */
