@@ -115,9 +115,14 @@
     window.fetch = wrapped;
   }
 
+  function removeChip() {
+    var c = document.getElementById("tltrialchip");
+    if (c) c.remove();
+  }
   function apply(a) {
     if (!a) return;
     if (a.state === "trial" && a.trialDaysLeft != null) chip(a.trialDaysLeft);
+    else removeChip(); // paid/expired/preview → no countdown chip (clears a stale one)
     if (a.state === "expired") { paywall(false); armGate(); wrapFetch(); }
   }
 
