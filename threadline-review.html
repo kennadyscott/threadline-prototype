@@ -196,7 +196,7 @@ svg.defs{position:absolute;width:0;height:0}
 <div class="foot" id="foot"><div class="footin">
   <button class="fbtn" onclick="toggleDiscuss()">💬 Discuss with Threadline</button>
   <button class="fbtn" id="editBtn" onclick="toggleEdit()">✏️ Make changes</button>
-  <button class="approve" onclick="approveAll()">✦ Approve &amp; activate my brand</button>
+  <button class="approve" onclick="approveAll()">✦ Approve my brand →</button>
   <div class="fnote">You can refine anything later in Settings → Brand.</div>
 </div></div>
 
@@ -319,7 +319,7 @@ const SLIDES=[
     <span><span class="ck">✓</span> Voice model locked in</span>
     <span><span class="ck">✓</span> First weeks drafted in Plan</span>
   </div>
-  <p class="finalnote">This is the engine your approval turns on. Hit <b>✦ Approve &amp; activate</b> below when it feels like you.</p>`
+  <p class="finalnote">This is the engine your approval turns on. Hit <b>✦ Approve my brand</b> below when it feels like you.</p>`
 }
 ];
 
@@ -336,7 +336,7 @@ function goSlide(n){
   $('#topstep').textContent='Slide '+(cur+1)+' of '+SLIDES.length;
   $('#dots').innerHTML=SLIDES.map((x,i)=>`<div class="dot${i===cur?' on':''}" onclick="goSlide(${i})" title="${esc(x.t)}"></div>`).join('');
   $('#prevBtn').style.visibility=cur===0?'hidden':'visible';
-  $('#nextBtn').textContent=cur===SLIDES.length-1?'✦ Approve & activate':'Next →';
+  $('#nextBtn').textContent=cur===SLIDES.length-1?'✦ Approve my brand':'Next →';
   $('#nextBtn').onclick=cur===SLIDES.length-1?approveAll:()=>goSlide(cur+1);
   if(editing) document.querySelectorAll('[data-b]').forEach(e=>e.contentEditable=true);
   window.scrollTo({top:0,behavior:'smooth'});
