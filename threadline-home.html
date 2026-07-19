@@ -306,6 +306,45 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
   .shiftrow,.pillars,.aud,.tiers{grid-template-columns:1fr}
   .navlinks{display:none}.mockbody{grid-template-columns:1fr}
 }
+
+/* --- See-how-it-works demo popup --- */
+.demo{position:fixed;inset:0;background:rgba(15,18,34,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:110;padding:20px}
+.demo.on{display:flex;animation:demofade .18s ease}
+@keyframes demofade{from{opacity:0}to{opacity:1}}
+.demobox{background:#fff;border-radius:22px;width:min(940px,96vw);max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 40px 100px rgba(15,18,34,.4);position:relative}
+.demox{position:absolute;top:15px;right:17px;background:none;border:none;font-size:25px;line-height:1;color:var(--faint);cursor:pointer;z-index:3}
+.demohd{display:flex;align-items:center;justify-content:space-between;padding:20px 26px 2px}
+.demokick{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet)}
+.demosteps{display:flex;gap:6px}
+.demosteps i{width:22px;height:4px;border-radius:2px;background:var(--line);transition:.2s}
+.demosteps i.on{background:var(--violet);width:30px}
+.demobody{padding:14px 26px 8px;overflow:auto}
+.demoscene{display:none}
+.demoscene.on{display:block;animation:demofade .22s ease}
+.demolab{font-size:12.5px;font-weight:800;color:var(--faint);letter-spacing:.02em;margin-bottom:12px}
+.democore{background:linear-gradient(135deg,rgba(128,61,255,.09),rgba(34,211,238,.09));border:1px solid rgba(128,61,255,.18);border-radius:16px;padding:18px 20px;text-align:center}
+.democore .cl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
+.democore .ct{font-family:'Satoshi';font-weight:900;font-size:21px;line-height:1.25;color:var(--ink,#0f1222)}
+.demosub{color:var(--muted);font-size:14px;line-height:1.55;margin:14px 0 16px;text-align:center}
+.demogrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:640px){.demogrid{grid-template-columns:1fr 1fr}.democore .ct{font-size:18px}}
+.demopc{text-align:left;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--c,#803dff);border-radius:12px;padding:12px 13px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:5px;font-family:inherit}
+.demopc:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,18,34,.1);border-color:var(--c,#803dff)}
+.demopc .pf{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c,#803dff)}
+.demopc b{font-size:13px;font-weight:800;line-height:1.3;color:var(--ink,#0f1222)}
+.demopc .pr{font-size:11.5px;color:var(--violet);font-weight:700;margin-top:2px}
+.demoframe{border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(15,18,34,.16)}
+.demobar{display:flex;gap:7px;align-items:center;padding:10px 14px;background:#f1f3f8;border-bottom:1px solid var(--line)}
+.demobar i{width:11px;height:11px;border-radius:50%;background:#d4d8e2}
+.demoframe img{display:block;width:100%;height:auto}
+.demofoot{display:flex;align-items:center;justify-content:space-between;padding:15px 26px;border-top:1px solid var(--line);background:#fff}
+.demodots{display:flex;gap:8px}
+.demodots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer;transition:.2s}
+.demodots i.on{background:var(--violet);transform:scale(1.25)}
+.demobtn{border:none;border-radius:11px;padding:11px 20px;font-family:'Satoshi';font-weight:800;font-size:14px;cursor:pointer}
+.demobtn.primary{background:var(--grad,linear-gradient(135deg,#803DFF,#3B82F6,#22D3EE));color:#fff}
+.demobtn.ghost{background:none;color:var(--muted)}
+
 </style>
 </head>
 <body>
@@ -325,7 +364,7 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
     <p class="lede">Threadline helps you uncover ideas, shape them into a clear direction, and turn them into content that's ready to move.</p>
     <div class="cta">
       <a class="btn primary lg" href="threadline-onboarding.html">Build my brand free →</a>
-      <a class="btn lg" href="#how">See how it works</a>
+      <a class="btn lg" href="#how" onclick="openDemo();return false;">See how it works</a>
     </div>
     <div class="assure"><span>✓ No credit card to start</span><span>✓ Plan free for 30 days</span><span>✓ Cancel anytime</span></div>
   </div>
@@ -489,6 +528,37 @@ function demoTab(el,page,url){
   document.getElementById('demourl').textContent=url;
 }
 </script>
+<div class="demo" id="demo" role="dialog" aria-modal="true" aria-label="How Threadline works">
+  <div class="demobox">
+    <button class="demox" onclick="closeDemo()" aria-label="Close">&times;</button>
+    <div class="demohd"><span class="demokick">How Threadline works</span><div class="demosteps"><i class="on"></i><i></i></div></div>
+    <div class="demobody">
+      <div class="demoscene on" id="demoS0">
+        <div class="demolab">Step 1 — One idea becomes a whole content set</div>
+        <div class="democore"><div class="cl">The core idea</div><div class="ct">Going viral gets you seen. Consistency gets you known.</div></div>
+        <p class="demosub">Threadline threads that one thought into six on-brand, ready-to-post pieces. Click any card to read the actual draft it wrote.</p>
+        <div class="demogrid">
+          <button class="demopc" style="--c:#f58529" onclick="spokePrev(0)"><span class="pf">Carousel</span><b>The long game, slide by slide</b><span class="pr">Read the draft &rarr;</span></button>
+          <button class="demopc" style="--c:#dd2a7b" onclick="spokePrev(1)"><span class="pf">Instagram post</span><b>Going viral gets you seen&hellip;</b><span class="pr">Read the draft &rarr;</span></button>
+          <button class="demopc" style="--c:#803dff" onclick="spokePrev(2)"><span class="pf">Reel</span><b>Going viral is not a content strategy</b><span class="pr">Read the draft &rarr;</span></button>
+          <button class="demopc" style="--c:#3b82f6" onclick="spokePrev(3)"><span class="pf">Email series</span><b>The 3-part arc: myth &rarr; system</b><span class="pr">Read the draft &rarr;</span></button>
+          <button class="demopc" style="--c:#b57708" onclick="spokePrev(4)"><span class="pf">Article</span><b>Consistency beats going viral</b><span class="pr">Read the draft &rarr;</span></button>
+          <button class="demopc" style="--c:#0e7f95" onclick="spokePrev(5)"><span class="pf">X post</span><b>The callout &mdash; three ways</b><span class="pr">Read the draft &rarr;</span></button>
+        </div>
+      </div>
+      <div class="demoscene" id="demoS1">
+        <div class="demolab">Step 2 — It all lands on your Plan</div>
+        <p class="demosub">Every piece drops onto your calendar &mdash; organized by rhythm, status, format, and schedule. Nothing publishes without you.</p>
+        <div class="demoframe"><div class="demobar"><i></i><i></i><i></i></div><img src="product-plan.png" alt="Threadline Plan &mdash; a content calendar organized by status, format, and schedule" loading="lazy"></div>
+      </div>
+    </div>
+    <div class="demofoot">
+      <button class="demobtn ghost" id="demoBack" onclick="demoGo(-1)" style="visibility:hidden">&larr; Back</button>
+      <div class="demodots"><i class="on" onclick="demoTo(0)"></i><i onclick="demoTo(1)"></i></div>
+      <button class="demobtn primary" id="demoNext" onclick="demoGo(1)">Next &rarr;</button>
+    </div>
+  </div>
+</div>
 <div class="spov" id="spov"><div class="card" style="position:relative"><span class="x" onclick="document.getElementById('spov').classList.remove('on')">&times;</span><div class="eyb" id="spovEye"></div><h4 id="spovTitle"></h4><div id="spovMock"></div><details class="spovfull"><summary>Full draft &amp; script</summary><pre id="spovBody"></pre></details></div></div>
 <script>
 var BRAND="yourbrand";
@@ -523,7 +593,22 @@ function spokePrev(i){
   document.getElementById('spov').classList.add('on');
 }
 document.getElementById('spov').addEventListener('click',function(e){ if(e.target.id==='spov') this.classList.remove('on'); });
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') document.getElementById('spov').classList.remove('on'); });
+document.addEventListener('keydown',function(e){ if(e.key!=='Escape') return; var sp=document.getElementById('spov'); if(sp&&sp.classList.contains('on')){ sp.classList.remove('on'); return; } if(typeof closeDemo==='function') closeDemo(); });
+/* --- See-how-it-works demo popup controller --- */
+var demoStep=0;
+function renderDemo(){
+  [0,1].forEach(function(i){ var el=document.getElementById('demoS'+i); if(el) el.classList.toggle('on', i===demoStep); });
+  document.querySelectorAll('#demo .demodots i').forEach(function(c,i){ c.className=(i===demoStep)?'on':''; });
+  document.querySelectorAll('#demo .demosteps i').forEach(function(c,i){ c.className=(i===demoStep)?'on':''; });
+  var back=document.getElementById('demoBack'); if(back) back.style.visibility=(demoStep===0)?'hidden':'visible';
+  var nx=document.getElementById('demoNext'); if(nx) nx.textContent=(demoStep===1)?'Build free \u2192':'Next \u2192';
+}
+function openDemo(){ demoStep=0; renderDemo(); var d=document.getElementById('demo'); if(d){ d.classList.add('on'); document.body.style.overflow='hidden'; } }
+function closeDemo(){ var d=document.getElementById('demo'); if(d){ d.classList.remove('on'); document.body.style.overflow=''; } }
+function demoScroll(){ var b=document.querySelector('#demo .demobody'); if(b) b.scrollTop=0; }
+function demoTo(n){ demoStep=n; renderDemo(); demoScroll(); }
+function demoGo(d){ if(demoStep>=1 && d>0){ location.href='threadline-onboarding.html'; return; } demoStep=Math.max(0,Math.min(1,demoStep+d)); renderDemo(); demoScroll(); }
+(function(){ var d=document.getElementById('demo'); if(d) d.addEventListener('click',function(e){ if(e.target.id==='demo') closeDemo(); }); })();
 function drawSpokeLines(){
   var cv=document.getElementById('spokemap'), svg=document.getElementById('splines'); if(!cv||!svg) return;
   var core=cv.querySelector('.spcore'); if(!core) return;
