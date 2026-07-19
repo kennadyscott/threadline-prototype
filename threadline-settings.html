@@ -231,7 +231,7 @@ a.logo{text-decoration:none;color:inherit;cursor:pointer}
       </div>
 
       <div class="panel">
-        <div class="ph"><h3>Publishing &amp; results</h3><span class="sub">Copy, post, and log results — nothing to connect.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
+        <div class="ph"><h3>Publishing &amp; results</h3><span class="sub">Publish yourself today. Auto-scheduling is rolling out to Pro &amp; Studio.</span><button class="act" onclick="location.href='threadline-analytics.html'">Open Analytics →</button></div>
         <div id="socialstatus"></div>
         <div id="conns"></div>
       </div>
@@ -355,11 +355,69 @@ async function portal(){
 }
 loadBilling();
 
-/* ---------- live social connection status ---------- */
-function loadSocial(){
+/* ---------- publishing + auto-schedule status (plan-aware) ---------- */
+var BTNP='background:linear-gradient(135deg,#803DFF,#3B82F6,#22D3EE);color:#fff;border:none;padding:9px 16px;border-radius:9px;font-weight:700;cursor:pointer;font-size:13px';
+var SUB2='color:var(--muted);font-size:12px';
+function schedEligible(){
+  return '<b>Auto-schedule &amp; publish</b> — rolling out to Pro &amp; Studio.<br>'+
+    'Connect a brand (all its platforms bundled into one) and post straight from your plan, with live numbers flowing back into Analytics.'+
+    '<br><br><button style="'+BTNP+'" onclick="joinEarly(this)">Join early access →</button> '+
+    '<span style="'+SUB2+'">We’ll switch it on for your account as we roll it out.</span>';
+}
+function schedOnList(){
+  return '<b>You’re on the early-access list ✓</b><br>'+
+    'We’ll let you know the moment auto-scheduling is live on your plan. Until then, <b>Copy</b> / <b>Post it</b> / log results keeps everything moving.';
+}
+function schedUpgrade(){
+  return '<b>Auto-schedule &amp; publish</b> — included on <b>Pro</b> (1 brand) and <b>Studio</b> (3 brands). Extra brands +$12/mo.<br>'+
+    'On your current plan, publish yourself with <b>Copy</b> / <b>Post it</b> and log results — Analytics still shows what’s working.'+
+    '<br><br><button style="'+BTNP+'" onclick="document.getElementById(\'planwrap\').scrollIntoView({behavior:\'smooth\'})">See plans →</button>';
+}
+function schedLive(){
+  return '<b>Auto-publishing is on 🎉</b><br>Connect a brand to publish and schedule straight from Threadline.'+
+    '<br><br><button style="'+BTNP+'" onclick="connectBrand(this)">Connect a brand →</button>';
+}
+function schedIntro(){
+  return '<div class="plnote" style="line-height:1.6">Threadline drafts every piece and keeps your calendar — when something’s ready, hit <b>Copy</b> or <b>Post it</b> to publish it yourself, then <b>log the results</b> so Analytics can tell you what’s working.</div>';
+}
+function renderSched(box,d){
+  var html;
+  if(d && d.live && d.eligible) html=schedLive();
+  else if(d && d.optedIn) html=schedOnList();
+  else if(d && d.eligible) html=schedEligible();
+  else html=schedUpgrade();
+  box.innerHTML=html;
+}
+async function joinEarly(btn){
+  btn.disabled=true; btn.textContent='Adding you…';
+  try{ await fetch('/api/social',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'optin'})}); }catch(e){}
+  document.getElementById('schedbox').innerHTML=schedOnList();
+  if(window.toast) toast('You’re on the early-access list ✓');
+}
+async function connectBrand(btn){
+  btn.disabled=true; btn.textContent='Opening…';
+  try{
+    var r=await fetch('/api/social',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'connect'})});
+    var d=await r.json();
+    if(d.url){ window.open(d.url,'_blank'); }
+    else if(window.toast) toast(d.note||d.error||'Connect flow ready');
+  }catch(e){}
+  btn.disabled=false; btn.textContent='Connect a brand →';
+}
+async function loadSocial(){
   var el=document.getElementById('socialstatus');
   if(!el) return;
-  el.innerHTML='<div class="plnote" style="line-height:1.6">Threadline drafts every piece and keeps your calendar — when something\u2019s ready, hit <b>Copy</b> or <b>Post it</b> to publish it yourself, then <b>log the results</b> so Analytics can tell you what\u2019s working.<br><br><b>Auto-publishing &amp; connected analytics</b> (post straight from Threadline, pull live numbers) are coming as a Studio add-on \u2014 they\u2019re optional so your plan stays lean.</div>';
+  el.innerHTML=schedIntro()+'<div id="schedbox" class="plnote" style="margin-top:12px;line-height:1.6">Checking your plan…</div>';
+  var box=document.getElementById('schedbox');
+  try{
+    var r=await fetch('/api/social',{headers:{'accept':'application/json'}});
+    var ct=r.headers.get('content-type')||'';
+    if(ct.indexOf('json')<0){ throw new Error('no api'); }
+    var d=await r.json();
+    renderSched(box,d);
+  }catch(e){
+    box.innerHTML=schedUpgrade();
+  }
 }
 loadSocial();
 </script>
