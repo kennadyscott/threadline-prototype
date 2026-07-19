@@ -45,6 +45,21 @@ h1,h2,h3{font-family:'Satoshi';font-weight:900;letter-spacing:-.025em;line-heigh
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.chip{cursor:pointer;font-family:inherit;transition:.15s}
+.chip:hover{border-color:var(--violet);color:var(--violet)}
+.flowhint{text-align:center;font-size:12px;color:var(--faint);font-weight:700;margin:14px 0 4px}
+.mockcap{text-align:center;font-size:13.5px;color:var(--muted);font-weight:700;padding:14px 20px 4px}
+.mockpanel{display:none}
+.mockpanel.on{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.mcol.wide{grid-column:1/-1}
+.mp{font-size:13.5px;color:var(--muted);margin-bottom:12px;line-height:1.55}
+.bubble{font-size:13px;line-height:1.5;border-radius:12px;padding:10px 13px;margin-bottom:9px;max-width:92%}
+.bubble.you{background:var(--surface-2);color:var(--ink)}
+.bubble.ai{background:linear-gradient(120deg,rgba(128,61,255,.1),rgba(59,130,246,.08));color:var(--ink);margin-left:auto}
+.postprev{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface)}
+.pph{font-weight:800;font-size:14.5px;margin-bottom:6px}
+.ppf{display:flex;gap:7px;margin-top:10px}
 .whatis{font-size:13.5px;font-weight:800;letter-spacing:.02em;color:var(--violet);text-transform:uppercase;margin-bottom:6px}
 .faq{padding:64px 0;background:var(--surface)}
 .faqgrid{display:grid;grid-template-columns:1fr 1fr;gap:22px 40px;max-width:960px;margin:0 auto}
@@ -269,30 +284,63 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
     <p>Start with what you're already thinking. Threadline threads it into a direction, then a series, then a scheduled plan.</p>
   </div>
   <div class="flow">
-    <div class="step"><span class="chip on">Spark</span><span class="arrow">→</span></div>
-    <div class="step"><span class="chip">Thread</span><span class="arrow">→</span></div>
-    <div class="step"><span class="chip">Series</span><span class="arrow">→</span></div>
-    <div class="step"><span class="chip">Content</span><span class="arrow">→</span></div>
-    <div class="step"><span class="chip">Calendar</span></div>
+    <div class="step"><button class="chip on" onclick="flowTab(0,this)">Spark</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="flowTab(1,this)">Thread</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="flowTab(2,this)">Series</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="flowTab(3,this)">Content</button><span class="arrow">→</span></div>
+    <div class="step"><button class="chip" onclick="flowTab(4,this)">Calendar</button></div>
   </div>
+  <div class="flowhint">Click any step to preview it →</div>
   <div class="mock">
     <div class="mockbar"><i></i><i></i><i></i></div>
-    <div class="mockbody">
-      <div class="mcol"><div class="h">💡 Idea Bank</div>
-        <div class="mline"><span class="mdot" style="background:#803dff"></span>People buy the "why," not the "what."</div>
+    <div class="mockcap" id="flowcap">You bring a raw thought — Threadline captures every spark.</div>
+
+    <div class="mockpanel on"><div class="mockbody">
+      <div class="mcol"><div class="h">💬 A thought, half-formed</div>
+        <div class="bubble you">"I want to talk about why consistency beats going viral — but I don't know where to start."</div>
+        <div class="bubble ai">That's a point of view worth building. Let's find the angle →</div>
+      </div>
+      <div class="mcol"><div class="h">💡 Captured to your Idea Bank</div>
+        <div class="mline"><span class="mdot" style="background:#803dff"></span>Consistency beats going viral.</div>
         <div class="mline"><span class="mdot" style="background:#3b82f6"></span>The behind-the-scenes builds trust.</div>
-        <div class="mline"><span class="mdot" style="background:#22d3ee"></span>Repurpose long-form with purpose.</div>
+        <div class="mline"><span class="mdot" style="background:#22d3ee"></span>People buy the "why," not the "what."</div>
       </div>
-      <div class="mcol"><div class="h">🧵 Thread — "Why we do what we do"</div>
-        <p style="font-size:13.5px;color:var(--muted);margin-bottom:12px">A series that shares the mission and purpose behind your brand. <b style="color:var(--ink)">4 pillars:</b> Purpose · Values · Impact · Story.</p>
-        <div class="mbtn">Build this series</div>
+    </div></div>
+
+    <div class="mockpanel"><div class="mockbody">
+      <div class="mcol wide"><div class="h">🧵 Thread — "Why we do what we do"</div>
+        <p class="mp">Threadline shapes one spark into a clear angle, with the pillars it should hit.</p>
+        <div class="mline"><span class="mdot" style="background:#803dff"></span>Purpose &nbsp;·&nbsp; Values &nbsp;·&nbsp; Impact &nbsp;·&nbsp; Story</div>
+        <div class="mbtn">Build this into a series</div>
       </div>
-      <div class="mcol"><div class="h">📅 This week</div>
+    </div></div>
+
+    <div class="mockpanel"><div class="mockbody">
+      <div class="mcol wide"><div class="h">📱 Series — a repeatable weekly format</div>
+        <div class="mline"><span class="mdot" style="background:#803dff"></span>Post 1 · The belief we started with</div>
+        <div class="mline"><span class="mdot" style="background:#3b82f6"></span>Post 2 · A moment that tested it</div>
+        <div class="mline"><span class="mdot" style="background:#22d3ee"></span>Post 3 · What we'd never compromise</div>
+        <div class="mline"><span class="mdot" style="background:#fb7185"></span>Post 4 · Where we're headed next</div>
+      </div>
+    </div></div>
+
+    <div class="mockpanel"><div class="mockbody">
+      <div class="mcol wide"><div class="h">✍️ Content — drafted in your voice</div>
+        <div class="postprev">
+          <div class="pph">The belief we started with</div>
+          <p class="mp">Everyone told us to post more. We did the opposite — and it's the reason people actually remember us. Here's what we learned about consistency over volume…</p>
+          <div class="ppf"><span class="mtag" style="background:#803dff">Carousel</span><span class="mtag" style="background:#3b82f6">LinkedIn</span></div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="mockpanel"><div class="mockbody">
+      <div class="mcol wide"><div class="h">📅 Calendar — on a dated plan</div>
         <div class="mline">Mon <span class="mtag" style="background:#803dff;margin-left:auto">Carousel</span></div>
         <div class="mline">Wed <span class="mtag" style="background:#3b82f6;margin-left:auto">Reel</span></div>
         <div class="mline">Fri <span class="mtag" style="background:#22d3ee;margin-left:auto;color:#083344">Story</span></div>
       </div>
-    </div>
+    </div></div>
   </div>
 </div></section>
 
@@ -362,5 +410,19 @@ footer{border-top:1px solid var(--line-2);padding:40px 0 60px;color:var(--faint)
   <span>© 2026 Threadline · <a href="threadline-privacy.html" style="color:var(--muted);font-weight:600">Privacy</a> · <a href="threadline-terms.html" style="color:var(--muted);font-weight:600">Terms</a></span>
 </div></footer>
 
+<script>
+function flowTab(i,el){
+  var caps=["You bring a raw thought — Threadline captures every spark.",
+    "Threadline threads one spark into a clear angle.",
+    "It becomes a repeatable series you can run weekly.",
+    "Each post gets drafted in your brand voice.",
+    "Everything lands on a dated, scheduled plan."];
+  document.querySelectorAll('.flow .chip').forEach(function(c){c.classList.remove('on')});
+  if(el) el.classList.add('on');
+  var panels=document.querySelectorAll('.mockpanel');
+  panels.forEach(function(p,idx){ p.classList.toggle('on', idx===i); });
+  var cap=document.getElementById('flowcap'); if(cap) cap.textContent=caps[i]||caps[0];
+}
+</script>
 </body>
 </html>
