@@ -21,8 +21,8 @@
     try{ if(sessionStorage.getItem('tlpbar.hide')) return; }catch(e){}
     var b=document.createElement('div'); b.id='tlpbar';
     b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;align-items:center;gap:14px;justify-content:center;background:#0f172a;color:#fff;font-family:Satoshi,system-ui,sans-serif;font-weight:700;font-size:13.5px;padding:11px 18px;box-shadow:0 -8px 30px rgba(15,23,42,.25);transition:transform .15s';
-    b.innerHTML='<span>👀 <b style="background:linear-gradient(135deg,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent">Preview mode</b> — your brand is built and your plan is drafted. It all goes live when you activate.</span>'
-      +'<button id="tlpgo" style="background:linear-gradient(135deg,#803dff,#3b82f6);color:#fff;font:800 13px Satoshi,sans-serif;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;white-space:nowrap">✦ Activate my brand</button>'
+    b.innerHTML='<span>👀 <b style="background:linear-gradient(135deg,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent">Preview mode</b> — your brand is built and your plan is drafted. Activate to unlock the full planner &amp; creator, free for 30 days.</span>'
+      +'<button id="tlpgo" style="background:linear-gradient(135deg,#803dff,#3b82f6);color:#fff;font:800 13px Satoshi,sans-serif;border:none;border-radius:10px;padding:9px 16px;cursor:pointer;white-space:nowrap">✦ Activate — 30 days free</button>'
       +'<button id="tlpx" style="background:none;border:none;color:rgba(255,255,255,.55);font-weight:900;font-size:15px;cursor:pointer;padding:4px 6px" title="Hide for this session">×</button>';
     document.body.appendChild(b);
     document.body.style.paddingBottom='64px';
