@@ -410,5 +410,17 @@ function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=document.
 
 goSlide(0);
 </script>
+<script>
+(function(){
+  function placeNav(){
+    var f=document.getElementById('foot'), n=document.getElementById('slidenav');
+    if(!f||!n) return;
+    n.style.bottom=(f.offsetHeight+12)+'px';
+  }
+  window.addEventListener('resize',placeNav);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',placeNav); else placeNav();
+  setTimeout(placeNav,300);
+})();
+</script>
 </body>
 </html>

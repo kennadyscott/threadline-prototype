@@ -391,7 +391,7 @@ function p2(){ renderProg();
     </div>`);
   renderProg();
   thinkThenRevealAsync($('#reveal'),'Threadline is reading your brand', async ()=>{
-    if(!snap || !snap.real){ const rs=await realSnap(); if(rs) snap=rs; else if(!snap) snap=buildSnap(); }
+    if(!snap || !snap.real || !snap.tagline){ const rs=await realSnap(); if(rs) snap=rs; else if(!snap) snap=buildSnap(); }
     const c=el('div','snap');
     c.innerHTML=`
       <div class="sh"><div class="bn">${esc(snap.name)}</div><div class="bs">${esc(snap.summary)}</div></div>
