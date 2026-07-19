@@ -159,9 +159,9 @@ const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"
 const MARK='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="tlm" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse"><stop stop-color="#803DFF"/><stop offset=".55" stop-color="#3B82F6"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs><g stroke="url(#tlm)" stroke-width="3.2" stroke-linecap="round"><path d="M9 10 H31"/><path d="M9 10 V17"/><path d="M31 10 V17"/><path d="M20 10 V31"/></g><g fill="url(#tlm)"><circle cx="9" cy="10" r="2.7"/><circle cx="31" cy="10" r="2.7"/><circle cx="20" cy="31" r="2.7"/></g></svg>';
 document.querySelector('.brand .mark').innerHTML=MARK;
 
-const state={ name:'', url:'', logo:'', logoData:'', logoColors:[], voice:'', content:'', colors:'' };
+const state={ name:'', url:'', logo:'', logoData:'', logoIcon:'', logoColors:[], voice:'', content:'', colors:'' };
 let snap=null, audit=null, analyzed=false, siteAnalysis=null;
-const PHASES=['Import','Snapshot','Audit'];
+const PHASES=['Import','Snapshot','Foundation'];
 let step=0; // 0 import,1 snapshot,2 audit,3 done
 
 function renderProg(){ const p=$('#prog'); p.innerHTML='';
@@ -179,11 +179,12 @@ async function thinkThenRevealAsync(container, label, promiseFn){
 }
 const SNAP_SCHEMA={type:'object',properties:{
   summary:{type:'string'},
+  tagline:{type:'string'},
   voice:{type:'array',items:{type:'string'}},
   audience:{type:'string'},
   themes:{type:'array',items:{type:'string'}},
   colors:{type:'array',items:{type:'string'}}
-},required:['summary','voice','audience','themes','colors'],additionalProperties:false};
+},required:['summary','tagline','voice','audience','themes','colors'],additionalProperties:false};
 async function realSnap(){
   const parts=[];
   parts.push('Brand name: '+state.name);
@@ -194,7 +195,7 @@ async function realSnap(){
   if(state.colors) parts.push('Brand colors they entered: '+state.colors);
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); voice = 3-5 single-word traits; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
+      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); tagline = a short fun tagline in the brand\'s own voice, max 7 words — playful if the brand is playful, never corporate filler; voice = 3-5 single-word traits; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
       messages:[{role:'user',content:parts.join('\n\n')}],
       max_tokens:700, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
     const ct=r.headers.get('content-type')||'';
@@ -207,6 +208,7 @@ async function realSnap(){
     return {
       name: state.name.trim()||'Your brand',
       summary: j.summary||'',
+      tagline: j.tagline||'',
       voice: (j.voice||[]).slice(0,5),
       colors: userCols.length?userCols:(logoCols.length?logoCols:((j.colors||[]).filter(c=>/^#[0-9a-f]{6}$/i.test(c)).slice(0,5))),
       audience: j.audience||'',
@@ -278,6 +280,30 @@ function p1(){ renderProg();
     img.src=dataURL;
   }
   window._importExtractColors=extractColors;
+  function makeIcon(){
+    if(!state.logoData) return;
+    const img=new Image();
+    img.onload=()=>{
+      const ar=img.width/Math.max(1,img.height);
+      if(ar>=0.8&&ar<=1.3){ state.logoIcon=''; persist&&persist(); return; } // square-ish → use as-is
+      try{
+        const c=document.createElement('canvas'); c.width=c.height=256;
+        const x=c.getContext('2d');
+        const cols=(state.logoColors&&state.logoColors.length)?state.logoColors:['#803DFF','#3B82F6'];
+        const g=x.createLinearGradient(0,0,256,256); g.addColorStop(0,cols[0]); g.addColorStop(1,cols[1]||cols[0]);
+        x.fillStyle=g; x.fillRect(0,0,256,256);
+        const letter=((state.name||state.logo||'B').trim()[0]||'B').toUpperCase();
+        x.fillStyle='#ffffff'; x.font='900 150px Satoshi,system-ui,sans-serif'; x.textAlign='center'; x.textBaseline='middle';
+        x.fillText(letter,128,140);
+        state.logoIcon=c.toDataURL('image/png');
+      }catch(e){ state.logoIcon=''; }
+      persist&&persist();
+    };
+    img.onerror=()=>{ state.logoIcon=''; };
+    img.src=state.logoData;
+  }
+  window._importMakeIcon=makeIcon;
+  if(state.logoData && state.logoIcon===undefined) makeIcon();
   // resume case: logo already on file but colors never pulled
   if(state.logoData && !(state.logoColors&&state.logoColors.length)){
     extractColors(state.logoData, cols=>{ state.logoColors=cols; if(cols.length && !$('#colors').value.trim()){ $('#colors').value=cols.join(', '); state.colors=$('#colors').value; } persist&&persist(); });
@@ -290,7 +316,7 @@ function p1(){ renderProg();
   $('#logoFile').onchange=e=>{
     const f=e.target.files&&e.target.files[0]; if(!f) return;
     const finish=()=>{ const d=$('#drop'); d.classList.add('filled'); d.querySelector('.di').innerHTML=state.logoData?('<img src="'+state.logoData+'" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:6px">'):'✓'; $('#dropName').textContent=f.name+' added';
-      if(state.logoData){ extractColors(state.logoData, cols=>{ state.logoColors=cols; if(cols.length){ if(!$('#colors').value.trim()){ $('#colors').value=cols.join(', '); state.colors=$('#colors').value; } $('#dropName').textContent=f.name+' added · '+cols.length+' colors pulled'; } persist&&persist(); }); }
+      if(state.logoData){ extractColors(state.logoData, cols=>{ state.logoColors=cols; if(cols.length){ if(!$('#colors').value.trim()){ $('#colors').value=cols.join(', '); state.colors=$('#colors').value; } $('#dropName').textContent=f.name+' added · '+cols.length+' colors pulled'; } persist&&persist(); makeIcon(); }); }
       persist&&persist(); };
     state.logo=f.name;
     const rd=new FileReader();
@@ -334,7 +360,7 @@ function p1(){ renderProg();
     $('#analyzeHint').innerHTML='<b style="color:var(--green)">Done.</b> Sample pull for the demo — the live app reads your real site.';
     b.disabled=false;
   };
-  $('#go1').onclick=()=>{ captureCurrent(); if(!state.name.trim()){ $('#name').focus(); return; } snap=null; adv(1,p2); };
+  $('#go1').onclick=()=>{ captureCurrent(); if(!state.name.trim()){ $('#name').focus(); return; } if(window._importMakeIcon) _importMakeIcon(); snap=null; adv(1,p2); };
 }
 
 /* ---------- build the extracted snapshot (mocked, tailored) ---------- */
@@ -360,7 +386,7 @@ function p2(){ renderProg();
     <div id="reveal"></div>
     <div class="nav">
       <button class="btn ghost" data-back onclick="adv(0,p1)">← Back</button>
-      <button class="btn ghost" data-next style="display:none" onclick="adv(2,p3)">Run my brand audit →</button>
+      <button class="btn ghost" data-next style="display:none" onclick="adv(2,done)">See my foundation →</button>
       <div class="grow"></div>
     </div>`);
   renderProg();
@@ -464,17 +490,19 @@ function p3(){ renderProg();
 }
 
 /* ---------- Completion ---------- */
-function done(){ step=3; renderProg(); try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromImport(state, snap); if(state.logoData) _b.visual.logo=state.logoData; if(state.logo) _b.visual.logoName=state.logo; saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
+function done(){ step=3; renderProg(); try{localStorage.removeItem(SAVE_KEY);}catch(e){} try{ if(window.saveBrand){ const _b=compileFromImport(state, snap);
+    if(snap&&snap.tagline){ _b.tagline=snap.tagline; if(_b.taglineOptions&&_b.taglineOptions.length) _b.taglineOptions[0]=snap.tagline; }
+    if(state.logoIcon){ _b.visual.logo=state.logoIcon; _b.visual.card=state.logoData||''; }
+    else if(state.logoData) _b.visual.logo=state.logoData;
+    if(state.logo) _b.visual.logoName=state.logo;
+    saveBrand(_b); } }catch(e){} const sb=document.getElementById('saveBtn'); if(sb)sb.style.display='none';
   const captured=['Logo','Colors','Brand voice','Audience','Content themes'];
   stage(`<div class="done-wrap">
     <div class="burst">✨</div>
     <div class="kick">Brand imported</div>
     <h2 class="q" style="margin-top:8px">${esc(snap?snap.name:'Your brand')} is <span class="grad-text">in Threadline.</span></h2>
-    <p class="lead" style="max-width:46ch;margin:12px auto 0">Everything you had is organized and scored. Here's what's captured—and the two moves that'll strengthen it fastest.</p>
+    <p class="lead" style="max-width:46ch;margin:12px auto 0">Everything you had is organized and ready to build on. Here's what's captured.</p>
     <div class="built">${captured.map(b=>`<span><span class="ck">✓</span> ${b}</span>`).join('')}</div>
-    <div class="nextbox"><div class="nl">△ Suggested next, from your audit</div>
-      ${(audit?audit.gaps:[]).map(g=>`<div class="ni"><span class="nk">→</span> ${esc(g.next||g.t)}</div>`).join('')}
-    </div>
     <div style="max-width:470px;margin:22px auto 0">
       <p style="font-size:17.5px;font-weight:800;margin-bottom:8px">Now let's <span class="grad-text">review it together.</span></p>
       <p style="color:var(--muted);font-size:14.5px;margin-bottom:22px">You'll approve each piece—positioning, voice, pillars, visuals—one slide at a time. Then Threadline activates your content engine.</p>
@@ -493,7 +521,7 @@ function loadSaved(){ try{ const r=localStorage.getItem(SAVE_KEY); return r?JSON
 function saveProgress(){ captureCurrent(); persist(); toast('Progress saved — pick up anytime.'); }
 function toast(msg){ let t=document.getElementById('toast'); if(!t){ t=el('div','toast'); t.id='toast'; document.body.appendChild(t); } t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
 function resetState(){ for(const k in state) state[k]=''; analyzed=false; }
-const PHASE_FN=[p1,p2,p3,done];
+const PHASE_FN=[p1,p2,done,done];
 function go(n){ step=Math.max(0,Math.min(3,n)); if(step>=1&&!snap) snap=buildSnap(); renderProg(); PHASE_FN[step](); }
 function adv(n,fn){ captureCurrent(); step=n; persist(); (fn||PHASE_FN[n])(); }
 function resumePrompt(saved){
@@ -505,7 +533,7 @@ function resumePrompt(saved){
       <button class="btn ghost" id="fresh">Start over</button>
       <button class="btn solid" id="resume">Resume →</button>
     </div></div>`);
-  document.getElementById('resume').onclick=()=>{ Object.assign(state, saved.state||{}); analyzed=!!saved.analyzed; snap=buildSnap(); go(saved.step||0); };
+  document.getElementById('resume').onclick=()=>{ Object.assign(state, saved.state||{}); analyzed=!!saved.analyzed; snap=buildSnap(); go(Math.min(saved.step||0,1)); };
   document.getElementById('fresh').onclick=()=>{ try{localStorage.removeItem(SAVE_KEY);}catch(e){} resetState(); snap=null; go(0); };
 }
 
