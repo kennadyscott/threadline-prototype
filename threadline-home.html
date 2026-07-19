@@ -71,7 +71,53 @@ a{color:inherit;text-decoration:none}
 .spov .eyb{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
 .spov h4{font-size:20px;margin-bottom:14px}
 .spov pre{white-space:pre-wrap;font-family:inherit;font-size:14px;line-height:1.65;color:var(--ink);margin:0}
-.spov .x{position:absolute;top:22px;right:26px;font-size:22px;color:var(--faint);cursor:pointer;font-weight:400}
+.spov .x{position:absolute;top:22px;right:26px;font-size:22px;color:var(--faint);cursor:pointer;font-weight:400;z-index:2}
+.spovfull{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.spovfull summary{font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer}
+.spovfull pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;color:var(--muted);margin-top:10px}
+.mk{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 18px rgba(20,20,60,.06)}
+.mk-av{width:34px;height:34px;border-radius:50%;background:var(--grad2);color:#fff;font-weight:900;display:inline-grid;place-items:center;font-size:15px;flex:none}
+.mk-vis{background:var(--grad2);color:#fff;padding:34px 22px;min-height:150px;display:flex;flex-direction:column;justify-content:center;position:relative}
+.mk-veye{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;opacity:.85;margin-bottom:8px}
+.mk-vbig{font-size:22px;font-weight:900;line-height:1.2}
+.mk-ig .mk-h{display:flex;align-items:center;gap:9px;padding:11px 13px}
+.mk-ig .mk-h b{font-size:13.5px}
+.mk-dots,.mk-slide{margin-left:auto;color:var(--faint);font-weight:800}
+.mk-slide{font-size:12px;background:rgba(0,0,0,.06);border-radius:999px;padding:2px 9px}
+.mk-dotrow{display:flex;gap:5px;justify-content:center;padding:9px 0 2px}
+.mk-dotrow i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.mk-dotrow i.on{background:var(--violet)}
+.mk-act{display:flex;gap:16px;padding:10px 14px 4px;font-size:18px}
+.mk-act .mk-save{margin-left:auto}
+.mk-cap{padding:2px 14px 14px;font-size:13px;line-height:1.5}
+.mk-reel{display:grid;grid-template-columns:200px 1fr;gap:16px;padding:16px;border:0;box-shadow:none;background:none}
+@media(max-width:560px){.mk-reel{grid-template-columns:1fr}}
+.mk-phone{border-radius:18px;overflow:hidden;position:relative;aspect-ratio:9/16;box-shadow:0 14px 40px rgba(20,20,60,.2)}
+.mk-phone .mk-vis{height:100%;min-height:0;justify-content:flex-end;padding:20px 16px 60px}
+.mk-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:34px;opacity:.9}
+.mk-rail{position:absolute;right:10px;bottom:70px;display:flex;flex-direction:column;gap:14px;font-size:19px}
+.mk-audio{position:absolute;left:14px;bottom:16px;font-size:11px;font-weight:700;opacity:.9}
+.mk-script{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--surface)}
+.mk-script>b{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+.mk-beat{font-size:12.5px;line-height:1.5;color:var(--ink);padding:5px 0;border-bottom:1px dashed var(--line-2)}
+.mk-email{padding:6px}
+.mk-erow{border-bottom:1px solid var(--line);padding:12px 14px}
+.mk-erow.open{background:var(--surface-2)}
+.mk-esub{display:flex;justify-content:space-between;gap:10px}
+.mk-esub b{font-size:13.5px}.mk-esub span{font-size:11px;color:var(--faint);white-space:nowrap}
+.mk-eprev{font-size:12.5px;color:var(--muted);margin-top:4px}
+.mk-article .mk-vis{min-height:120px}
+.mk-abody{padding:16px}
+.mk-abody h5{font-size:18px;margin-bottom:6px}
+.mk-dek{font-size:13.5px;color:var(--muted);margin-bottom:8px}
+.mk-meta{font-size:11.5px;color:var(--faint);margin-bottom:12px}
+.mk-abody ul{padding-left:18px;font-size:13px;color:var(--muted)}
+.mk-abody li{margin:4px 0}
+.mk-x{padding:16px}
+.mk-xh{display:flex;gap:10px;align-items:center}
+.mk-xh b{font-size:14px;display:block}.mk-xh span{font-size:12.5px;color:var(--faint)}
+.mk-xtext{font-size:15px;line-height:1.5;margin:12px 0;color:var(--ink)}
+.mk-xf{display:flex;gap:22px;font-size:12.5px;color:var(--faint);font-weight:700}
 .flowhint{text-align:center;font-size:12.5px;color:var(--faint);font-weight:700;margin:14px 0 18px}
 .demoframe{max-width:1080px;margin:0 auto;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px rgba(20,20,60,.20);background:var(--surface)}
 .demobar{display:flex;align-items:center;gap:8px;padding:11px 16px;background:#f2f4f9;border-bottom:1px solid var(--line)}
@@ -419,20 +465,51 @@ function demoTab(el,page,url){
   document.getElementById('demourl').textContent=url;
 }
 </script>
-<div class="spov" id="spov"><div class="card" style="position:relative"><span class="x" onclick="document.getElementById('spov').classList.remove('on')">&times;</span><div class="eyb" id="spovEye"></div><h4 id="spovTitle"></h4><pre id="spovBody"></pre></div></div>
+<div class="spov" id="spov"><div class="card" style="position:relative"><span class="x" onclick="document.getElementById('spov').classList.remove('on')">&times;</span><div class="eyb" id="spovEye"></div><h4 id="spovTitle"></h4><div id="spovMock"></div><details class="spovfull"><summary>Full draft &amp; script</summary><pre id="spovBody"></pre></details></div></div>
 <script>
+var BRAND="yourbrand";
 var SPOKE_PIECES=[
- {fmt:"Carousel",c:"#f58529",title:"Why consistency wins, slide by slide",body:"Slide 1 — Consistency beats going viral.\nSlide 2 — Virality is a spike. Consistency is a slope.\nSlide 3 — One viral post gets you noticed. Ninety steady posts get you trusted.\nSlide 4 — And trust is the thing that actually converts.\nSlide 5 — You can’t schedule virality. You can schedule showing up.\nSlide 6 — Pick one format. Pick one day. Start this week.\n\nCAPTION: Save this for the next time a viral post makes you feel behind. The brands you admire didn’t get there on one moment — they got there on a hundred quiet ones."},
- {fmt:"Instagram post",c:"#dd2a7b",title:"The unglamorous truth about growth",body:"Everyone wants the viral post.\n\nAlmost nobody wants the 90 unremarkable posts that come before it.\n\nBut here’s what we’ve watched happen with every brand that actually grew: it was never one big moment. It was showing up — clearly, on-brand — on the days no one clapped.\n\nConsistency isn’t the boring cousin of virality. It’s the whole engine.\n\nWhat’s one thing you could post every single week without fail? Tell me below — I’ll help you make it repeatable."},
- {fmt:"Reel",c:"#803dff",title:"Say it to camera",body:"HOOK: Stop trying to go viral.\n\nBEAT 1: Everyone chases the spike — one post, one big moment, one algorithm miracle.\n\nBEAT 2: But the brands you actually remember? They just showed up. Every week. Clearly.\n\nBEAT 3: Virality gets you noticed. Consistency gets you trusted — and trust is what people buy.\n\nCTA: Follow for the un-hyped version of building a brand.\n\nCAPTION: The least viral advice on here, and the only one that compounds."},
- {fmt:"Email series",c:"#3b82f6",title:"The 3-part arc",body:"EMAIL 1 — Subject: The viral post that ruined my month\nThe high of a post that pops — and the crash when the next three flop. Why chasing the spike quietly wrecks your consistency. End on the reframe: the goal was never the spike.\n\nEMAIL 2 — Subject: What I did instead (and why it worked)\nThe boring system that replaced the chase: one format, one day, no exceptions. A real before-and-after from a client who stopped chasing and started compounding.\n\nEMAIL 3 — Subject: Your turn — the one-post-a-week challenge\nThe simplest possible starting point. Pick the format. Pick the day. Reply and tell me what it is — I’ll hold you to it."},
- {fmt:"Article",c:"#b57708",title:"Consistency beats going viral — the long version",body:"HEADLINE: Consistency Beats Going Viral\nDEK: Why the slow, “boring” content strategy is the one that actually compounds — for the blog or LinkedIn.\n\n1. The viral trap — why one big post feels like success and quietly isn’t.\n2. What virality actually gets you (attention) vs. what you need (trust).\n3. The compounding math of showing up — the slope beats the spike over any real timeline.\n4. How to build a rhythm you can actually keep when you’re busy.\n5. The one-post-a-week starting point — and how to make it repeatable.\n\nENDING: You don’t need to go viral. You need to be recognizable. Those are very different projects — and only one of them is in your control."},
- {fmt:"X post",c:"#0e7f95",title:"The callout",body:"Virality is a spike. Consistency is a slope.\n\nOne gets you noticed. The other gets you trusted.\n\nStop chasing the spike."}
+ {type:"carousel",fmt:"Carousel",c:"#f58529",title:"Why consistency wins, slide by slide",
+  slides:["Consistency beats going viral.","Virality is a spike. Consistency is a slope.","One viral post gets you noticed. Ninety steady posts get you trusted.","And trust is the thing that actually converts.","You can’t schedule virality. You can schedule showing up.","Pick one format. Pick one day. Start this week."],
+  caption:"Save this for the next time a viral post makes you feel behind. The brands you admire didn’t get there on one moment — they got there on a hundred quiet ones.",
+  body:"Slide 1 — Consistency beats going viral.\nSlide 2 — Virality is a spike. Consistency is a slope.\nSlide 3 — One viral post gets you noticed. Ninety steady posts get you trusted.\nSlide 4 — And trust is the thing that actually converts.\nSlide 5 — You can’t schedule virality. You can schedule showing up.\nSlide 6 — Pick one format. Pick one day. Start this week.\n\nCAPTION: Save this for the next time a viral post makes you feel behind."},
+ {type:"ig",fmt:"Instagram post",c:"#dd2a7b",title:"The unglamorous truth about growth",
+  visualEye:"THE UNGLAMOROUS TRUTH",visualBig:"Consistency beats going viral.",
+  caption:"Everyone wants the viral post. Almost nobody wants the 90 unremarkable posts before it. But every brand that actually grew did it by showing up — clearly, on-brand — on the days no one clapped. Consistency isn’t the boring cousin of virality. It’s the whole engine.",
+  body:"Everyone wants the viral post.\n\nAlmost nobody wants the 90 unremarkable posts that come before it.\n\nBut here’s what we’ve watched happen with every brand that actually grew: it was never one big moment. It was showing up — clearly, on-brand — on the days no one clapped.\n\nConsistency isn’t the boring cousin of virality. It’s the whole engine.\n\nWhat’s one thing you could post every single week without fail?"},
+ {type:"reel",fmt:"Reel",c:"#803dff",title:"Say it to camera",
+  hook:"Stop trying to go viral.",audio:"original audio · yourbrand",
+  beats:["HOOK: Stop trying to go viral.","BEAT 1: Everyone chases the spike — one post, one big moment.","BEAT 2: But the brands you remember just showed up. Every week.","BEAT 3: Virality gets you noticed. Consistency gets you trusted.","CTA: Follow for the un-hyped version of building a brand."],
+  body:"HOOK: Stop trying to go viral.\n\nBEAT 1: Everyone chases the spike — one post, one big moment, one algorithm miracle.\n\nBEAT 2: But the brands you actually remember? They just showed up. Every week. Clearly.\n\nBEAT 3: Virality gets you noticed. Consistency gets you trusted — and trust is what people buy.\n\nCTA: Follow for the un-hyped version of building a brand."},
+ {type:"email",fmt:"Email series",c:"#3b82f6",title:"The 3-part arc",
+  emails:[{s:"The viral post that ruined my month",p:"The high of a post that pops — and the crash when the next three flop…"},{s:"What I did instead (and why it worked)",p:"The boring system that replaced the chase: one format, one day, no exceptions…"},{s:"Your turn — the one-post-a-week challenge",p:"The simplest possible starting point. Pick the format. Pick the day…"}],
+  body:"EMAIL 1 — Subject: The viral post that ruined my month\nThe high of a post that pops, and the crash when the next three flop. Why chasing the spike wrecks consistency.\n\nEMAIL 2 — Subject: What I did instead (and why it worked)\nThe boring system that replaced the chase: one format, one day, no exceptions. A real before-and-after.\n\nEMAIL 3 — Subject: Your turn — the one-post-a-week challenge\nThe simplest starting point. Pick the format. Pick the day. Reply and tell me what it is."},
+ {type:"article",fmt:"Article",c:"#b57708",title:"Consistency beats going viral — the long version",
+  headline:"Consistency Beats Going Viral",dek:"Why the slow, “boring” content strategy is the one that actually compounds.",read:"5 min read · blog or LinkedIn",
+  outline:["The viral trap — why one big post feels like success and quietly isn’t.","What virality actually gets you (attention) vs. what you need (trust).","The compounding math of showing up — the slope beats the spike.","How to build a rhythm you can keep when you’re busy.","The one-post-a-week starting point."],
+  body:"HEADLINE: Consistency Beats Going Viral\nDEK: Why the slow, “boring” content strategy is the one that actually compounds.\n\n1. The viral trap.\n2. What virality gets you vs. what you need.\n3. The compounding math of showing up.\n4. How to build a rhythm you can keep.\n5. The one-post-a-week starting point.\n\nENDING: You don’t need to go viral. You need to be recognizable."},
+ {type:"x",fmt:"X post",c:"#0e7f95",title:"The callout",
+  text:"Virality is a spike. Consistency is a slope.\n\nOne gets you noticed. The other gets you trusted.\n\nStop chasing the spike.",
+  body:"Virality is a spike. Consistency is a slope.\n\nOne gets you noticed. The other gets you trusted.\n\nStop chasing the spike."}
 ];
+function esc(t){return (t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function av(){return '<span class="mk-av">Y</span>';}
+function gvis(eye,big,extra){return '<div class="mk-vis">'+(eye?'<span class="mk-veye">'+esc(eye)+'</span>':'')+'<span class="mk-vbig">'+esc(big)+'</span>'+(extra||'')+'</div>';}
+function renderPiece(p){
+  if(p.type==="ig") return '<div class="mk mk-ig"><div class="mk-h">'+av()+'<b>'+BRAND+'</b><span class="mk-dots">…</span></div>'+gvis(p.visualEye,p.visualBig)+'<div class="mk-act"><span>♡</span><span>💬</span><span>➤</span><span class="mk-save">🔖</span></div><div class="mk-cap"><b>'+BRAND+'</b> '+esc(p.caption)+'</div></div>';
+  if(p.type==="carousel"){var dots="";for(var d=0;d<6;d++)dots+='<i'+(d===0?' class="on"':'')+'></i>';
+    return '<div class="mk mk-ig"><div class="mk-h">'+av()+'<b>'+BRAND+'</b><span class="mk-slide">1/6</span></div>'+gvis("CAROUSEL · SWIPE →",p.slides[0])+'<div class="mk-dotrow">'+dots+'</div><div class="mk-act"><span>♡</span><span>💬</span><span>➤</span><span class="mk-save">🔖</span></div><div class="mk-cap"><b>'+BRAND+'</b> '+esc(p.caption)+'</div></div>';}
+  if(p.type==="reel") return '<div class="mk mk-reel"><div class="mk-phone">'+gvis("REEL",p.hook,'<span class="mk-play">▶</span>')+'<div class="mk-rail"><span>♡</span><span>💬</span><span>➤</span></div><div class="mk-audio">♪ '+esc(p.audio)+'</div></div><div class="mk-script"><b>Script</b>'+p.beats.map(function(b){return '<div class="mk-beat">'+esc(b)+'</div>';}).join("")+'</div></div>';
+  if(p.type==="email") return '<div class="mk mk-email">'+p.emails.map(function(e,i){return '<div class="mk-erow'+(i===0?' open':'')+'"><div class="mk-esub"><b>'+esc(e.s)+'</b><span>from '+BRAND+'</span></div><div class="mk-eprev">'+esc(e.p)+'</div></div>';}).join("")+'</div>';
+  if(p.type==="article") return '<div class="mk mk-article">'+gvis("ARTICLE",p.headline)+'<div class="mk-abody"><h5>'+esc(p.headline)+'</h5><p class="mk-dek">'+esc(p.dek)+'</p><div class="mk-meta">By '+BRAND+' · '+esc(p.read)+'</div><ul>'+p.outline.map(function(o){return '<li>'+esc(o)+'</li>';}).join("")+'</ul></div></div>';
+  if(p.type==="x") return '<div class="mk mk-x"><div class="mk-xh">'+av()+'<div><b>'+BRAND+'</b><span>@'+BRAND+'</span></div></div><div class="mk-xtext">'+esc(p.text).replace(/\n/g,"<br>")+'</div><div class="mk-xf"><span>💬 42</span><span>🔁 118</span><span>♡ 906</span></div></div>';
+  return '<pre>'+esc(p.body)+'</pre>';
+}
 function spokePrev(i){
   var p=SPOKE_PIECES[i]; if(!p) return;
   document.getElementById('spovEye').textContent=p.fmt; document.getElementById('spovEye').style.color=p.c;
   document.getElementById('spovTitle').textContent=p.title;
+  document.getElementById('spovMock').innerHTML=renderPiece(p);
   document.getElementById('spovBody').textContent=p.body;
   document.getElementById('spov').classList.add('on');
 }
