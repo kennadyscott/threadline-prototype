@@ -214,7 +214,7 @@ async function realSnap(){
     if(!r.ok){ let msg='HTTP '+r.status; try{const e=await r.json(); if(e&&e.error) msg=String(e.error).slice(0,140);}catch(_e){} window._snapErr=msg; return null; }
     const d=await r.json();
     if(d&&d.stop_reason==='max_tokens'){ window._snapErr='response ran long — try again'; return null; }
-    const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t){ window._snapErr='empty AI response'; return null; }
+    const t=d&&d.content&&((d.content.filter(function(b){return b.type==='text'}).pop()||{}).text); if(!t){ window._snapErr='empty AI response'; return null; }
     let j; try{ j=JSON.parse(t); }catch(pe){ window._snapErr='malformed AI response — try again'; return null; }
     window._snapErr=null;
     const userCols=(state.colors||'').split(/[,\s]+/).map(c=>c.trim()).filter(c=>/^#?[0-9a-f]{3,8}$/i.test(c)).map(c=>c[0]==='#'?c:'#'+c);
@@ -473,7 +473,7 @@ async function realAudit(){
     const ct=r.headers.get('content-type')||'';
     if(ct.indexOf('json')<0) return null;
     if(!r.ok){ try{const e=await r.json(); if(e&&e.error&&window.toast) toast('AI audit hiccup — '+String(e.error).slice(0,120)); }catch(_e){} return null; }
-    const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(!t) return null;
+    const d=await r.json(); const t=d&&d.content&&((d.content.filter(function(b){return b.type==='text'}).pop()||{}).text); if(!t) return null;
     const j=JSON.parse(t);
     const NAMES=['Visual identity','Brand voice','Audience definition','Positioning clarity','Content system'];
     const col=v=> v>=70?'var(--green)':(v>=45?'var(--amber)':'var(--coral)');

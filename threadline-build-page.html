@@ -824,7 +824,7 @@ async function refreshTrends(){
       max_tokens:900})});
     if(!r.ok) throw new Error('offline');
     const d=await r.json();
-    let txt=d&&d.content&&d.content[0]&&d.content[0].text; if(!txt) throw new Error('empty');
+    let txt=d&&d.content&&((d.content.filter(function(b){return b.type==='text'}).pop()||{}).text); if(!txt) throw new Error('empty');
     txt=txt.replace(/^```(json)?/i,'').replace(/```$/,'').trim();
     const j=JSON.parse(txt);
     if(!j.topics||!j.formats||!j.audio) throw new Error('shape');
@@ -877,7 +877,7 @@ async function spinSpokes(){
       system:'You turn ONE content idea into SIX finished, DETAILED draft pieces in the brand voice \u2014 the hub-and-spoke model. Produce all six formats with these exact fields.\n\n1) "Instagram post" (a static graphic): graphicLine1 + graphicLine2 = the punchy two-line statement for the graphic (short, bold); caption = a full caption, 80-140 words, that can include a short bulleted list (use \u2022 for bullets), ending with a takeaway.\n2) "Carousel": cover = the cover-slide line; coverLabel = a 2-4 word label like "THE LONG GAME \u2192"; slides = 8-9 slide texts (each a full slide, first is the cover); caption = a full caption 80-140 words.\n3) "Reel": hook = the opening line; script = the full spoken script (5-8 short paragraphs); onscreen = 6 short on-screen text overlays; audio = a short audio note; caption = a full caption.\n4) "Email series": emails = exactly 3 objects {tag like "1 \u00b7 The myth", subject, preview (one line), emailBody (90-140 words), cta}. One narrative arc across the three.\n5) "Article": headline; dek (subtitle); articleBody = a full 700-1000 word article with SHORT ALL-CAPS section headers on their own lines; read like "6 min read \u00b7 blog or LinkedIn".\n6) "X post": variants = 3 objects {label: "Primary"|"Shorter"|"Punchiest", text (under 280 chars, no hashtags)}.\n\nEvery piece also needs: format (exact name above), title (under 10 words), and body = the complete draft rendered as plain text (used for copy/paste). Anchor every piece to the ONE idea and the brand.',
       messages:[{role:'user',content:'Brand: '+(B.name||'')+' \u2014 '+((B.overview&&B.overview.oneLine)?B.overview.oneLine.replace(/<[^>]*>/g,''):'')+'\nVoice: '+((B.voice&&B.voice.traits)?B.voice.traits.join(', '):'clear, honest')+'\nAudience: '+((B.audience&&B.audience.primary)||'')+'\n\nThe idea in the middle: '+idea}],
       max_tokens:2800, output_config:{format:{type:'json_schema',schema:SPOKE_SCHEMA}}})});
-    if(r.ok){ const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text; if(t){ const j=JSON.parse(t); if(j.pieces&&j.pieces.length) pieces=j.pieces.slice(0,6); } }
+    if(r.ok){ const d=await r.json(); const t=d&&d.content&&((d.content.filter(function(b){return b.type==='text'}).pop()||{}).text); if(t){ const j=JSON.parse(t); if(j.pieces&&j.pieces.length) pieces=j.pieces.slice(0,6); } }
   }catch(e){}
   if(!pieces){ pieces=spokeFallback(idea); toast('Live drafting runs in the real app \u2014 showing the template spin for now'); }
   SPOKES=pieces; spokeSel=0; renderSpokes();

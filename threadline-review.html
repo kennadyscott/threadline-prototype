@@ -378,7 +378,7 @@ async function sendDiscuss(){
       system:'You are Threadline, a warm, sharp brand thought partner. The founder is reviewing the brand you built together and has a question or concern. Answer in 2-3 sentences, under 60 words: explain the reasoning behind the relevant choice, and offer one concrete adjustment you could make. Plain text.',
       messages:[{role:'user',content:'Brand: '+B.name+' — '+strip(B.overview.oneLine)+'\nVoice: '+B.voice.traits.join(', ')+'\nPositioning: '+strip(B.positioning.knownFor)+'\n\nFounder says: '+q}],
       max_tokens:200})});
-    if(r.ok){ const d=await r.json(); text=d&&d.content&&d.content[0]&&d.content[0].text; }
+    if(r.ok){ const d=await r.json(); text=d&&d.content&&((d.content.filter(function(b){return b.type==='text'}).pop()||{}).text); }
   }catch(e){}
   rep.textContent=text||('Fair point. Everything here traces back to something you told me — and nothing is locked. Hit “Make changes” to rewrite any line directly, or refine it later in Settings → Brand.');
   $('#dtext').value='';

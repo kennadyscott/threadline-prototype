@@ -679,7 +679,7 @@ async function hubAI(system,user,schema,maxTok){
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({system:system,messages:[{role:'user',content:user}],max_tokens:maxTok||700,output_config:{format:{type:'json_schema',schema:schema}}})});
     if(r.status===402){ try{ const d=await r.json(); toast(d.error+' Upgrade in Settings →'); }catch(e){} return null; }
     if(!r.ok) return null;
-    const d=await r.json(); const t=d&&d.content&&d.content[0]&&d.content[0].text;
+    const d=await r.json(); const t=d&&d.content&&((d.content.filter(function(b){return b.type==='text'}).pop()||{}).text);
     return t?JSON.parse(t):null;
   }catch(e){ return null; }
 }
