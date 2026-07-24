@@ -524,7 +524,7 @@ function done(){ step=3; renderProg(); try{localStorage.removeItem(SAVE_KEY);}ca
         if(snap.feelBecome) _b.positioning.theyBecome=snap.feelBecome;
         if(snap.promise) _b.overview.promise=snap.promise;
         if(snap.different) _b.overview.differentiator=snap.different;
-        if(snap.believe) _b.messaging.primary=snap.believe;
+        if(snap.believe){ _b.messaging.primary=snap.believe; _b.messaging.beliefs=snap.believe; }
         if(snap.pov) _b.messaging.pov=snap.pov;
         if(snap.sampleHeadline) _b.voice.headline=snap.sampleHeadline;
         if(snap.sampleCaption) _b.voice.caption=snap.sampleCaption;
