@@ -191,11 +191,12 @@ const SNAP_SCHEMA={type:'object',properties:{
   pov:{type:'string'},
   feelNow:{type:'string'},
   feelBecome:{type:'string'},
+  heartLine:{type:'string'},
   sampleHeadline:{type:'string'},
   sampleCaption:{type:'string'},
   soundsLike:{type:'array',items:{type:'string'}},
   notLike:{type:'array',items:{type:'string'}}
-},required:['summary','tagline','voice','audience','themes','colors','knownFor','promise','believe','different','pov','feelNow','feelBecome','sampleHeadline','sampleCaption','soundsLike','notLike'],additionalProperties:false};
+},required:['summary','tagline','voice','audience','themes','colors','knownFor','promise','believe','different','pov','feelNow','feelBecome','heartLine','sampleHeadline','sampleCaption','soundsLike','notLike'],additionalProperties:false};
 async function realSnap(){
   const parts=[];
   parts.push('Brand name: '+state.name);
@@ -206,7 +207,7 @@ async function realSnap(){
   if(state.colors) parts.push('Brand colors they entered: '+state.colors);
   try{
     const r=await fetch('/api/ai',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({
-      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); tagline = a short fun tagline in the brand\'s own voice, max 7 words — playful if the brand is playful, never corporate filler; voice = 3-5 single-word traits; knownFor = what this brand should be known for, one specific phrase in its own language (never "the clear choice"); promise = the core promise to the audience, one short sentence naming their world; believe = the brand\'s strongest belief as a punchy line in its voice; different = what genuinely sets it apart, one sentence with specifics; pov = a one-line point of view the brand would defend; feelNow = one word for how the audience feels today; feelBecome = one word for what the brand helps them become; sampleHeadline = a social post headline this brand would actually write; sampleCaption = a 2-sentence caption in its exact voice; soundsLike = 2 short quotes that sound exactly like this brand; notLike = 2 short quotes that would be off-brand for THIS specific brand; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
+      system:'You are Threadline, a sharp, warm brand strategist organizing a founder\'s brand from the material they provided. Every field must be grounded in their actual material — echo their language and specifics. Never produce generic filler that could describe any brand. Fields: summary = one sentence in the brand\'s own energy (max 25 words); tagline = a short fun tagline in the brand\'s own voice, max 7 words — playful if the brand is playful, never corporate filler; voice = 3-5 single-word traits; knownFor = what this brand should be known for, one specific phrase in its own language (never "the clear choice"); promise = the core promise to the audience, one short sentence naming their world; believe = the brand\'s strongest belief as a punchy line in its voice; different = what genuinely sets it apart, one sentence with specifics; pov = a one-line point of view the brand would defend; feelNow = one word for how the audience feels today; feelBecome = one word for what the brand helps them become; heartLine = completes the sentence "Your brand is about helping …" in 14 words or fewer, in the brand\'s voice; sampleHeadline = a social post headline this brand would actually write; sampleCaption = a 2-sentence caption in its exact voice; soundsLike = 2 short quotes that sound exactly like this brand; notLike = 2 short quotes that would be off-brand for THIS specific brand; audience = one sentence on who it serves; themes = 3-5 short content themes from the material; colors = up to 5 hex codes, preferring any the user provided.',
       messages:[{role:'user',content:parts.join('\n\n')}],
       max_tokens:2200, output_config:{format:{type:'json_schema',schema:SNAP_SCHEMA}}})});
     const ct=r.headers.get('content-type')||'';
@@ -224,7 +225,7 @@ async function realSnap(){
       summary: j.summary||'',
       tagline: j.tagline||'',
       knownFor: j.knownFor||'', promise: j.promise||'', believe: j.believe||'', different: j.different||'',
-      pov: j.pov||'', feelNow: j.feelNow||'', feelBecome: j.feelBecome||'',
+      pov: j.pov||'', feelNow: j.feelNow||'', feelBecome: j.feelBecome||'', heartLine: j.heartLine||'',
       sampleHeadline: j.sampleHeadline||'', sampleCaption: j.sampleCaption||'',
       soundsLike: (j.soundsLike||[]).slice(0,2), notLike: (j.notLike||[]).slice(0,2),
       voice: (j.voice||[]).slice(0,5),
@@ -410,7 +411,7 @@ function p2(){ renderProg();
   renderProg();
   thinkThenRevealAsync($('#reveal'),'Threadline is reading your brand', async ()=>{
     let aiFailed=false;
-    if(!snap || !snap.real || !snap.tagline || !snap.knownFor){ const rs=await realSnap(); if(rs) snap=rs; else { aiFailed=!!localStorage.getItem('threadline.owner'); if(!snap) snap=buildSnap(); } }
+    if(!snap || !snap.real || !snap.tagline || !snap.knownFor || !snap.heartLine){ const rs=await realSnap(); if(rs) snap=rs; else { aiFailed=!!localStorage.getItem('threadline.owner'); if(!snap) snap=buildSnap(); } }
     const c=el('div','snap');
     if(aiFailed){
       const warn=el('div','');
@@ -520,6 +521,7 @@ function done(){ step=3; renderProg(); try{localStorage.removeItem(SAVE_KEY);}ca
     if(snap&&snap.real){
       try{
         if(snap.knownFor) _b.positioning.knownFor=snap.knownFor;
+        if(snap.heartLine) _b.heartLine=snap.heartLine.replace(/^helping\s+/i,'').replace(/\.$/,'');
         if(snap.feelNow) _b.positioning.theyFeel=snap.feelNow;
         if(snap.feelBecome) _b.positioning.theyBecome=snap.feelBecome;
         if(snap.promise) _b.overview.promise=snap.promise;
